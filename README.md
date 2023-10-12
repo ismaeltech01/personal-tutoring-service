@@ -1,3 +1,5 @@
-# cse-3310-proj
-TBD project for CSE 3310
+# Personal Tutoring Service
+
+Android project for CSE 3310.
+
 hola
