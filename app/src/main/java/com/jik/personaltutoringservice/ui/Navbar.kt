@@ -2,7 +2,9 @@ package com.jik.personaltutoringservice.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ColumnScopeInstance.weight
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScopeInstance.weight
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.MailOutline
@@ -27,26 +30,26 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
-val NavbarModifier = Modifier.background(color = Color.Blue).fillMaxWidth().fillMaxHeight(.1f)
-val IconModifier = Modifier.padding(horizontal = 15.dp, vertical = 15.dp)
-val ButtonModifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp)
+val IconModifier = Modifier.padding(horizontal = 15.dp, vertical = 15.dp).fillMaxSize()
 
 @Composable
-fun Navbar() {
+fun Navbar(modifier : Modifier) {
     Row (horizontalArrangement = Arrangement.Center, modifier = NavbarModifier) {
-        NavbarButton(Icons.Rounded.Home, "Home Navbar button")
-        NavbarButton(Icons.Rounded.Search, "Search Navbar button")
-        //Replace with profile picture
-        NavbarButton(Icons.Rounded.AccountCircle, "Profile Navbar button")
-        NavbarButton(Icons.Rounded.MailOutline, "Messaging Navbar button")
-        NavbarButton(Icons.Rounded.MoreVert, "More Navbar button")
-    }
-}
-
-@Composable
-fun NavbarButton(icon : ImageVector, desc : String) {
-    Button(onClick = { /*TODO*/ }, modifier = ButtonModifier) {
-        Icon(icon, desc, IconModifier)
+        Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight()) {
+            Icon(Icons.Rounded.Home, "Home button", IconModifier)
+        }
+        Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight() ) {
+            Icon(Icons.Rounded.Search, "Search button", IconModifier)
+        }
+        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.28f).fillMaxHeight()) {
+            Icon(Icons.Rounded.AccountCircle, "Profile button", IconModifier)
+        }
+        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight()) {
+            Icon(Icons.Rounded.MailOutline, "Mail button", IconModifier)
+        }
+        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight()) {
+            Icon(Icons.Rounded.MoreVert, "More button", IconModifier)
+        }
     }
 }
 

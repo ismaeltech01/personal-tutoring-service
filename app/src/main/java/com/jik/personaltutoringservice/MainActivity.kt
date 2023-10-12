@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,16 +29,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PersonalTutoringServiceTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                         Titlebar()
                         HomePage()
-                        Navbar();
-                    }
+                        Navbar(modifier = Modifier.background(color = Color.Blue).fillMaxWidth().fillMaxHeight(.1f).weight(.5f))
                 }
             }
         }
@@ -46,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Titlebar() {
-    val TextModifier = Modifier.background(Color.Blue).fillMaxHeight(.05f)
+    val TextModifier = Modifier.background(Color.Blue).fillMaxHeight(.05f).fillMaxWidth()
 
     Text(text = "Personal Tutoring Service", modifier = TextModifier)
 }

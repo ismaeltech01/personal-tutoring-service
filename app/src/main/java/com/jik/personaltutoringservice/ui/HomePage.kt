@@ -3,11 +3,12 @@ package com.jik.personaltutoringservice.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-val HomePageModifier = Modifier.fillMaxHeight(.85f).fillMaxHeight()
+val HomePageModifier = Modifier.fillMaxHeight(.85f).fillMaxWidth()
 
 @Composable
 fun HomePage() {
