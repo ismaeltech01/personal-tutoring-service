@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 val HomePageModifier = Modifier.fillMaxHeight(.85f).fillMaxWidth()
 
 @Composable
-fun HomePage() {
-    Column (modifier = HomePageModifier) {
+fun HomePage(modifier: Modifier) {
+    Column (modifier = modifier) {
         Text(text = "Current Tutors")
         Text(text = "Suggested")
     }

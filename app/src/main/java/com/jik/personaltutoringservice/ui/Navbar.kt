@@ -2,9 +2,7 @@ package com.jik.personaltutoringservice.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScopeInstance.weight
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScopeInstance.weight
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,24 +28,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
-val IconModifier = Modifier.padding(horizontal = 15.dp, vertical = 15.dp).fillMaxSize()
+val IconModifier = Modifier.padding(0.dp).fillMaxSize()
 
 @Composable
 fun Navbar(modifier : Modifier) {
-    Row (horizontalArrangement = Arrangement.Center, modifier = NavbarModifier) {
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight()) {
+    Row (horizontalArrangement = Arrangement.Center, modifier = modifier) {
+        Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(1.dp).weight(.2f).fillMaxHeight().background(Color.Transparent)) {
             Icon(Icons.Rounded.Home, "Home button", IconModifier)
         }
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight() ) {
+        Button(onClick = { /*TODO*/ }, modifier = Modifier.padding(1.dp).weight(.2f).fillMaxHeight().background(Color.Transparent)) {
             Icon(Icons.Rounded.Search, "Search button", IconModifier)
         }
-        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.28f).fillMaxHeight()) {
+        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(1.dp).weight(.2f).fillMaxHeight().background(Color.Transparent)) {
             Icon(Icons.Rounded.AccountCircle, "Profile button", IconModifier)
         }
-        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight()) {
+        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(1.dp).weight(.2f).fillMaxHeight().background(Color.Transparent)) {
             Icon(Icons.Rounded.MailOutline, "Mail button", IconModifier)
         }
-        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp).weight(.18f).fillMaxHeight()) {
+        Button (onClick = { /*TODO*/ }, modifier = Modifier.padding(1.dp).weight(.2f).fillMaxHeight().background(Color.Transparent)) {
             Icon(Icons.Rounded.MoreVert, "More button", IconModifier)
         }
     }
@@ -57,6 +55,6 @@ fun Navbar(modifier : Modifier) {
 @Composable
 fun NavbarPreview() {
     PersonalTutoringServiceTheme {
-        Navbar()
+        //Navbar()
     }
 }

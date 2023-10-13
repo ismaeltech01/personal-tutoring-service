@@ -30,9 +30,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             PersonalTutoringServiceTheme {
                 Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Titlebar()
-                        HomePage()
-                        Navbar(modifier = Modifier.background(color = Color.Blue).fillMaxWidth().fillMaxHeight(.1f).weight(.5f))
+                        Titlebar(modifier = Modifier.background(color = Color.Blue).fillMaxWidth().weight(.1f))
+                        HomePage(modifier = Modifier.background(color = Color.White).fillMaxWidth().weight(.8f))
+                        Navbar(modifier = Modifier.background(color = Color.Blue).fillMaxWidth().weight(.1f))
                 }
             }
         }
@@ -40,8 +40,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Titlebar() {
-    val TextModifier = Modifier.background(Color.Blue).fillMaxHeight(.05f).fillMaxWidth()
-
-    Text(text = "Personal Tutoring Service", modifier = TextModifier)
+fun Titlebar(modifier : Modifier) {
+    Text(text = "Personal Tutoring Service", modifier = modifier)
 }
