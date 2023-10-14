@@ -46,14 +46,16 @@ class MainActivity : ComponentActivity() {
 
             PersonalTutoringServiceTheme {
                 Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    //Titlebar used for testing, can be removed
+                    /*
+                    Titlebar used for testing, can be removed
                     Titlebar(modifier = Modifier
-                        .background(color = Color.Blue)
+                        .background(MaterialTheme.colorScheme.secondary)
                         .fillMaxWidth()
                         .weight(.1f))
+                     */
 
                     //NavHost used to hold navigation page (current page that the user is looking at)
-                    NavHost(navController, startDestination = "home", modifier = Modifier.weight(.8f)) {
+                    NavHost(navController, startDestination = "home", modifier = Modifier.weight(.87f)) {
                         //Each composable under the NavHost is a path/destination to travel to
                         // and the respective component to load for such destination
                         composable("home") {
@@ -75,9 +77,9 @@ class MainActivity : ComponentActivity() {
 
                     //Navigation bar at the bottom
                     Navbar(modifier = Modifier
-                        .background(color = Color.Blue)
+                        .background(MaterialTheme.colorScheme.primary)
                         .fillMaxWidth()
-                        .weight(.1f),
+                        .weight(.13f),
                         { navController.navigate("home") },
                         { navController.navigate("search") },
                         { navController.navigate("profile") },

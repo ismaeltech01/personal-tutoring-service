@@ -9,21 +9,21 @@ import androidx.compose.ui.Modifier
 
 //Page that contains all of the links for the "Other" option in the navbar
 @Composable
-fun OtherPage() {
+fun OtherPage(onCalendarClick : () -> Unit, onCoursesClick : () -> Unit, onPaymentsClick : () -> Unit, onAdClick : () -> Unit, onSettingsClick : () -> Unit, onReportClick : () -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
-        PageButton("Calendar")
-        PageButton("Courses")
-        PageButton("Payments")
-        PageButton("Advertisement")
-        PageButton("Settings")
-        PageButton("Reporting")
+        PageButton("Calendar", onCalendarClick)
+        PageButton("Courses", onCoursesClick)
+        PageButton("Payments", onPaymentsClick)
+        PageButton("Advertisement", onAdClick)
+        PageButton("Settings", onSettingsClick)
+        PageButton("Reporting", onReportClick)
     }
 }
 
 //Rectangular buttons used for Other page (can be used for other things as well)
 @Composable
-fun PageButton(text : String) {
-    Button(onClick = { /*TODO*/ }) {
+fun PageButton(text : String, onBtnClick : () -> Unit) {
+    Button(onClick = onBtnClick) {
         Text(text = text)
     }
 }
