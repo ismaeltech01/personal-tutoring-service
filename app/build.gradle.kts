@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.jik.personaltutoringservice"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.jik.personaltutoringservice"
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -50,6 +50,9 @@ android {
 }
 
 dependencies {
+    val nav_version = "2.7.4"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
