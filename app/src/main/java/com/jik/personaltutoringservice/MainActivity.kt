@@ -71,7 +71,32 @@ class MainActivity : ComponentActivity() {
                             MessagingPage()
                         }
                         composable("other") {
-                            OtherPage()
+                            OtherPage(
+                                { navController.navigate("calendar") },
+                                { navController.navigate("courses") },
+                                { navController.navigate("payments") },
+                                { navController.navigate("ads") },
+                                { navController.navigate("settings") },
+                                { navController.navigate("reporting") })
+                        }
+                        //Below here are routes relating to the OtherPage links
+                        composable("calendar") {
+
+                        }
+                        composable("courses") {
+
+                        }
+                        composable("payments") {
+
+                        }
+                        composable("ads") {
+
+                        }
+                        composable("settings") {
+
+                        }
+                        composable("reporting") {
+
                         }
                     }
 

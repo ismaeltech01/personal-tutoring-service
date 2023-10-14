@@ -1,4 +1,3 @@
-//NOTE: Test file. Anyone can delete this file if needed. Or keep if yall like it
 package com.jik.personaltutoringservice.ui
 
 import androidx.compose.foundation.layout.Column
@@ -8,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
+//******NOTE: This page is just a test. Can be removed or kept if desired
 val HomePageModifier = Modifier.fillMaxHeight(.85f).fillMaxWidth()
 
 @Composable

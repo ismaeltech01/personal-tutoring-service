@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 
 //NOTE: This page is just a test. Can be removed or kept if desired
 @Composable
-fun SearchPage() {
+fun CoursesPage() {
     Column {
     }
 }
