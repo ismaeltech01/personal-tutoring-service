@@ -65,7 +65,10 @@ class MainActivity : ComponentActivity() {
                             SearchPage()
                         }
                         composable("profile") {
-                            ProfilePage(modifier = pageModifier)
+                            ProfilePage(
+                                modifier = pageModifier,
+                                onLoginClick = {navController.navigate("login")}
+                            )
                         }
                         composable("messaging") {
                             MessagingPage()
@@ -96,6 +99,13 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("reporting") {
+
+                        }
+                        //Login & Registration pages
+                        composable("login") {
+
+                        }
+                        composable("register") {
 
                         }
                     }
