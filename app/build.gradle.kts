@@ -76,4 +76,5 @@ dependencies {
     //Firebase services
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.firebaseui:firebase-ui-auth:7.2.0")
 }

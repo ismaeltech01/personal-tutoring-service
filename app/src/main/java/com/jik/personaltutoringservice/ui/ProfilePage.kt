@@ -1,5 +1,6 @@
 package com.jik.personaltutoringservice.ui
 
+import android.app.Activity.RESULT_OK
 import android.graphics.fonts.FontStyle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -18,14 +19,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.auth.FirebaseAuth
+
+
 
 @Composable
 fun ProfilePage(
     modifier : Modifier,
     onLoginClick : () -> Unit
 ) {
-    var registered = true;
-    var userName = "Guest"
+
+    val user = FirebaseAuth.getInstance().currentUser
+    var loggedIn = user != null;
+    val name = if (loggedIn) user?.displayName else "Guest";
+    val email = if (loggedIn) user?.email else "guest@guest.com";
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,14 +46,14 @@ fun ProfilePage(
             contentDescription = "Profile Image",
             modifier = Modifier.size(100.dp)
         )
-        Text("Hello, $userName", fontSize = 20.sp)
+        Text("Hello, $name!", fontSize = 20.sp)
         Spacer(modifier = Modifier.height(3.dp))
-        Button(
-            onClick = onLoginClick,
-            modifier = Modifier.fillMaxWidth(.5f)
-        ) {
-            if (!registered)
-                Text(text = "Login", color = Color.White, fontSize = 10.sp)
-        }
+        if (!loggedIn)
+            Button(
+                onClick = onLoginClick,
+                modifier = Modifier.fillMaxWidth(.5f)
+            ) {
+                    Text(text = "Login", color = Color.White, fontSize = 10.sp)
+            }
     }
 }

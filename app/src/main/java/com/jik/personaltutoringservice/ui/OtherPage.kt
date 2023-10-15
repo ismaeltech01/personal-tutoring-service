@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firebase.ui.auth.AuthUI
 
 //Page that contains all of the links for the "Other" option in the navbar
 @Composable
@@ -29,7 +30,8 @@ fun OtherPage(
     onPaymentsClick : () -> Unit,
     onAdClick : () -> Unit,
     onSettingsClick : () -> Unit,
-    onReportClick : () -> Unit
+    onReportClick : () -> Unit,
+    onSignOutClick : () -> Unit
 ) {
     val spacerModifier = Modifier.height(3.dp)
 
@@ -51,6 +53,7 @@ fun OtherPage(
         Spacer(modifier = spacerModifier.weight(.02f))
         PageButton("Reporting", onReportClick, modifier = Modifier.weight(.1f))
         Spacer(modifier = spacerModifier.weight(.05f))
+        PageButton("Sign Out", onSignOutClick, modifier = Modifier.weight(.1f))
     }
 }
 
@@ -77,6 +80,7 @@ fun PageButton(
 @Preview
 @Composable
 fun OtherPagePreview() {
+    /*
     OtherPage(
         onCalendarClick = { /*TODO*/ },
         onCoursesClick = { /*TODO*/ },
@@ -84,6 +88,7 @@ fun OtherPagePreview() {
         onAdClick = { /*TODO*/ },
         onSettingsClick = { /*TODO*/ },
         onReportClick = { })
+     */
 }
 
 @Preview
