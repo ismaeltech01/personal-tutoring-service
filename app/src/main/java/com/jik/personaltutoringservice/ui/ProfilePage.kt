@@ -60,14 +60,14 @@ fun ProfilePage(
                 onClick = onLoginClick,
                 modifier = Modifier.fillMaxWidth(.5f)
             ) {
-                Text(text = "Login", color = Color.White, fontSize = 10.sp)
+                Text(text = "Login", color = Color.White)
             }
 
             Button(
                 onClick = onRegisterClick,
                 modifier = Modifier.fillMaxWidth(.5f)
             ) {
-                Text(text = "Register", color = Color.White, fontSize = 10.sp)
+                Text(text = "Register", color = Color.White)
             }
             /* NOTE: If User not able to login with existing email account error continues,
                 consider making separate button & page for login

@@ -1,7 +1,10 @@
 //This is just default file for reference
 package com.jik.personaltutoringservice
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -19,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.jik.personaltutoringservice.ui.HomePage
 import com.jik.personaltutoringservice.ui.LoginPage
+import com.jik.personaltutoringservice.ui.MainViewModel
 import com.jik.personaltutoringservice.ui.MessagingPage
 import com.jik.personaltutoringservice.ui.Navbar
 import com.jik.personaltutoringservice.ui.OtherPage
@@ -47,7 +52,9 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
+            val viewModel = viewModel<MainViewModel>();
             val navController = rememberNavController()
+
 
             //Modifier applied to all pages of the app
             val pageModifier = Modifier
@@ -93,12 +100,16 @@ class MainActivity : ComponentActivity() {
                                 { navController.navigate("ads") },
                                 { navController.navigate("settings") },
                                 { navController.navigate("reporting") },
+                                { navController.navigate("profile") },
                                 onSignOutClick = {
                                     AuthUI.getInstance()
                                         .signOut(this@MainActivity)
                                         .addOnCompleteListener {
                                             //TODO: Display popup that signout was successful
-                                        }},
+                                        }
+
+                                    navController.navigate("home")
+                                                 },
                                 userSignedIn = (auth.currentUser != null)
                                )
                         }
@@ -123,7 +134,10 @@ class MainActivity : ComponentActivity() {
                         }
                         //Login & Registration pages
                         composable("login") {
-                            LoginPage()
+                            LoginPage(
+                                auth,
+                                this@MainActivity
+                            )
                         }
                         composable("register") {
                             RegisterPage (auth, this@MainActivity)

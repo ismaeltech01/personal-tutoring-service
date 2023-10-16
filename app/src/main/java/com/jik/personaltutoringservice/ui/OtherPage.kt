@@ -31,35 +31,48 @@ fun OtherPage(
     onAdClick : () -> Unit,
     onSettingsClick : () -> Unit,
     onReportClick : () -> Unit,
+    onSigninClick : () -> Unit,
     onSignOutClick : () -> Unit,
     userSignedIn : Boolean
 ) {
     val spacerModifier = Modifier.height(3.dp)
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Spacer(modifier = spacerModifier.weight(.05f))
-        PageButton("Calendar", onCalendarClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Courses", onCoursesClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Payments", onPaymentsClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Advertisement", onAdClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Settings", onSettingsClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Reporting", onReportClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        if (userSignedIn)
+    if (userSignedIn)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Spacer(modifier = spacerModifier.weight(.05f))
+            PageButton("Calendar", onCalendarClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Courses", onCoursesClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Payments", onPaymentsClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Advertisement", onAdClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Settings", onSettingsClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Reporting", onReportClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
             PageButton("Sign Out", onSignOutClick, modifier = Modifier.weight(.1f))
-        else
-            Spacer(modifier = spacerModifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.05f))
-    }
+            Spacer(modifier = spacerModifier.weight(.05f))
+        }
+    else 
+        Column (
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
+            Text("Please Signin to view more options")
+            Spacer(modifier = Modifier.height(5.dp))
+            Button(
+                onClick = onSigninClick
+            ) {
+                Text("Signin")
+            }
+        }
 }
 
 //Rectangular buttons used for Other page (can be used for other things as well)
