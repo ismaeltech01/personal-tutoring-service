@@ -30,11 +30,13 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun ProfilePage(
     modifier : Modifier,
-    onLoginClick : () -> Unit
+    onLoginClick : () -> Unit,
+    onRegisterClick : () -> Unit,
+    auth : FirebaseAuth
 ) {
 
     //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
-    val user = FirebaseAuth.getInstance().currentUser
+    val user = auth.currentUser
     val loggedIn = user != null;
     val name = if (loggedIn) user?.displayName else "Guest";
     val email = if (loggedIn) user?.email else null;
@@ -59,6 +61,13 @@ fun ProfilePage(
                 modifier = Modifier.fillMaxWidth(.5f)
             ) {
                 Text(text = "Login", color = Color.White, fontSize = 10.sp)
+            }
+
+            Button(
+                onClick = onRegisterClick,
+                modifier = Modifier.fillMaxWidth(.5f)
+            ) {
+                Text(text = "Register", color = Color.White, fontSize = 10.sp)
             }
             /* NOTE: If User not able to login with existing email account error continues,
                 consider making separate button & page for login

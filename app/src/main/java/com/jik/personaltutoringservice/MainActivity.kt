@@ -28,54 +28,22 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.jik.personaltutoringservice.ui.HomePage
+import com.jik.personaltutoringservice.ui.LoginPage
 import com.jik.personaltutoringservice.ui.MessagingPage
 import com.jik.personaltutoringservice.ui.Navbar
 import com.jik.personaltutoringservice.ui.OtherPage
 import com.jik.personaltutoringservice.ui.ProfilePage
+import com.jik.personaltutoringservice.ui.RegisterPage
 import com.jik.personaltutoringservice.ui.SearchPage
 import com.jik.personaltutoringservice.ui.theme.PersonalTutoringServiceTheme
 
 
 //MainActivity is were main app is loaded
 class MainActivity : ComponentActivity() {
-    val user = FirebaseAuth.getInstance().currentUser
-
-    private val signInLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract(),
-    ) { res ->
-        this.onSignInResult(res)
-    }
-
-    // Choose authentication providers
-    private val providers = arrayListOf(
-        AuthUI.IdpConfig.EmailBuilder().build(),
-        AuthUI.IdpConfig.GoogleBuilder().build(),
-    )
-
-    // Create and launch sign-in intent
-    private val signInIntent = AuthUI.getInstance()
-        .createSignInIntentBuilder()
-        .setAvailableProviders(providers)
-        .build();
-    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        val response = result.idpResponse
-        if (result.resultCode == RESULT_OK) {
-            // Successfully signed in
-            val user = FirebaseAuth.getInstance().currentUser
-            // ...
-        } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
-        }
-    }
-
-    //Triggers signout when user clicks sign out
-    //****Code causing app to crash*****
-    //private val signOutAction = {;
+    private lateinit var auth: FirebaseAuth;
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        auth = FirebaseAuth.getInstance()
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -109,7 +77,9 @@ class MainActivity : ComponentActivity() {
                         composable("profile") {
                             ProfilePage(
                                 modifier = pageModifier,
-                                onLoginClick = { signInLauncher.launch(signInIntent) }
+                                onLoginClick = { navController.navigate("login") },
+                                onRegisterClick = { navController.navigate("register") },
+                                auth
                             )
                         }
                         composable("messaging") {
@@ -129,7 +99,7 @@ class MainActivity : ComponentActivity() {
                                         .addOnCompleteListener {
                                             //TODO: Display popup that signout was successful
                                         }},
-                                userSignedIn = (user != null)
+                                userSignedIn = (auth.currentUser != null)
                                )
                         }
                         //Below here are routes relating to the OtherPage links
@@ -153,10 +123,10 @@ class MainActivity : ComponentActivity() {
                         }
                         //Login & Registration pages
                         composable("login") {
-
+                            LoginPage()
                         }
                         composable("register") {
-
+                            RegisterPage (auth, this@MainActivity)
                         }
                     }
 
