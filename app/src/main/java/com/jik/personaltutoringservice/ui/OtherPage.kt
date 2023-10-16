@@ -31,7 +31,8 @@ fun OtherPage(
     onAdClick : () -> Unit,
     onSettingsClick : () -> Unit,
     onReportClick : () -> Unit,
-    onSignOutClick : () -> Unit
+    onSignOutClick : () -> Unit,
+    userSignedIn : Boolean
 ) {
     val spacerModifier = Modifier.height(3.dp)
 
@@ -52,8 +53,12 @@ fun OtherPage(
         PageButton("Settings", onSettingsClick, modifier = Modifier.weight(.1f))
         Spacer(modifier = spacerModifier.weight(.02f))
         PageButton("Reporting", onReportClick, modifier = Modifier.weight(.1f))
+        Spacer(modifier = spacerModifier.weight(.02f))
+        if (userSignedIn)
+            PageButton("Sign Out", onSignOutClick, modifier = Modifier.weight(.1f))
+        else
+            Spacer(modifier = spacerModifier.weight(.1f))
         Spacer(modifier = spacerModifier.weight(.05f))
-        PageButton("Sign Out", onSignOutClick, modifier = Modifier.weight(.1f))
     }
 }
 

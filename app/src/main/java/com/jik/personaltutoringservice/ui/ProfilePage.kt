@@ -17,8 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
@@ -31,16 +33,19 @@ fun ProfilePage(
     onLoginClick : () -> Unit
 ) {
 
+    //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
     val user = FirebaseAuth.getInstance().currentUser
-    var loggedIn = user != null;
+    val loggedIn = user != null;
     val name = if (loggedIn) user?.displayName else "Guest";
-    val email = if (loggedIn) user?.email else "guest@guest.com";
+    val email = if (loggedIn) user?.email else null;
+    val image = if (loggedIn) user?.photoUrl else null;
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = modifier
     ) {
+        //TODO: Find way to store & load images (maybe using AsyncImage)
         Image(
             Icons.Rounded.AccountCircle,
             contentDescription = "Profile Image",
@@ -48,12 +53,25 @@ fun ProfilePage(
         )
         Text("Hello, $name!", fontSize = 20.sp)
         Spacer(modifier = Modifier.height(3.dp))
-        if (!loggedIn)
+        if (!loggedIn) {
             Button(
                 onClick = onLoginClick,
                 modifier = Modifier.fillMaxWidth(.5f)
             ) {
-                    Text(text = "Login", color = Color.White, fontSize = 10.sp)
+                Text(text = "Login", color = Color.White, fontSize = 10.sp)
             }
+            /* NOTE: If User not able to login with existing email account error continues,
+                consider making separate button & page for login
+            Button(
+                onClick = onSignupClick,
+                modifier = Modifier.fillMaxWidth(.5f)
+            ) {
+                Text(text = "Signup", color = Color.White, fontSize = 10.sp)
+            }
+
+             */
+        } else {
+            Text("Email: $email")
+        }
     }
 }

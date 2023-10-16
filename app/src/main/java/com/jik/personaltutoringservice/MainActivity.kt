@@ -72,14 +72,8 @@ class MainActivity : ComponentActivity() {
     }
 
     //Triggers signout when user clicks sign out
-    /* ****Code causing app to crash*****
-    private val signOutAction = AuthUI.getInstance()
-        .signOut(this)
-        .addOnCompleteListener {
-            //TODO: Display popup that signout was successful
-        };
-
-     */
+    //****Code causing app to crash*****
+    //private val signOutAction = {;
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -129,7 +123,13 @@ class MainActivity : ComponentActivity() {
                                 { navController.navigate("ads") },
                                 { navController.navigate("settings") },
                                 { navController.navigate("reporting") },
-                                { }
+                                onSignOutClick = {
+                                    AuthUI.getInstance()
+                                        .signOut(this@MainActivity)
+                                        .addOnCompleteListener {
+                                            //TODO: Display popup that signout was successful
+                                        }},
+                                userSignedIn = (user != null)
                                )
                         }
                         //Below here are routes relating to the OtherPage links
