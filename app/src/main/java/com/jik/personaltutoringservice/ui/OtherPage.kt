@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firebase.ui.auth.AuthUI
 
 //Page that contains all of the links for the "Other" option in the navbar
 @Composable
@@ -29,29 +30,49 @@ fun OtherPage(
     onPaymentsClick : () -> Unit,
     onAdClick : () -> Unit,
     onSettingsClick : () -> Unit,
-    onReportClick : () -> Unit
+    onReportClick : () -> Unit,
+    onSigninClick : () -> Unit,
+    onSignOutClick : () -> Unit,
+    userSignedIn : Boolean
 ) {
     val spacerModifier = Modifier.height(3.dp)
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Spacer(modifier = spacerModifier.weight(.05f))
-        PageButton("Calendar", onCalendarClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Courses", onCoursesClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Payments", onPaymentsClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Advertisement", onAdClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Settings", onSettingsClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.02f))
-        PageButton("Reporting", onReportClick, modifier = Modifier.weight(.1f))
-        Spacer(modifier = spacerModifier.weight(.05f))
-    }
+    if (userSignedIn)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Spacer(modifier = spacerModifier.weight(.05f))
+            PageButton("Calendar", onCalendarClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Courses", onCoursesClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Payments", onPaymentsClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Advertisement", onAdClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Settings", onSettingsClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Reporting", onReportClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.02f))
+            PageButton("Sign Out", onSignOutClick, modifier = Modifier.weight(.1f))
+            Spacer(modifier = spacerModifier.weight(.05f))
+        }
+    else 
+        Column (
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
+            Text("Please Signin to view more options")
+            Spacer(modifier = Modifier.height(5.dp))
+            Button(
+                onClick = onSigninClick
+            ) {
+                Text("Signin")
+            }
+        }
 }
 
 //Rectangular buttons used for Other page (can be used for other things as well)
@@ -77,6 +98,7 @@ fun PageButton(
 @Preview
 @Composable
 fun OtherPagePreview() {
+    /*
     OtherPage(
         onCalendarClick = { /*TODO*/ },
         onCoursesClick = { /*TODO*/ },
@@ -84,6 +106,7 @@ fun OtherPagePreview() {
         onAdClick = { /*TODO*/ },
         onSettingsClick = { /*TODO*/ },
         onReportClick = { })
+     */
 }
 
 @Preview
