@@ -24,7 +24,7 @@ import coil.compose.AsyncImage
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
-
+import com.google.firebase.auth.FirebaseUser
 
 
 @Composable
@@ -32,16 +32,12 @@ fun ProfilePage(
     modifier : Modifier,
     onLoginClick : () -> Unit,
     onRegisterClick : () -> Unit,
-    auth : FirebaseAuth
+    loggedIn : Boolean,
+    name : String?,
+    email : String?
 ) {
 
     //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
-    val user = auth.currentUser
-    val loggedIn = user != null;
-    val name = if (loggedIn) user?.displayName else "Guest";
-    val email = if (loggedIn) user?.email else null;
-    val image = if (loggedIn) user?.photoUrl else null;
-
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

@@ -1,36 +1,22 @@
-//This is just default file for reference
 package com.jik.personaltutoringservice
 
-import android.content.ContentValues.TAG
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
 import com.jik.personaltutoringservice.ui.HomePage
 import com.jik.personaltutoringservice.ui.LoginPage
 import com.jik.personaltutoringservice.ui.MainViewModel
@@ -45,16 +31,16 @@ import com.jik.personaltutoringservice.ui.theme.PersonalTutoringServiceTheme
 
 //MainActivity is were main app is loaded
 class MainActivity : ComponentActivity() {
-    private lateinit var auth: FirebaseAuth;
+//    private lateinit var auth: FirebaseAuth;
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        auth = FirebaseAuth.getInstance()
-
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel = viewModel<MainViewModel>();
+            val viewModel = viewModel<MainViewModel>()
             val navController = rememberNavController()
-
+            val loggedIn by viewModel.loggedInState.collectAsState()
+            val name by viewModel.nameState.collectAsState()
+            val email by viewModel.emailState.collectAsState()
 
             //Modifier applied to all pages of the app
             val pageModifier = Modifier
@@ -86,7 +72,9 @@ class MainActivity : ComponentActivity() {
                                 modifier = pageModifier,
                                 onLoginClick = { navController.navigate("login") },
                                 onRegisterClick = { navController.navigate("register") },
-                                auth
+                                loggedIn,
+                                name,
+                                email
                             )
                         }
                         composable("messaging") {
@@ -102,16 +90,11 @@ class MainActivity : ComponentActivity() {
                                 { navController.navigate("reporting") },
                                 { navController.navigate("profile") },
                                 onSignOutClick = {
-                                    AuthUI.getInstance()
-                                        .signOut(this@MainActivity)
-                                        .addOnCompleteListener {
-                                            //TODO: Display popup that signout was successful
-                                        }
-
+                                    viewModel.SignOut(this@MainActivity)
                                     navController.navigate("home")
-                                                 },
-                                userSignedIn = (auth.currentUser != null)
-                               )
+                                },
+                                userSignedIn = loggedIn
+                            )
                         }
                         //Below here are routes relating to the OtherPage links
                         composable("calendar") {
@@ -134,13 +117,10 @@ class MainActivity : ComponentActivity() {
                         }
                         //Login & Registration pages
                         composable("login") {
-                            LoginPage(
-                                auth,
-                                this@MainActivity
-                            )
+                            LoginPage(viewModel, this@MainActivity) { navController.navigate("profile") }
                         }
                         composable("register") {
-                            RegisterPage (auth, this@MainActivity)
+                            RegisterPage(viewModel, this@MainActivity) { navController.navigate("profile") }
                         }
                     }
 
@@ -158,9 +138,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Titlebar(modifier : Modifier) {
-    Text(text = "Personal Tutoring Service", modifier = modifier)
 }
