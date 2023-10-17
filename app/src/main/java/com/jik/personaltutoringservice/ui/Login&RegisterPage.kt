@@ -72,8 +72,8 @@ fun LoginPage(
         Spacer(modifier = Modifier.height(5.dp))
 
         Button(onClick = {
-            viewModel.LogIn(emailState, passwdState, activity)
-            navigate()
+            val res = viewModel.LogIn(emailState, passwdState, activity)
+            if (res != -1) { navigate() }
         })
         {
             Text("Login")
@@ -130,8 +130,8 @@ fun RegisterPage(
         Spacer(modifier = Modifier.height(5.dp))
 
         Button(onClick = {
-            viewModel.Register(nameState, emailState, passwdState, activity)
-            navigate()
+            val res = viewModel.Register(nameState, emailState, passwdState, activity)
+            if (res != -1) { navigate() }
         })
         {
             Text("Register")
