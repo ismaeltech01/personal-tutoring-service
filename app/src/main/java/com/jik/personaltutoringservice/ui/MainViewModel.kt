@@ -41,6 +41,13 @@ class MainViewModel : ViewModel() {
     private val _uid = MutableStateFlow(if (loggedInState.value) user.value?.uid else defaults["uid"])
     val uidState = _uid.asStateFlow()
 
+    /** Logges In User based on input data.
+     * NOTE: Crashes if email or password are empty strings ("")
+     *
+     * @param [email] User's Email
+     * @param [password] User's Password
+     * @param [activity] The Activity passed to the auth function (should be MainActivity)
+     * */
     fun LogIn(email : String?, password : String, activity : Activity) : Int {
         var result = 0;
 
@@ -76,6 +83,14 @@ class MainViewModel : ViewModel() {
         return result;
     }
 
+    /** Registers User based on input data.
+     * NOTE: Crashes if email or password are empty strings ("")
+     *
+     * @param [name] User's Name
+     * @param [email] User's Email
+     * @param [password] User's Password
+     * @param [activity] The Activity passed to the auth function (should be MainActivity)
+     * */
     fun Register(name : String?, email : String?, password : String, activity : Activity) : Int {
         //Returns -1 if registration failed, otherwise returns 0 on success
         var result = 0;
@@ -93,7 +108,7 @@ class MainViewModel : ViewModel() {
                     .addOnCompleteListener(activity) { task ->
                         if (task.isSuccessful) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(ContentValues.TAG, "createUserWithEmail:success")
+                            Log.d(TAG, "createUserWithEmail:success")
 
                             UpdateAuthData()
                             FetchUserData()
@@ -106,13 +121,13 @@ class MainViewModel : ViewModel() {
                             _user.value!!.updateProfile(profileUpdates)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
-                                        Log.d(ContentValues.TAG, "User profile updated.")
+                                        Log.d(TAG, "User profile updated.")
                                     }
                                 }
                             _loggedIn.value = true
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w(ContentValues.TAG, "createUserWithEmail:failure", task.exception)
+                            Log.w(TAG, "createUserWithEmail:failure", task.exception)
                             Toast.makeText(
                                 activity,
                                 "Registration failed. Likely an invalid email.",
@@ -126,6 +141,8 @@ class MainViewModel : ViewModel() {
         return result;
     }
 
+    /** Signs Out currently logged in user
+     * */
     fun SignOut(activity: Activity) {
         AuthUI.getInstance()
             .signOut(activity)
@@ -135,6 +152,8 @@ class MainViewModel : ViewModel() {
             }
     }
 
+    /** Updates state to default
+     * */
     fun RestoreDefaults() {
         _loggedIn.value = false
         _email.value = defaults["email"]
@@ -143,6 +162,8 @@ class MainViewModel : ViewModel() {
         _uid.value = defaults["uid"]
     }
 
+    /** Updates UserAuthData state
+     * */
     fun UpdateAuthData() {
         _user.value = auth.currentUser
         _name.value = user.value?.displayName
@@ -151,11 +172,12 @@ class MainViewModel : ViewModel() {
         _loggedIn.value = true
     }
 
-    //Gets User Data from Database updates app state accordingly
+    /** Gets User Data from Database & updates app state accordingly
+     * NOTE: Crashes app whenever uidString is empty ("")
+     */
     fun FetchUserData() {
         val uidString = uidState.value.toString()
 
-        //Crashes whenever uidString is empty ("")
         db.collection("users").document(uidString).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
@@ -165,7 +187,7 @@ class MainViewModel : ViewModel() {
                     _phone.value = document.data?.get("phone").toString()
                 } else {
                     Log.d(TAG, "No document found. Creating user document.")
-                    val data = mapOf("docSet" to "true")
+                    val data = mapOf("email" to emailState.value)
                     db.collection("users").document(uidString).set(data)
                 }
             }
