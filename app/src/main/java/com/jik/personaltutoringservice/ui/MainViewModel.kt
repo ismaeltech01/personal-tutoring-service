@@ -22,24 +22,22 @@ class MainViewModel : ViewModel() {
     private val db = Firebase.firestore
     private val defaults = mapOf("name" to "Guest", "email" to "", "uid" to "", "phone" to "")
 
-    private val _user = MutableStateFlow(auth.currentUser)
-    private val user = _user.asStateFlow()
-
-    private val _loggedIn = MutableStateFlow(user.value != null)
+    private val _loggedIn = MutableStateFlow(auth.currentUser != null)
     val loggedInState = _loggedIn.asStateFlow()
 
-    private val _name = MutableStateFlow(if (loggedInState.value) user.value?.displayName else defaults["name"])
+    private val _name = MutableStateFlow(if (loggedInState.value) auth.currentUser?.displayName else defaults["name"])
     val nameState = _name.asStateFlow()
 
-    private val _email = MutableStateFlow(if (loggedInState.value) user.value?.email else defaults["email"])
+    private val _email = MutableStateFlow(if (loggedInState.value) auth.currentUser?.email else defaults["email"])
     val emailState = _email.asStateFlow()
 
-    private val _phone = MutableStateFlow(if (loggedInState.value) user.value?.uid else defaults["phone"])
+    private val _phone = MutableStateFlow(defaults["phone"])
     val phoneState = _phone.asStateFlow()
 
     //User ID of current logged in user (used to retrieve data from db)
-    private val _uid = MutableStateFlow(if (loggedInState.value) user.value?.uid else defaults["uid"])
+    private val _uid = MutableStateFlow(if (loggedInState.value) auth.currentUser?.uid else defaults["uid"])
     val uidState = _uid.asStateFlow()
+
 
     /** Logges In User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
@@ -59,27 +57,25 @@ class MainViewModel : ViewModel() {
             ).show()
             result = -1;
         } else {
-            email?.let {
-                auth.signInWithEmailAndPassword(it, password)
-                    .addOnCompleteListener(activity) { task ->
-                        if (task.isSuccessful) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(ContentValues.TAG, "signInWithEmail:success")
+            auth.signInWithEmailAndPassword(email.toString(), password)
+                .addOnCompleteListener(activity) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithEmail:success")
 
-                            UpdateAuthData()
-                            FetchUserData()
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(ContentValues.TAG, "signInWithEmail:failure", task.exception)
-                            Toast.makeText(
-                                activity,
-                                "Authentication failed.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        }
+                        UpdateAuthData()
+                        FetchUserData()
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "signInWithEmail:failure", task.exception)
+                        Toast.makeText(
+                            activity,
+                            "Authentication failed.",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     }
+                }
             }
-        }
         return result;
     }
 
@@ -91,11 +87,11 @@ class MainViewModel : ViewModel() {
      * @param [password] User's Password
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
      * */
-    fun Register(name : String?, email : String?, password : String, activity : Activity) : Int {
+    fun Register(name : String?, email : String?, phone : String?, password : String, activity : Activity) : Int {
         //Returns -1 if registration failed, otherwise returns 0 on success
         var result = 0;
 
-        if (name == "" || email == "" || password == "") {
+        if (name == "" || email == "" || phone == "" || password == "") {
             Toast.makeText(
                 activity,
                 "One or more fields are empty.",
@@ -103,37 +99,24 @@ class MainViewModel : ViewModel() {
             ).show()
             result = -1;
         } else {
-            email?.let {
-                auth.createUserWithEmailAndPassword(it, password)
-                    .addOnCompleteListener(activity) { task ->
-                        if (task.isSuccessful) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success")
+            auth.createUserWithEmailAndPassword(email.toString(), password)
+                .addOnCompleteListener(activity) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "createUserWithEmail:success")
 
-                            UpdateAuthData()
-                            FetchUserData()
+                        UpdateAuthData()
+                        FetchUserData()
+                        UpdateUserData(phone = phone, displayName = name)
 
-                            val profileUpdates =
-                                UserProfileChangeRequest.Builder()
-                                    .setDisplayName(nameState.value)
-                                    .build()
-
-                            _user.value!!.updateProfile(profileUpdates)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        Log.d(TAG, "User profile updated.")
-                                    }
-                                }
-                            _loggedIn.value = true
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.exception)
-                            Toast.makeText(
-                                activity,
-                                "Registration failed. Likely an invalid email.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        }
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                        Toast.makeText(
+                            activity,
+                            "Registration failed. Likely an invalid email.",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     }
             }
         }
@@ -162,14 +145,52 @@ class MainViewModel : ViewModel() {
         _uid.value = defaults["uid"]
     }
 
-    /** Updates UserAuthData state
+    /** Updates UserAuthData state variables
      * */
     fun UpdateAuthData() {
-        _user.value = auth.currentUser
-        _name.value = user.value?.displayName
-        _email.value = user.value?.email
-        _uid.value = user.value?.uid
+        _name.value = auth.currentUser?.displayName
+        _email.value = auth.currentUser?.email
+        _uid.value = auth.currentUser?.uid
         _loggedIn.value = true
+    }
+
+    /**
+     * Updates User data in Firestore & in app state based on the parameters passed to the function.
+     * */
+    fun UpdateUserData(
+        phone: String? = "",
+        displayName: String? = "",
+        email: String? = "",
+        password: String? = ""
+        ) {
+        if (phone != "") {
+            db.collection("users").document(uidState.value.toString()).update("phone", phone)
+            _phone.value = phone
+        }
+
+        if (displayName != "") {
+            val profileUpdates = UserProfileChangeRequest.Builder()
+                .setDisplayName(displayName)
+                .build()
+
+            auth.currentUser!!.updateProfile(profileUpdates)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "User profile updated.")
+                    }
+                }
+
+            _name.value = auth.currentUser?.displayName
+        }
+
+        if (email != "") {
+            auth.currentUser?.updateEmail(email.toString())
+            _email.value = auth.currentUser?.email
+        }
+
+        if (password != "") {
+            auth.currentUser?.updatePassword(password.toString())
+        }
     }
 
     /** Gets User Data from Database & updates app state accordingly

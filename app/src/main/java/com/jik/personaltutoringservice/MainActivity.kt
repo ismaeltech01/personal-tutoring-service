@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
             val loggedIn by viewModel.loggedInState.collectAsState()
             val name by viewModel.nameState.collectAsState()
             val email by viewModel.emailState.collectAsState()
+            val phone by viewModel.phoneState.collectAsState()
 
             //Modifier applied to all pages of the app
             val pageModifier = Modifier
@@ -74,7 +75,8 @@ class MainActivity : ComponentActivity() {
                                 onRegisterClick = { navController.navigate("register") },
                                 loggedIn,
                                 name,
-                                email
+                                email,
+                                phone
                             )
                         }
                         composable("messaging") {

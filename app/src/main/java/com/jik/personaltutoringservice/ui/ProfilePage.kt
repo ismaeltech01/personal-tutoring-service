@@ -34,7 +34,8 @@ fun ProfilePage(
     onRegisterClick : () -> Unit,
     loggedIn : Boolean,
     name : String?,
-    email : String?
+    email : String?,
+    phone : String?
 ) {
 
     //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
@@ -77,6 +78,7 @@ fun ProfilePage(
              */
         } else {
             Text("Email: $email")
+            Text("Phone: $phone")
         }
     }
 }
