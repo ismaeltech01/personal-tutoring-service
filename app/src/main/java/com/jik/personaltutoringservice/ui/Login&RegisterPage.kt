@@ -91,17 +91,23 @@ fun LoginPage(
         Spacer(modifier = Modifier.height(5.dp))
 
         Button(onClick = {
-            if (isValidEmail(emailState)) {
+            if (!isValidEmail(emailState)) {
+                Toast.makeText(
+                    activity,
+                    "Invalid email. Try again.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            } else if (passwdState.length < 6) {
+                Toast.makeText(
+                    activity,
+                    "Password must be at least 6 characters long.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            } else {
                 val res = viewModel.LogIn(emailState, passwdState, activity)
                 if (res != -1) {
                     navigate()
                 }
-            } else {
-                Toast.makeText(
-                    activity,
-                    "Invalid email. Try again.",
-                    Toast.LENGTH_SHORT,
-                ).show()
             }
         })
         {
@@ -216,9 +222,20 @@ fun RegisterPage(
             )
 
             Button(onClick = {
-                if (isValidEmail(emailState)) {
-                    val res =
-                        viewModel.Register(
+                if (!isValidEmail(emailState)) {
+                    Toast.makeText(
+                        activity,
+                        "Invalid email. Try again.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                } else if (passwdState.length < 6) {
+                    Toast.makeText(
+                        activity,
+                        "Password must be at least 6 characters long.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                } else {
+                    val res = viewModel.Register(
                             firstName = firstNameState,
                             middleName = middleNameState,
                             lastName = lastNameState,
@@ -232,12 +249,6 @@ fun RegisterPage(
                     if (res != -1) {
                         navigate()
                     }
-                } else {
-                    Toast.makeText(
-                        activity,
-                        "Invalid email. Try again.",
-                        Toast.LENGTH_SHORT,
-                    ).show()
                 }
             })
             {
