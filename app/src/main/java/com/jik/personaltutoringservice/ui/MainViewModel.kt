@@ -20,24 +20,29 @@ class MainViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     //db val holds database instance (to interact with Firebase Firestore)
     private val db = Firebase.firestore
-    private val defaults = mapOf("name" to "Guest", "email" to "", "uid" to "", "phone" to "")
+    private val defaults = mapOf("fullName" to "Guest", "userName" to "Guest", "email" to "", "uid" to "", "phone" to "", "address" to "")
 
     private val _loggedIn = MutableStateFlow(auth.currentUser != null)
     val loggedInState = _loggedIn.asStateFlow()
 
-    private val _name = MutableStateFlow(if (loggedInState.value) auth.currentUser?.displayName else defaults["name"])
-    val nameState = _name.asStateFlow()
+    //User ID of current logged in user (used to retrieve data from db)
+    private val _uid = MutableStateFlow(defaults["uid"])
+    val uidState = _uid.asStateFlow()
 
-    private val _email = MutableStateFlow(if (loggedInState.value) auth.currentUser?.email else defaults["email"])
+    private val _fullName = MutableStateFlow(defaults["fullName"])
+    val fullNameState = _fullName.asStateFlow()
+
+    private val _userName = MutableStateFlow(defaults["userName"])
+    val userName = _userName.asStateFlow()
+
+    private val _email = MutableStateFlow(defaults["email"])
     val emailState = _email.asStateFlow()
 
     private val _phone = MutableStateFlow(defaults["phone"])
     val phoneState = _phone.asStateFlow()
 
-    //User ID of current logged in user (used to retrieve data from db)
-    private val _uid = MutableStateFlow(if (loggedInState.value) auth.currentUser?.uid else defaults["uid"])
-    val uidState = _uid.asStateFlow()
-
+    private val _address = MutableStateFlow(defaults["address"])
+    val addressState = _address.asStateFlow()
 
     /** Logges In User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
@@ -63,7 +68,7 @@ class MainViewModel : ViewModel() {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithEmail:success")
 
-                        UpdateAuthData()
+                        UpdateAuthData(startUp = false)
                         FetchUserData()
                     } else {
                         // If sign in fails, display a message to the user.
@@ -87,11 +92,21 @@ class MainViewModel : ViewModel() {
      * @param [password] User's Password
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
      * */
-    fun Register(name : String?, email : String?, phone : String?, password : String, activity : Activity) : Int {
+    fun Register(
+        firstName : String,
+        middleName : String,
+        lastName : String,
+        userName : String?,
+        phone : String?,
+        address : String,
+        email : String?,
+        password : String,
+        activity : Activity
+    ) : Int {
         //Returns -1 if registration failed, otherwise returns 0 on success
         var result = 0;
 
-        if (name == "" || email == "" || phone == "" || password == "") {
+        if (firstName == "" || lastName == "" || userName == "" || phone == "" || address == "" || email == "" ||  password == "") {
             Toast.makeText(
                 activity,
                 "One or more fields are empty.",
@@ -105,9 +120,9 @@ class MainViewModel : ViewModel() {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "createUserWithEmail:success")
 
-                        UpdateAuthData()
+                        UpdateAuthData(startUp = false)
                         FetchUserData()
-                        UpdateUserData(phone = phone, displayName = name)
+                        UpdateUserData(phone = phone, displayName = userName, firstName = firstName, middleName = middleName, lastName = lastName)
 
                     } else {
                         // If sign in fails, display a message to the user.
@@ -140,32 +155,62 @@ class MainViewModel : ViewModel() {
     fun RestoreDefaults() {
         _loggedIn.value = false
         _email.value = defaults["email"]
-        _name.value = defaults["name"]
+        _fullName.value = defaults["name"]
         _phone.value = defaults["phone"]
+        _address.value = defaults["address"]
         _uid.value = defaults["uid"]
     }
 
     /** Updates UserAuthData state variables
+     *
+     * @param [startUp] Specify if this function was called when app loads
      * */
-    fun UpdateAuthData() {
-        _name.value = auth.currentUser?.displayName
-        _email.value = auth.currentUser?.email
-        _uid.value = auth.currentUser?.uid
-        _loggedIn.value = true
+    fun UpdateAuthData(startUp : Boolean) {
+        _loggedIn.value = auth.currentUser != null
+        if (loggedInState.value) {
+            _userName.value = auth.currentUser?.displayName
+            _email.value = auth.currentUser?.email
+            _uid.value = auth.currentUser?.uid
+        } else if (startUp) {
+            RestoreDefaults()
+        }
     }
 
     /**
      * Updates User data in Firestore & in app state based on the parameters passed to the function.
+     *
+     * NOTE: For firstName, middleName & lastName, the function will update the respective field in the fullName string accordingly.
+     * i.e.: if you would only like to update firstName, only pass a firstName value, the rest of the names would be left alone.
+     *
+     * @param [middleName] pass in "*" to remove middle name and make it empty
      * */
     fun UpdateUserData(
-        phone: String? = "",
+        firstName: String = "",
+        middleName: String = "",
+        lastName: String = "",
         displayName: String? = "",
+        phone: String? = "",
+        address: String? = "",
         email: String? = "",
         password: String? = ""
         ) {
-        if (phone != "") {
-            db.collection("users").document(uidState.value.toString()).update("phone", phone)
-            _phone.value = phone
+        if (firstName != "" || middleName != "" || lastName != "") {
+            val names = fullNameState.value.toString().split(" ").toMutableList()
+
+            if (firstName != "") {
+                names[0] = firstName
+            }
+
+            if (middleName != "") {
+                names[1] = middleName
+            }
+
+            if (lastName != "") {
+                names[2] = lastName
+            }
+
+            _fullName.value = "${names[0]} ${names[1]} ${names[2]}"
+            db.collection("users").document(uidState.value.toString()).update("fullName", fullNameState.value)
         }
 
         if (displayName != "") {
@@ -180,7 +225,17 @@ class MainViewModel : ViewModel() {
                     }
                 }
 
-            _name.value = auth.currentUser?.displayName
+            _fullName.value = auth.currentUser?.displayName
+        }
+
+        if (phone != "") {
+            db.collection("users").document(uidState.value.toString()).update("phone", phone)
+            _phone.value = phone
+        }
+
+        if (address != "") {
+            db.collection("users").document(uidState.value.toString()).update("address", address)
+            _address.value = address
         }
 
         if (email != "") {

@@ -27,13 +27,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 
+//TODO: Implement way to tell if user is a tutor or not
+//TODO: Check if user is looking at someone else's profile or their own
 @Composable
 fun ProfilePage(
     modifier : Modifier,
     onLoginClick : () -> Unit,
     onRegisterClick : () -> Unit,
     loggedIn : Boolean,
-    name : String?,
+    userName : String?,
     email : String?,
     phone : String?
 ) {
@@ -50,7 +52,7 @@ fun ProfilePage(
             contentDescription = "Profile Image",
             modifier = Modifier.size(100.dp)
         )
-        Text("Hello, $name!", fontSize = 20.sp)
+        Text("Hello, $userName!", fontSize = 20.sp)
         Spacer(modifier = Modifier.height(3.dp))
         if (!loggedIn) {
             Button(
