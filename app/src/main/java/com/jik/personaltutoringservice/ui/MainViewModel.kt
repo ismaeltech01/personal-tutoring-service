@@ -1,11 +1,10 @@
 package com.jik.personaltutoringservice.ui
 
 import android.app.Activity
-import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
@@ -43,6 +42,11 @@ class MainViewModel : ViewModel() {
     private val _address = MutableStateFlow("")
     val addressState = _address.asStateFlow()
 
+    private val _cardInfo = mutableStateMapOf<String, String>()
+    val cardNumState = _cardInfo["card"]
+    val expDateState = _cardInfo["exp"]
+    val secCodeState = _cardInfo["secCode"]
+
     /** Logges In User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
      *
@@ -51,7 +55,7 @@ class MainViewModel : ViewModel() {
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
      * */
     fun LogIn(email : String?, password : String, activity : Activity) : Int {
-        var result = 0;
+        var result = 0
 
         if (email == "" || password == "") {
             Toast.makeText(
@@ -59,7 +63,7 @@ class MainViewModel : ViewModel() {
                 "One or more fields are empty.",
                 Toast.LENGTH_SHORT,
             ).show()
-            result = -1;
+            result = -1
         } else {
             auth.signInWithEmailAndPassword(email.toString(), password)
                 .addOnCompleteListener(activity) { task ->
@@ -80,13 +84,13 @@ class MainViewModel : ViewModel() {
                     }
                 }
             }
-        return result;
+        return result
     }
 
     /** Registers User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
      *
-     * @param [name] User's Name
+     * @param [userName] User's username
      * @param [email] User's Email
      * @param [password] User's Password
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
@@ -103,7 +107,7 @@ class MainViewModel : ViewModel() {
         activity : Activity
     ) : Int {
         //Returns -1 if registration failed, otherwise returns 0 on success
-        var result = 0;
+        var result = 0
 
         if (firstName == "" || lastName == "" || userName == "" || phone == "" || address == "" || email == "" ||  password == "") {
             Toast.makeText(
@@ -111,7 +115,7 @@ class MainViewModel : ViewModel() {
                 "One or more fields are empty.",
                 Toast.LENGTH_SHORT,
             ).show()
-            result = -1;
+            result = -1
         } else {
             auth.createUserWithEmailAndPassword(email.toString(), password)
                 .addOnCompleteListener(activity) { task ->
@@ -134,7 +138,7 @@ class MainViewModel : ViewModel() {
             }
         }
 
-        return result;
+        return result
     }
 
     /** Signs Out currently logged in user
@@ -251,6 +255,14 @@ class MainViewModel : ViewModel() {
         } else {
             Log.w(TAG, "UpdateUserData:failure -> uid is empty")
         }
+    }
+
+    fun UpdateCardInfo(
+        cardNum : String = "",
+        expDate : String = "",
+        secCode : String = ""
+    ) {
+//TODO
     }
 
     fun CreateUserDataDocument() {

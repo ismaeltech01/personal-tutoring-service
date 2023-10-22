@@ -23,6 +23,7 @@ import com.jik.personaltutoringservice.ui.MainViewModel
 import com.jik.personaltutoringservice.ui.MessagingPage
 import com.jik.personaltutoringservice.ui.Navbar
 import com.jik.personaltutoringservice.ui.OtherPage
+import com.jik.personaltutoringservice.ui.PaymentsPage
 import com.jik.personaltutoringservice.ui.ProfilePage
 import com.jik.personaltutoringservice.ui.RegisterPage
 import com.jik.personaltutoringservice.ui.SearchPage
@@ -45,6 +46,9 @@ class MainActivity : ComponentActivity() {
             val email by viewModel.emailState.collectAsState()
             val phone by viewModel.phoneState.collectAsState()
             val address by viewModel.addressState.collectAsState()
+            val cardNum = viewModel.cardNumState
+            val expDate = viewModel.expDateState
+            val secCode = viewModel.secCodeState
 
             if (loggedIn) {
                 viewModel.UpdateAuthData()
@@ -115,7 +119,11 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("payments") {
-
+                            PaymentsPage(
+                                cardNum = cardNum.toString(),
+                                expDate = expDate.toString(),
+                                secCode = secCode.toString()
+                            )
                         }
                         composable("ads") {
 
