@@ -172,19 +172,31 @@ fun RegisterPage(
 
             NameField(
                 value = firstNameState,
-                onValueChange = { firstNameState =  it },
+                onValueChange = {
+                    if (ValidName(it, activity)) {
+                        firstNameState = it
+                    }
+                },
                 text = "First Name"
             )
 
             NameField(
                 value = middleNameState,
-                onValueChange = { middleNameState = it },
+                onValueChange = {
+                    if (ValidName(it, activity)) {
+                        middleNameState = it
+                    }
+                },
                 text = "Middle Name (Optional)"
             )
 
             NameField(
                 value = lastNameState,
-                onValueChange = { lastNameState = it },
+                onValueChange = {
+                    if (ValidName(it, activity)) {
+                        lastNameState = it
+                    }
+                },
                 text = "Last Name"
             )
 
@@ -265,6 +277,23 @@ fun RegisterPage(
  */
 fun isValidEmail(email : String) : Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+}
+
+/**
+ * Check if a given name is valid (does not contain characters outside of A-Z, a-z, & -)
+ * If invalid, ValidName notifies user of such
+ * */
+fun ValidName(name : String, activity: Activity) : Boolean {
+    if (Regex("[^A-Za-z-]").containsMatchIn(name)) {
+        return true
+    } else {
+        Toast.makeText(
+            activity,
+            "Name cannot contain characters outside of A-Z, a-z, & -",
+            Toast.LENGTH_LONG,
+        ).show()
+        return false
+    }
 }
 
 @Composable
