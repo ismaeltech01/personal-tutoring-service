@@ -37,14 +37,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val viewModel = viewModel<MainViewModel>()
+            //Get Auth data & Database data
             val navController = rememberNavController()
             val loggedIn by viewModel.loggedInState.collectAsState()
-            val name by viewModel.nameState.collectAsState()
+            val fullName by viewModel.fullNameState.collectAsState()
+            val userName by viewModel.userName.collectAsState()
             val email by viewModel.emailState.collectAsState()
+            val phone by viewModel.phoneState.collectAsState()
+            val address by viewModel.addressState.collectAsState()
+
+            if (loggedIn) {
+                viewModel.UpdateAuthData()
+                viewModel.FetchUserData()
+            }
 
             //Modifier applied to all pages of the app
             val pageModifier = Modifier
-                .background(color = Color.White)
                 .fillMaxWidth()
 
             PersonalTutoringServiceTheme {
@@ -72,9 +80,12 @@ class MainActivity : ComponentActivity() {
                                 modifier = pageModifier,
                                 onLoginClick = { navController.navigate("login") },
                                 onRegisterClick = { navController.navigate("register") },
-                                loggedIn,
-                                name,
-                                email
+                                loggedIn = loggedIn,
+                                fullName = fullName,
+                                userName = userName,
+                                email = email,
+                                phone = phone,
+                                address = address
                             )
                         }
                         composable("messaging") {
