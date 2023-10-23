@@ -172,31 +172,19 @@ fun RegisterPage(
 
             NameField(
                 value = firstNameState,
-                onValueChange = {
-                    if (ValidName(it, activity)) {
-                        firstNameState = it
-                    }
-                },
+                onValueChange = { firstNameState = it },
                 text = "First Name"
             )
 
             NameField(
                 value = middleNameState,
-                onValueChange = {
-                    if (ValidName(it, activity)) {
-                        middleNameState = it
-                    }
-                },
+                onValueChange = { middleNameState = it },
                 text = "Middle Name (Optional)"
             )
 
             NameField(
                 value = lastNameState,
-                onValueChange = {
-                    if (ValidName(it, activity)) {
-                        lastNameState = it
-                    }
-                },
+                onValueChange = { lastNameState = it },
                 text = "Last Name"
             )
 
@@ -234,7 +222,21 @@ fun RegisterPage(
             )
 
             Button(onClick = {
-                if (!isValidEmail(emailState)) {
+                val validFirstName = isValidName(firstNameState)
+                val validMiddleName = isValidName(middleNameState)
+                val validLastName = isValidName(lastNameState)
+
+                if (!validFirstName || !validMiddleName || !validLastName) {
+                    val nameStr = if (!validFirstName) "First Name"
+                    else if (!validMiddleName) "Middle Name"
+                    else "Last Name"
+
+                    Toast.makeText(
+                        activity,
+                        "$nameStr cannot contain characters outside of A-Z, a-z, & -",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                } else if (!isValidEmail(emailState)) {
                     Toast.makeText(
                         activity,
                         "Invalid email. Try again.",
@@ -283,17 +285,8 @@ fun isValidEmail(email : String) : Boolean {
  * Check if a given name is valid (does not contain characters outside of A-Z, a-z, & -)
  * If invalid, ValidName notifies user of such
  * */
-fun ValidName(name : String, activity: Activity) : Boolean {
-    if (Regex("[^A-Za-z-]").containsMatchIn(name)) {
-        return true
-    } else {
-        Toast.makeText(
-            activity,
-            "Name cannot contain characters outside of A-Z, a-z, & -",
-            Toast.LENGTH_LONG,
-        ).show()
-        return false
-    }
+fun isValidName(name : String) : Boolean {
+    return !Regex("[^A-Za-z-]").containsMatchIn(name)
 }
 
 @Composable

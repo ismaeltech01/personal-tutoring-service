@@ -46,9 +46,9 @@ class MainActivity : ComponentActivity() {
             val email by viewModel.emailState.collectAsState()
             val phone by viewModel.phoneState.collectAsState()
             val address by viewModel.addressState.collectAsState()
-            val cardNum = viewModel.cardNumState
-            val expDate = viewModel.expDateState
-            val secCode = viewModel.secCodeState
+            val cardNum by viewModel.cardNumState.collectAsState()
+            val expDate by viewModel.expDateState.collectAsState()
+            val secCode by viewModel.secCodeState.collectAsState()
 
             if (loggedIn) {
                 viewModel.UpdateAuthData()
@@ -120,9 +120,12 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("payments") {
                             PaymentsPage(
-                                cardNum = cardNum.toString(),
-                                expDate = expDate.toString(),
-                                secCode = secCode.toString()
+                                cardNum = cardNum,
+                                expDate = expDate,
+                                secCode = secCode,
+                                activity = this@MainActivity,
+                                viewModel = viewModel,
+                                navigate = { navController.navigate("other") }
                             )
                         }
                         composable("ads") {

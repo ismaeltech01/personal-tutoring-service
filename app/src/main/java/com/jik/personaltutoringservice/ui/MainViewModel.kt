@@ -42,10 +42,14 @@ class MainViewModel : ViewModel() {
     private val _address = MutableStateFlow("")
     val addressState = _address.asStateFlow()
 
-    private val _cardInfo = mutableStateMapOf<String, String>()
-    val cardNumState = _cardInfo["card"]
-    val expDateState = _cardInfo["exp"]
-    val secCodeState = _cardInfo["secCode"]
+    private val _cardNum = MutableStateFlow("")
+    val cardNumState = _cardNum.asStateFlow()
+
+    private val _expDate = MutableStateFlow("")
+    val expDateState = _expDate.asStateFlow()
+
+    private val _secCode = MutableStateFlow("")
+    val secCodeState = _secCode.asStateFlow()
 
     /** Logges In User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
@@ -262,12 +266,41 @@ class MainViewModel : ViewModel() {
         expDate : String = "",
         secCode : String = ""
     ) {
-//TODO
+        val editCardNum = cardNum != ""
+        val editExpDate = expDate != ""
+        val editSecCode = secCode != ""
+
+        val map = mutableMapOf<String, Any>()
+        if (editCardNum)
+            map["cardNum"] = cardNum
+
+        if (editExpDate)
+            map["expDate"] = expDate
+
+        if (editSecCode)
+            map["secCode"] = secCode
+
+        db.collection("banking").document(uidState.value).update(map)
+
+        if (editCardNum)
+            _cardNum.value = cardNum
+
+        if (editExpDate)
+            _expDate.value = expDate
+
+        if (editSecCode)
+            _secCode.value = secCode
     }
 
+    /**
+     * WARNING: THIS FUNCTION WILL OVERWRITE A USER'S DATA DOCUMENT IF IT EXISTS!
+     * */
     fun CreateUserDataDocument() {
         val data = mapOf("email" to emailState.value)
+        val bankingData = mapOf("cardNum" to cardNumState, "expDate" to expDateState, "secCode" to secCodeState)
+
         db.collection("users").document(uidState.value).set(data)
+        db.collection("banking").document(uidState.value).set(bankingData)
     }
 
     /** Gets User Data from Database & updates app state accordingly
@@ -283,9 +316,37 @@ class MainViewModel : ViewModel() {
                         Log.d(TAG, "DocumentSnapshot data: ${document.data}")
 
                         //Update state values (Used in app)
+                        //* Update user info
                         _fullName.value = document.data?.get("fullName").toString()
                         _phone.value = document.data?.get("phone").toString()
                         _address.value = document.data?.get("address").toString()
+                    } else {
+                        Log.d(TAG, "FetchUserData:failure -> No document found.")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "get() failed with ", exception)
+                }
+        }
+    }
+
+    /** Gets Banking Data from Database & updates app state accordingly
+     * NOTE: Crashes app whenever uidString is empty ("")
+     */
+    fun FetchUserBankingInfo() {
+        val uidString = uidState.value
+
+        if (uidString != "") {
+            db.collection("banking").document(uidString).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+
+                        //Update state values (Used in app)
+                        //* Update Banking Info
+                        _cardNum.value = document.data?.get("cardNum").toString()
+                        _expDate.value = document.data?.get("expDate").toString()
+                        _secCode.value = document.data?.get("secCode").toString()
                     } else {
                         Log.d(TAG, "FetchUserData:failure -> No document found.")
                     }
