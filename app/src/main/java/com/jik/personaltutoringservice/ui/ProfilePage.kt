@@ -44,12 +44,14 @@ fun ProfilePage(
     modifier : Modifier,
     onLoginClick : () -> Unit,
     onRegisterClick : () -> Unit,
+    onTutorClick : () -> Unit,
     loggedIn : Boolean,
     fullName : String,
     userName : String,
     email : String,
     phone : String,
-    address : String
+    address : String,
+    isTutor : Boolean
 ) {
 
     //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
@@ -105,6 +107,14 @@ fun ProfilePage(
                 Icon(Icons.Rounded.Home, "Home Icon")
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(address)
+            }
+            if (!isTutor) {
+                Spacer(modifier = Modifier.height(5.dp))
+                Button(
+                    onClick = onTutorClick
+                ) {
+                    Text("Become a Tutor")
+                }
             }
         }
     }

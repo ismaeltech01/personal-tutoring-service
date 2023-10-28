@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.jik.personaltutoringservice.ui.AgreementPage
 import com.jik.personaltutoringservice.ui.HomePage
 import com.jik.personaltutoringservice.ui.LoginPage
 import com.jik.personaltutoringservice.ui.MainViewModel
@@ -26,7 +27,9 @@ import com.jik.personaltutoringservice.ui.OtherPage
 import com.jik.personaltutoringservice.ui.PaymentsPage
 import com.jik.personaltutoringservice.ui.ProfilePage
 import com.jik.personaltutoringservice.ui.RegisterPage
+import com.jik.personaltutoringservice.ui.ReportingPage
 import com.jik.personaltutoringservice.ui.SearchPage
+import com.jik.personaltutoringservice.ui.SettingsPage
 import com.jik.personaltutoringservice.ui.theme.PersonalTutoringServiceTheme
 
 
@@ -49,6 +52,8 @@ class MainActivity : ComponentActivity() {
             val cardNum by viewModel.cardNumState.collectAsState()
             val expDate by viewModel.expDateState.collectAsState()
             val secCode by viewModel.secCodeState.collectAsState()
+            val isTutor by viewModel.isTutorState.collectAsState()
+            val tutors = viewModel.tutorsState.toMap()
 
             if (loggedIn) {
                 viewModel.UpdateAuthData()
@@ -84,13 +89,18 @@ class MainActivity : ComponentActivity() {
                                 modifier = pageModifier,
                                 onLoginClick = { navController.navigate("login") },
                                 onRegisterClick = { navController.navigate("register") },
+                                onTutorClick = { navController.navigate("agreement") },
                                 loggedIn = loggedIn,
                                 fullName = fullName,
                                 userName = userName,
                                 email = email,
                                 phone = phone,
-                                address = address
+                                address = address,
+                                isTutor = isTutor
                             )
+                        }
+                        composable("agreement") {
+                            AgreementPage()
                         }
                         composable("messaging") {
                             MessagingPage()
@@ -132,10 +142,10 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("settings") {
-
+                            SettingsPage()
                         }
                         composable("reporting") {
-
+                            ReportingPage(tutors = tutors)
                         }
                         //Login & Registration pages
                         composable("login") {

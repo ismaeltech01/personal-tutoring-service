@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
@@ -51,6 +52,12 @@ class MainViewModel : ViewModel() {
     private val _secCode = MutableStateFlow("")
     val secCodeState = _secCode.asStateFlow()
 
+    private val _isTutor = MutableStateFlow(false)
+    val isTutorState = _isTutor.asStateFlow()
+
+    private val _tutors = mutableStateMapOf<String, Map<String, String>>()
+    val tutorsState =_tutors
+
     /** Logges In User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
      *
@@ -77,6 +84,7 @@ class MainViewModel : ViewModel() {
 
                         UpdateAuthData()
                         FetchUserData()
+                        FetchUserBankingInfo()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -297,7 +305,7 @@ class MainViewModel : ViewModel() {
      * */
     fun CreateUserDataDocument() {
         val data = mapOf("email" to emailState.value)
-        val bankingData = mapOf("cardNum" to cardNumState, "expDate" to expDateState, "secCode" to secCodeState)
+        val bankingData = mapOf("cardNum" to cardNumState.value, "expDate" to expDateState.value, "secCode" to secCodeState.value)
 
         db.collection("users").document(uidState.value).set(data)
         db.collection("banking").document(uidState.value).set(bankingData)
@@ -355,5 +363,29 @@ class MainViewModel : ViewModel() {
                     Log.d(TAG, "get() failed with ", exception)
                 }
         }
+    }
+
+    fun FetchTutorsRelations() {
+        val uidString = uidState.value
+
+        if (uidString != "") {
+            db.collection("relations").document(uidString).collection("tutors").get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        if (doc.id != "sample") {
+                            tutorsState[doc.id] = doc.data as Map<String, String>
+                            Log.d(TAG, "${doc.id} => ${doc.data}")
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting tutors documents: ", exception)
+                }
+        }
+
+    }
+
+    fun FetchClientsRelations() {
+
     }
 }
