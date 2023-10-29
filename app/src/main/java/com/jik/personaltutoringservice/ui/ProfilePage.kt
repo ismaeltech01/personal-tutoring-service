@@ -122,13 +122,22 @@ fun ProfilePage(
 
 @Composable
 fun NameDisplay(fullName: String) {
+    val name = ParseFullName(fullName)
+
+    Text("Hello, $name!", fontSize = 20.sp)
+}
+
+/**
+ * Expects a fullName string and returns the appropriate string to display in the app.
+ * */
+fun ParseFullName(fullName : String) : String {
     var name = ""
+
     try {
         val names = fullName.split(" ")
         name = if (names[1].contains("*")) "${names[0]} ${names[2]}" else fullName
     } catch (e : Exception) {
         Log.e(TAG, "NameDisplay:failure -> fullName is likely too short", e)
     }
-
-    Text("Hello, $name!", fontSize = 20.sp)
+    return name
 }

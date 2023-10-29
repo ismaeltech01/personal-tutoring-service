@@ -58,6 +58,9 @@ class MainViewModel : ViewModel() {
     private val _tutors = mutableStateMapOf<String, Map<String, String>>()
     val tutorsState =_tutors
 
+    private val _clients = mutableStateMapOf<String, Map<String, String>>()
+    val clientsState = _clients
+
     /** Logges In User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
      *
@@ -85,6 +88,11 @@ class MainViewModel : ViewModel() {
                         UpdateAuthData()
                         FetchUserData()
                         FetchUserBankingInfo()
+                        if (isTutorState.value) {
+                            FetchClientsRelations()
+                        } else {
+                            FetchTutorsRelations()
+                        }
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -309,6 +317,9 @@ class MainViewModel : ViewModel() {
 
         db.collection("users").document(uidState.value).set(data)
         db.collection("banking").document(uidState.value).set(bankingData)
+        db.collection("relations").document(uidState.value).set(mapOf("init" to true))
+        db.collection("relations").document(uidState.value).collection("tutors").document("sample").set(mapOf("init" to true))
+        db.collection("relations").document(uidState.value).collection("clients").document("sample").set(mapOf("init" to true))
     }
 
     /** Gets User Data from Database & updates app state accordingly
@@ -335,6 +346,8 @@ class MainViewModel : ViewModel() {
                 .addOnFailureListener { exception ->
                     Log.d(TAG, "get() failed with ", exception)
                 }
+        } else {
+            Log.w(TAG, "FetchUserData:failure -> uid is empty")
         }
     }
 
@@ -362,6 +375,8 @@ class MainViewModel : ViewModel() {
                 .addOnFailureListener { exception ->
                     Log.d(TAG, "get() failed with ", exception)
                 }
+        } else {
+            Log.w(TAG, "FetchUserBankingInfo:failure -> uid is empty")
         }
     }
 
@@ -381,11 +396,30 @@ class MainViewModel : ViewModel() {
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting tutors documents: ", exception)
                 }
+        } else {
+            Log.w(TAG, "FetchTutorsRelations:failure -> uid is empty")
         }
-
     }
 
     fun FetchClientsRelations() {
+        val uidString = uidState.value
 
+        if (uidString != "") {
+            db.collection("relations").document(uidString).collection("clients").get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        if (doc.id != "sample") {
+                            tutorsState[doc.id] = doc.data as Map<String, String>
+                            Log.d(TAG, "${doc.id} => ${doc.data}")
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting tutors documents: ", exception)
+                }
+        } else {
+            Log.w(TAG, "FetchClientsRelations:failure -> uid is empty")
+        }
     }
+
 }

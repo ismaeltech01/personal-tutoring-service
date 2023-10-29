@@ -54,10 +54,16 @@ class MainActivity : ComponentActivity() {
             val secCode by viewModel.secCodeState.collectAsState()
             val isTutor by viewModel.isTutorState.collectAsState()
             val tutors = viewModel.tutorsState.toMap()
+            val clients = viewModel.clientsState.toMap()
 
             if (loggedIn) {
                 viewModel.UpdateAuthData()
                 viewModel.FetchUserData()
+                if (isTutor) {
+                    viewModel.FetchClientsRelations()
+                } else {
+                    viewModel.FetchTutorsRelations()
+                }
             }
 
             //Modifier applied to all pages of the app
