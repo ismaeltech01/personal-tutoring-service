@@ -1,23 +1,38 @@
 package com.jik.personaltutoringservice.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposableOpenTarget
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun ReportingPage(
@@ -43,6 +58,7 @@ fun ReportingPage(
         mutableStateOf("")
     }
 
+
     if (tutors.isEmpty()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -51,29 +67,33 @@ fun ReportingPage(
             Text("You have not hired or messaged any tutors yet.")
         }
     } else if (!confirmState) {
-        Column {
-            for (pair in tutors) {
-                val fullName = ParseFullName(pair.value["fullName"].toString())
-                val userName = ParseFullName(pair.value["userName"].toString())
+        LazyColumn {
+            item {
+                for (pair in tutors) {
+                    val fullName = ParseFullName(pair.value["fullName"].toString())
+                    val userName = pair.value["userName"].toString()
 
-                UserCard(
-                    fullName = fullName,
-                    userName = userName,
-                    onReportClick = {
-                        confirmState = true
-                        reportUIDState = pair.key
-                        reportFullNameState = fullName
-                        reportUserNameState = userName
-                    }
-                )
+                    UserCard(
+                        fullName = fullName,
+                        userName = userName,
+                        enableReport = true,
+                        onReportClick = {
+                            confirmState = true
+                            reportUIDState = pair.key
+                            reportFullNameState = fullName
+                            reportUserNameState = userName
+                        }
+                    )
+                }
             }
         }
     } else {
-        ReportConfirmPage (
+        ReportConfirmPage(
             uid = reportUIDState,
             picture = reportPicState,
             userName = reportUserNameState,
-            fullName = reportFullNameState
+            fullName = reportFullNameState,
+            onBackClick = { confirmState = false }
         )
     }
 }
@@ -83,28 +103,74 @@ fun UserCard(
     picture : String = "",
     fullName : String,
     userName : String,
-    onReportClick : () -> Unit
+    enableReport : Boolean,
+    onReportClick : () -> Unit = {}
 ) {
     Row (
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 15.dp)
     ) {
-        if (picture == "") {
-            Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
-        } else {
-            //TODO
-        }
+//        if (enableReport) {
+            Row (
+                horizontalArrangement = if (enableReport) Arrangement.Start else Arrangement.Center,
+                verticalAlignment = CenterVertically,
+                modifier = Modifier.weight(if (enableReport) 2 / 3f else 1f)
+            ) {
+                Column (
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    if (picture == "") {
+                        Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
+                    } else {
+                        //TODO
+                    }
+                }
 
-        Column (
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(fullName)
-            Text("username: $userName")
-        }
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(15.dp)
+                ) {
+                    Text(fullName)
+                    Row {
+                        Image(Icons.Rounded.Person, "UserName icon")
+                        Text(userName)
+                    }
+                }
+            }
 
-        Button(onClick = onReportClick) {
-            Text("Report")
+        if (enableReport) {
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = CenterVertically,
+                modifier = Modifier.weight(1 / 3f)
+            ) {
+                Button(onClick = onReportClick) {
+                    Text("Report")
+                }
+            }
         }
+//        } else {
+//            Column (
+//                horizontalAlignment = Alignment.Start,
+//                verticalArrangement = Arrangement.Center
+//            ) {
+//                if (picture == "") {
+//                    Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
+//                } else {
+//                    //TODO
+//                }
+//
+//                Text(fullName)
+//                Row {
+//                    Image(Icons.Rounded.Person, "UserName icon")
+//                    Text(userName)
+//                }
+//            }
     }
 }
 
@@ -113,7 +179,8 @@ fun ReportConfirmPage(
     picture: String,
     uid : String,
     fullName : String,
-    userName : String
+    userName : String,
+    onBackClick : () -> Unit
 ) {
     var textState by remember {
         mutableStateOf("")
@@ -123,14 +190,35 @@ fun ReportConfirmPage(
         mutableStateOf(false)
     }
 
-    Column {
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Row (
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Image(Icons.Rounded.ArrowBack, "Back arrow", modifier = Modifier
+                .clickable(onClick = onBackClick)
+                .size(60.dp)
+                .padding(15.dp))
+        }
+
         Text("The following user will be reported: ")
+
+        UserCard(
+            fullName = fullName,
+            userName = userName,
+            enableReport = false
+        )
+
         OutlinedTextField(
             value = textState,
             onValueChange = { textState = it },
             minLines = 4,
             placeholder = { Text(text = "Reasons for reporting...")}
         )
+
         Button(
             modifier = Modifier.background(if (reportState) Color.Red else Color.Transparent),
             onClick = {
@@ -143,6 +231,15 @@ fun ReportConfirmPage(
         }
     }
 }
+
+@Preview
+@Composable
+fun ReportConfirmPagePreview() {
+    ReportConfirmPage(picture = "", uid = "", fullName = "Patrick Spam", userName = "spamspam" ) {
+
+    }
+}
+
 fun ReportUser(
     uid : String
 ) {
