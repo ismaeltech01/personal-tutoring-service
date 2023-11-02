@@ -18,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.jik.personaltutoringservice.ui.AgreementPage
+import com.jik.personaltutoringservice.ui.CoursesPage
 import com.jik.personaltutoringservice.ui.HomePage
 import com.jik.personaltutoringservice.ui.LoginPage
 import com.jik.personaltutoringservice.ui.MainViewModel
@@ -132,7 +133,7 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("courses") {
-
+                            CoursesPage()
                         }
                         composable("payments") {
                             PaymentsPage(
