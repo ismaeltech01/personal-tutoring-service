@@ -60,6 +60,8 @@ class MainActivity : ComponentActivity() {
             if (loggedIn) {
                 viewModel.UpdateAuthData()
                 viewModel.FetchUserData()
+                viewModel.FetchUserBankingInfo()
+
                 if (isTutor) {
                     viewModel.FetchClientsRelations()
                 } else {
@@ -114,13 +116,13 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("other") {
                             OtherPage(
-                                { navController.navigate("calendar") },
-                                { navController.navigate("courses") },
-                                { navController.navigate("payments") },
-                                { navController.navigate("ads") },
-                                { navController.navigate("settings") },
-                                { navController.navigate("reporting") },
-                                { navController.navigate("profile") },
+                                onCalendarClick = { navController.navigate("calendar") },
+                                onCoursesClick = { navController.navigate("courses") },
+                                onPaymentsClick = { navController.navigate("payments") },
+                                onAdClick = { navController.navigate("ads") },
+                                onSettingsClick = { navController.navigate("settings") },
+                                onReportClick = { navController.navigate("reporting") },
+                                onSigninClick = { navController.navigate("profile") },
                                 onSignOutClick = {
                                     viewModel.SignOut(this@MainActivity)
                                     navController.navigate("home")
@@ -149,10 +151,16 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("settings") {
-                            SettingsPage()
+                            SettingsPage(viewModel = viewModel, activity = this@MainActivity) {
+                                navController.navigate("other")
+                            }
                         }
                         composable("reporting") {
-                            ReportingPage(tutors = tutors)
+                            ReportingPage(
+                                tutors = tutors,
+                                clients = clients,
+                                isTutor = isTutor
+                            )
                         }
                         //Login & Registration pages
                         composable("login") {

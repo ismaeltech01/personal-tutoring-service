@@ -36,7 +36,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ReportingPage(
-    tutors : Map<String, Map<String, String>>
+    tutors : Map<String, Map<String, String>>,
+    clients : Map<String, Map<String, String>>,
+    isTutor : Boolean
 ) {
     var confirmState by remember {
         mutableStateOf(false)
@@ -69,6 +71,16 @@ fun ReportingPage(
     } else if (!confirmState) {
         LazyColumn {
             item {
+                Row (
+                    verticalAlignment = CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                ) {
+                    Text("Tutors")
+                }
+
                 for (pair in tutors) {
                     val fullName = ParseFullName(pair.value["fullName"].toString())
                     val userName = pair.value["userName"].toString()
@@ -84,6 +96,35 @@ fun ReportingPage(
                             reportUserNameState = userName
                         }
                     )
+                }
+
+                if (isTutor) {
+                    Row (
+                        verticalAlignment = CenterVertically,
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(15.dp)
+                    ) {
+                        Text("Students")
+                    }
+
+                    for (pair in clients) {
+                        val fullName = ParseFullName(pair.value["fullName"].toString())
+                        val userName = pair.value["userName"].toString()
+
+                        UserCard(
+                            fullName = fullName,
+                            userName = userName,
+                            enableReport = true,
+                            onReportClick = {
+                                confirmState = true
+                                reportUIDState = pair.key
+                                reportFullNameState = fullName
+                                reportUserNameState = userName
+                            }
+                        )
+                    }
                 }
             }
         }
