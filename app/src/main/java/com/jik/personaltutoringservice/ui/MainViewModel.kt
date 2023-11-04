@@ -14,6 +14,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.math.BigDecimal
 
 class MainViewModel : ViewModel() {
     //auth val holds authentication instance (to interact with FirebaseAuth)
@@ -43,6 +44,7 @@ class MainViewModel : ViewModel() {
     private val _address = MutableStateFlow("")
     val addressState = _address.asStateFlow()
 
+    /** Card info */
     private val _cardNum = MutableStateFlow("")
     val cardNumState = _cardNum.asStateFlow()
 
@@ -51,6 +53,7 @@ class MainViewModel : ViewModel() {
 
     private val _secCode = MutableStateFlow("")
     val secCodeState = _secCode.asStateFlow()
+    /***/
 
     private val _isTutor = MutableStateFlow(false)
     val isTutorState = _isTutor.asStateFlow()
@@ -60,6 +63,22 @@ class MainViewModel : ViewModel() {
 
     private val _clients = mutableStateMapOf<String, Map<String, String>>()
     val clientsState = _clients
+
+    /** Transaction state variables (for current transaction, if any) */
+    private val _payerUserName = MutableStateFlow("")
+    val payerUserName = _payerUserName.asStateFlow()
+
+    val commission : BigDecimal = BigDecimal(".20").setScale(2)
+
+    private val _appProfit = MutableStateFlow(BigDecimal("0"))
+    val appProfit = _appProfit.asStateFlow()
+
+    private val _tutorProfit = MutableStateFlow(BigDecimal("0"))
+    val tutorProfit = _tutorProfit.asStateFlow()
+
+    private val _tutorRate = MutableStateFlow(BigDecimal("0"))
+    val tutorRate = _tutorRate.asStateFlow()
+    /***/
 
     /** Logges In User based on input data.
      * NOTE: Crashes if email or password are empty strings ("")
@@ -422,4 +441,77 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Init transaction between payer & payee.
+     *
+     * @param [hours] amount of service hours payer will purchase
+     * @return code specifying if transaction was successful
+     *          Codes:
+     *          0 == success
+     *          -1 == payer's credit card is invalid
+     *          -2 == tutor's credit card is invalid
+     *          -3 == Tutor rate is 0
+     *          -4 == Error retrieving tutor's info
+     * */
+    fun InitTransaction(
+        payerUID : String,
+        payeeUserName : String,
+        hours : BigDecimal
+    ) : Int {
+        if (!ConfirmBankingInfo(cardNumState.value, expDateState.value, secCodeState.value)) {
+            Log.e(TAG, "Error in InitTransaction: User (uid: $payerUID) card info not valid")
+            return -1
+        }
+
+        var docSuccess: Boolean = false
+//        var tutorCardNum = ""
+//        var tutorExpDate = ""
+//        var tutorSecCode = ""
+        //TODO: Modify security rules for firebase (may lead to access denied when modifying tutor stuff)
+        db.collection("users").whereEqualTo("userName", payeeUserName).get()
+            .addOnSuccessListener { docs ->
+                val doc = docs.documents[0]
+                _tutorRate.value = BigDecimal(doc.data?.get("tutorRate").toString())
+
+                Log.d(TAG, "${doc.id} => ${doc.data}")
+                docSuccess = true
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting tutors documents: ", exception)
+            }
+
+//        if (!ConfirmBankingInfo(tutorCardNum, tutorExpDate, tutorSecCode)) {
+//            Log.e(TAG, "Error in InitTransaction: Tutor (userName: $payeeUserName) card info not valid")
+//            return -2
+//          }
+        if (tutorRate.value.longValueExact() == 0L) {
+            Log.w(TAG, "Error in InitTransaction:tutorRate is 0")
+            return -3
+        } else if (!docSuccess) {
+            return -4
+        } else {
+            ProfitManagement(tutorRate.value.multiply(hours))
+            return 0
+        }
+    }
+
+    fun ConfirmBankingInfo(
+        cardNum : String,
+        expDate : String,
+        secCode: String
+    ) : Boolean {
+        return cardNum.length == 16 && expDate.length == 4 && secCode.length == 3
+    }
+
+    /**
+     * Calculates the commission from a payment total and returns the remaining amount of revenue for a tutor after taking commission
+     *
+     * @param [total] The total dollar value of the transaction
+     * */
+    fun ProfitManagement(
+        total : BigDecimal
+    ) {
+        _appProfit.value = commission.multiply(total)
+        _tutorProfit.value = total.subtract(appProfit.value).setScale(2)
+    }
 }

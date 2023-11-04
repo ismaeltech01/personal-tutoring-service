@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.firebase.ui.auth.AuthUI
 
 //Page that contains all of the links for the "Other" option in the navbar
 @Composable
@@ -95,18 +92,22 @@ fun PageButton(
     }
 }
 
-@Preview
+@Preview(
+    showBackground = true
+)
 @Composable
 fun OtherPagePreview() {
-    /*
     OtherPage(
         onCalendarClick = { /*TODO*/ },
         onCoursesClick = { /*TODO*/ },
         onPaymentsClick = { /*TODO*/ },
         onAdClick = { /*TODO*/ },
         onSettingsClick = { /*TODO*/ },
-        onReportClick = { })
-     */
+        onReportClick = { /*TODO*/ },
+        onSigninClick = { /*TODO*/ },
+        onSignOutClick = { /*TODO*/ },
+        userSignedIn = true
+    )
 }
 
 @Preview
