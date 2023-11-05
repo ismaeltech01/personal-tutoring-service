@@ -1,5 +1,7 @@
 package com.jik.personaltutoringservice.ui
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,8 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jik.personaltutoringservice.R
+import java.io.File
+import java.util.regex.Pattern
 
 @Composable
 fun ReportingPage(
@@ -285,6 +291,28 @@ fun ReportUser(
     uid : String
 ) {
     //TODO: Maybe make simple react console for reporting
+}
+
+/**
+ * Scans text to see if there is any banned words in it.
+ *
+ * @return true if the input text is valid (no banned words detected), false otherwise
+ * */
+fun ScanText(
+    text : String
+) : Boolean {
+    var isValid : Boolean = true
+    val lowerCased = text.lowercase()
+    val pattern = Pattern.compile("\\b$\\b")
+    val file = File("/res/values/bannedWords")
+
+    file.forEachLine {
+        val matches = Pattern.matches("\\b$it\\b", lowerCased)
+        isValid = !matches
+        if (matches) Log.w(TAG, "Banned Word detected: $it")
+    }
+
+    return isValid
 }
 
 //@Preview

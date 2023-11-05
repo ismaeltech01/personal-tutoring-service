@@ -514,4 +514,5 @@ class MainViewModel : ViewModel() {
         _appProfit.value = commission.multiply(total)
         _tutorProfit.value = total.subtract(appProfit.value).setScale(2)
     }
+
 }
