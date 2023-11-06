@@ -296,6 +296,14 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun UpdateSecQuestion(
+        question : String,
+        answer : String
+    ) {
+        val data = mapOf("secQuestion" to question, "secAnswer" to answer)
+        db.collection("users").document(uidState.value).set(data)
+    }
+
     fun UpdateCardInfo(
         cardNum : String = "",
         expDate : String = "",

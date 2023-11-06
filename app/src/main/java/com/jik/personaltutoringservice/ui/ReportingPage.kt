@@ -303,8 +303,7 @@ fun ScanText(
 ) : Boolean {
     var isValid : Boolean = true
     val lowerCased = text.lowercase()
-    val pattern = Pattern.compile("\\b$\\b")
-    val file = File("/res/values/bannedWords")
+    val file = File("/java/com/jik/personaltutoringservice/ui/banned/bannedWords.txt")
 
     file.forEachLine {
         val matches = Pattern.matches("\\b$it\\b", lowerCased)

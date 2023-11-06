@@ -4,53 +4,53 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.AccountBox
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.ArrowDropUp
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
-import androidx.compose.material.icons.rounded.RemoveCircleOutline
+import androidx.compose.material.icons.rounded.QuestionAnswer
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun LoginPage(
@@ -121,7 +121,7 @@ fun LoginPage(
 fun RegisterPage(
     viewModel: MainViewModel,
     activity: Activity,
-    navigate: () -> Unit
+    onRegisterNavigate: () -> Unit
 ) {
     var firstNameState by remember {
         mutableStateOf("")
@@ -135,7 +135,7 @@ fun RegisterPage(
         mutableStateOf("")
     }
 
-    var usernameState by remember {
+    var userNameState by remember {
         mutableStateOf("")
     }
 
@@ -152,9 +152,11 @@ fun RegisterPage(
     }
 
 
-    var passwdState by remember {
+    var passwordState by remember {
         mutableStateOf("")
     }
+
+    var toSecQuestion by remember { mutableStateOf(false) }
 
     LazyColumn(
         verticalArrangement = Arrangement.Center,
@@ -164,110 +166,140 @@ fun RegisterPage(
     )
     {
         item {
-            Image(
-                Icons.Rounded.AccountBox,
-                contentDescription = "Register icon",
-                modifier = Modifier.size(100.dp)
-            )
+            if (!toSecQuestion) {
+                Image(
+                    Icons.Rounded.AccountBox,
+                    contentDescription = "Register icon",
+                    modifier = Modifier.size(100.dp)
+                )
 
-            NameField(
-                value = firstNameState,
-                onValueChange = { firstNameState = it },
-                text = "First Name"
-            )
+                NameField(
+                    value = firstNameState,
+                    onValueChange = { firstNameState = it },
+                    text = "First Name"
+                )
 
-            NameField(
-                value = middleNameState,
-                onValueChange = { middleNameState = it },
-                text = "Middle Name (Optional)"
-            )
+                NameField(
+                    value = middleNameState,
+                    onValueChange = { middleNameState = it },
+                    text = "Middle Name (Optional)"
+                )
 
-            NameField(
-                value = lastNameState,
-                onValueChange = { lastNameState = it },
-                text = "Last Name"
-            )
+                NameField(
+                    value = lastNameState,
+                    onValueChange = { lastNameState = it },
+                    text = "Last Name"
+                )
 
-            UsernameField(
-                value = usernameState,
-                onValueChange = { usernameState = it }
-            )
+                UsernameField(
+                    value = userNameState,
+                    onValueChange = { userNameState = it }
+                )
 
-            PhoneField(
-                value = phoneState,
-                onValueChange = {
-                    //Used to restrict user input to numbers
-                    if (it.length <= 10 && !Regex("[^0-9]").containsMatchIn(it)) phoneState = it
-                }
-            )
-
-            AddressField(
-                value = addressState,
-                onValueChange = { addressState = it }
-            )
-
-            EmailField(
-                value = emailState,
-                onValueChange = { emailState = it }
-            )
-
-            PasswordField(
-                value = passwdState,
-                onValueChange = { passwdState = it }
-            )
-
-            Text(
-                text = "NOTE: Email & Password will be used to Login!",
-                modifier = Modifier.padding(vertical = 10.dp)
-            )
-
-            Button(onClick = {
-                val validFirstName = isValidName(firstNameState)
-                val validMiddleName = isValidName(middleNameState)
-                val validLastName = isValidName(lastNameState)
-
-                if (!validFirstName || !validMiddleName || !validLastName) {
-                    val nameStr = if (!validFirstName) "First Name"
-                    else if (!validMiddleName) "Middle Name"
-                    else "Last Name"
-
-                    Toast.makeText(
-                        activity,
-                        "$nameStr cannot contain characters outside of A-Z, a-z, & -",
-                        Toast.LENGTH_LONG,
-                    ).show()
-                } else if (!isValidEmail(emailState)) {
-                    Toast.makeText(
-                        activity,
-                        "Invalid email. Try again.",
-                        Toast.LENGTH_LONG,
-                    ).show()
-                } else if (passwdState.length < 6) {
-                    Toast.makeText(
-                        activity,
-                        "Password must be at least 6 characters long.",
-                        Toast.LENGTH_LONG,
-                    ).show()
-                } else {
-                    val res = viewModel.Register(
-                            firstName = firstNameState,
-                            middleName = middleNameState,
-                            lastName = lastNameState,
-                            userName = usernameState,
-                            phone = phoneState,
-                            address = addressState,
-                            email = emailState,
-                            password = passwdState,
-                            activity = activity
-                        )
-                    if (res != -1) {
-                        navigate()
+                PhoneField(
+                    value = phoneState,
+                    onValueChange = {
+                        //Used to restrict user input to numbers
+                        if (it.length <= 10 && !Regex("[^0-9]").containsMatchIn(it)) phoneState = it
                     }
+                )
+
+                AddressField(
+                    value = addressState,
+                    onValueChange = { addressState = it }
+                )
+
+                EmailField(
+                    value = emailState,
+                    onValueChange = { emailState = it }
+                )
+
+                PasswordField(
+                    value = passwordState,
+                    onValueChange = { passwordState = it }
+                )
+
+                Text(
+                    text = "NOTE: Email & Password will be used to Login!",
+                    modifier = Modifier.padding(vertical = 10.dp)
+                )
+
+                Button(onClick = { toSecQuestion = true })
+                {
+                    Text("Continue")
                 }
-            })
-            {
-                Text("Register")
+            } else {
+                SecQuestionPage(
+                    firstName = firstNameState,
+                    middleName = middleNameState,
+                    lastName = lastNameState,
+                    email = emailState,
+                    userName = userNameState,
+                    password = passwordState,
+                    address = addressState,
+                    phone = phoneState,
+                    activity = activity,
+                    viewModel = viewModel,
+                    onRegisterNavigate = onRegisterNavigate
+                )
             }
+        }
+    }
+}
+
+fun onRegisterClick(
+    firstName : String,
+    middleName : String,
+    lastName : String,
+    email : String,
+    password : String,
+    address : String,
+    userName : String,
+    phone : String,
+    activity: Activity,
+    viewModel: MainViewModel,
+    onRegisterNavigate: () -> Unit
+) {
+    val validFirstName = isValidName(firstName)
+    val validMiddleName = isValidName(middleName)
+    val validLastName = isValidName(lastName)
+
+    if (!validFirstName || !validMiddleName || !validLastName) {
+        val nameStr = if (!validFirstName) "First Name"
+        else if (!validMiddleName) "Middle Name"
+        else "Last Name"
+
+        Toast.makeText(
+            activity,
+            "$nameStr cannot contain characters outside of A-Z, a-z, & -",
+            Toast.LENGTH_LONG,
+        ).show()
+    } else if (!isValidEmail(email)) {
+        Toast.makeText(
+            activity,
+            "Invalid email. Try again.",
+            Toast.LENGTH_LONG,
+        ).show()
+    } else if (password.length < 6) {
+        Toast.makeText(
+            activity,
+            "Password must be at least 6 characters long.",
+            Toast.LENGTH_LONG,
+        ).show()
+    } else {
+        val res = viewModel.Register(
+            firstName = firstName,
+            middleName = middleName,
+            lastName = lastName,
+            userName = userName,
+            phone = phone,
+            address = address,
+            email = email,
+            password = password,
+            activity = activity
+        )
+        if (res != -1) {
+            onRegisterNavigate()
         }
     }
 }
@@ -384,5 +416,108 @@ fun PasswordField(
             }
         },
         visualTransformation = if (passwdVisible) VisualTransformation.None else PasswordVisualTransformation()
+    )
+}
+
+/**
+ *
+ * Drop down created with the help of Bing copilot: https://sl.bing.net/c5QxG1rPuDc
+ * */
+@Composable
+fun SecQuestionPage(
+    firstName : String,
+    middleName : String,
+    lastName : String,
+    email : String,
+    password : String,
+    address : String,
+    userName : String,
+    phone : String,
+    activity: Activity,
+    viewModel: MainViewModel,
+    onRegisterNavigate: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val options = getSecQuestions()
+    var selectedOption by remember { mutableStateOf(options[0]) }
+    var answer by remember { mutableStateOf("") }
+
+    Text(text = "Security Question")
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = selectedOption,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+                .padding(16.dp)
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    onClick = {
+                        selectedOption = option
+                        expanded = false
+                    },
+                    text = {Text(option)},
+                    trailingIcon = { if (!expanded) Icon(Icons.Rounded.ArrowDropDown, "Drop down not expanded icon") else Icon(Icons.Rounded.ArrowDropUp, "Drop down expanded icon")}
+                )
+            }
+        }
+    }
+
+    OutlinedTextField(
+        value = answer,
+        onValueChange = { answer = it },
+        label = { Text("Answer") },
+        keyboardOptions = KeyboardOptions.Default,
+        leadingIcon = { Icon(Icons.Rounded.QuestionAnswer, contentDescription = "Answer edit Icon") },
+    )
+
+    Button(onClick = {
+        if (answer == "") {
+            Toast.makeText(
+                activity,
+                "Answer cannot be left blank.",
+                Toast.LENGTH_LONG,
+            ).show()
+        } else {
+            onRegisterClick(
+                firstName = firstName,
+                middleName = middleName,
+                lastName = lastName,
+                email = email,
+                userName = userName,
+                password = password,
+                address = address,
+                phone = phone,
+                activity = activity,
+                viewModel = viewModel,
+                onRegisterNavigate = onRegisterNavigate
+            )
+            viewModel.UpdateSecQuestion(selectedOption, answer)
+        }
+    }) {
+        Text("Submit")
+    }
+}
+
+fun getSecQuestions() : List<String> {
+    return listOf(
+        "Do you think water is wet and why?",
+        "What is your favorite topping on pizza? (Plz don't say pineapple)",
+        "What was the name of your first crush in high school?",
+        "What is the title and artist of your favorite song?",
+        "Why did you pick your current career?",
+        "What is the name of your great grandfather?",
+        "Who was your favorite teacher in high school?"
     )
 }
