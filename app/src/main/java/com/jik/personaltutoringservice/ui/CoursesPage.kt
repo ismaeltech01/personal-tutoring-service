@@ -54,6 +54,11 @@ import org.w3c.dom.Text
 fun CoursesPage(){
 
     val scrollState = rememberScrollState()
+    var checkedStateMath by remember { mutableStateOf(false) }
+    var checkedStatePiano by remember { mutableStateOf(false) }
+    var checkedStateFrench by remember { mutableStateOf(false) }
+    var checkedStateCoding by remember { mutableStateOf(false) }
+    var checkedStateTennis by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -62,49 +67,50 @@ fun CoursesPage(){
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Text("Course",
-            fontSize = 40.sp)
+            fontSize = 50.sp)
         Text("Page",
-            fontSize = 40.sp)
+            fontSize = 50.sp)
+        Text("Which courses do you need tutoring for?",
+            fontSize = 15.sp)
 
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("Math")
+        Row {
+            Checkbox(checked = checkedStateMath,
+                modifier = Modifier.padding(16.dp),
+                onCheckedChange = { checkedStateMath = it })
+            Text(text = "Math", modifier = Modifier.padding(16.dp),fontSize = 30.sp)
         }
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("Piano")
+        Row {
+            Checkbox(checked = checkedStatePiano,
+                modifier = Modifier.padding(16.dp),
+                onCheckedChange = { checkedStatePiano = it })
+            Text(text = "Piano", modifier = Modifier.padding(16.dp),fontSize = 30.sp)
         }
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("French")
+        Row {
+            Checkbox(checked = checkedStateFrench,
+                modifier = Modifier.padding(16.dp),
+                onCheckedChange = { checkedStateFrench = it })
+            Text(text = "French", modifier = Modifier.padding(16.dp),fontSize = 30.sp)
         }
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("Coding")
+        Row {
+            Checkbox(checked = checkedStateCoding,
+                modifier = Modifier.padding(16.dp),
+                onCheckedChange = { checkedStateCoding = it })
+            Text(text = "Coding", modifier = Modifier.padding(16.dp),fontSize = 30.sp)
         }
+        Row {
+            Checkbox(checked = checkedStateTennis,
+                modifier = Modifier.padding(16.dp),
+                onCheckedChange = { checkedStateTennis = it })
+            Text(text = "Tennis", modifier = Modifier.padding(16.dp),fontSize = 30.sp)
+        }
+
         Button(onClick = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(scrollState),
 
             ){
-            Text("Tennis")
+            Text("Find Tutors",fontSize = 30.sp)
         }
     }
 
