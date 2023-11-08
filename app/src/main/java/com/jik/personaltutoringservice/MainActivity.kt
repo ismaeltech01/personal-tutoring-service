@@ -1,6 +1,7 @@
 package com.jik.personaltutoringservice
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -164,7 +165,18 @@ class MainActivity : ComponentActivity() {
                         }
                         //Login & Registration pages
                         composable("login") {
-                            LoginPage(viewModel, this@MainActivity) { navController.navigate("profile") }
+                            LoginPage(viewModel,
+                                this@MainActivity,
+                                navigate = { navController.navigate("profile") },
+                                onResetPassword = {
+                                    navController.navigate("login")
+
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "",
+                                        Toast.LENGTH_LONG,
+                                    ).show()
+                                })
                         }
                         composable("register") {
                             RegisterPage(viewModel, this@MainActivity) { navController.navigate("profile") }

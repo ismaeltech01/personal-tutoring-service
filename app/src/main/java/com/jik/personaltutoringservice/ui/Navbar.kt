@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.jik.personaltutoringservice.ui.theme.NavyBlue
 
 val IconModifier = Modifier
     .padding(0.dp)
@@ -31,7 +32,10 @@ val IconModifier = Modifier
 
 @Composable
 fun Navbar(modifier : Modifier, homeOnClick : () -> Unit, searchOnClick : () -> Unit, profileOnClick : () -> Unit, messagesOnClick : () -> Unit, moreOnClick : () -> Unit) {
-    Row (horizontalArrangement = Arrangement.Center, modifier = modifier) {
+    Row (
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier.background(NavyBlue)
+    ) {
         Button(onClick = homeOnClick, modifier = Modifier
             .padding(1.dp)
             .weight(.2f)

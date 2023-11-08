@@ -304,6 +304,29 @@ class MainViewModel : ViewModel() {
         db.collection("users").document(uidState.value).set(data)
     }
 
+    fun isCorrectSecQuestion(
+        question : String,
+        answer : String
+    ) : Boolean {
+        var match = false
+
+        db.collection("users").document(uidState.value).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+
+                    match = document.data?.get("secQuestion").toString() == question && document.data?.get("secAnswer").toString() == answer
+                } else {
+                    Log.d(TAG, "FetchUserData:failure -> No document found.")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "get() failed with ", exception)
+            }
+
+        return match
+    }
+
     fun UpdateCardInfo(
         cardNum : String = "",
         expDate : String = "",

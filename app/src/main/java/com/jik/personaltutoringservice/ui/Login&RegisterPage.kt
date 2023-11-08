@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,18 +47,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
 
 @Composable
 fun LoginPage(
     viewModel: MainViewModel,
     activity: Activity,
-    navigate: () -> Unit
+    navigate: () -> Unit,
+    onResetPassword: () -> Unit
 ) {
     var emailState by remember {
         mutableStateOf("")
@@ -66,53 +73,70 @@ fun LoginPage(
         mutableStateOf("")
     }
 
-    Column (
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
-    )
-    {
-        Image(
-            Icons.Rounded.AccountBox,
-            contentDescription = "Login icon",
-            modifier = Modifier.size(100.dp)
+    var passwordReset by remember { mutableStateOf(false) }
+
+    if (!passwordReset) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
         )
-
-        EmailField(
-            value = emailState,
-            onValueChange = { emailState = it }
-        )
-
-        PasswordField(
-            value = passwdState,
-            onValueChange = { passwdState = it }
-        )
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Button(onClick = {
-            if (!isValidEmail(emailState)) {
-                Toast.makeText(
-                    activity,
-                    "Invalid email. Try again.",
-                    Toast.LENGTH_LONG,
-                ).show()
-            } else if (passwdState.length < 6) {
-                Toast.makeText(
-                    activity,
-                    "Password must be at least 6 characters long.",
-                    Toast.LENGTH_LONG,
-                ).show()
-            } else {
-                val res = viewModel.LogIn(emailState, passwdState, activity)
-                if (res != -1) {
-                    navigate()
-                }
-            }
-        })
         {
-            Text("Login")
+            Image(
+                Icons.Rounded.AccountBox,
+                contentDescription = "Login icon",
+                modifier = Modifier.size(100.dp)
+            )
+
+            EmailField(
+                value = emailState,
+                onValueChange = { emailState = it }
+            )
+
+            PasswordField(
+                value = passwdState,
+                onValueChange = { passwdState = it }
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Button(onClick = {
+                if (!isValidEmail(emailState)) {
+                    Toast.makeText(
+                        activity,
+                        "Invalid email. Try again.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                } else if (passwdState.length < 6) {
+                    Toast.makeText(
+                        activity,
+                        "Password must be at least 6 characters long.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                } else {
+                    val res = viewModel.LogIn(emailState, passwdState, activity)
+                    if (res != -1) {
+                        navigate()
+                    }
+                }
+            })
+            {
+                Text("Login")
+            }
+
+            Text(
+                "Forgot Password?",
+                modifier = Modifier
+                    .clickable(onClick = {passwordReset = true})
+            )
         }
+    } else {
+        /** If user clicks the forgot password option */
+        SeqQPassResetPage(
+            viewModel = viewModel,
+            activity = activity,
+            onResetPassword = onResetPassword
+        )
     }
 }
 
@@ -280,12 +304,8 @@ fun onRegisterClick(
             "Invalid email. Try again.",
             Toast.LENGTH_LONG,
         ).show()
-    } else if (password.length < 6) {
-        Toast.makeText(
-            activity,
-            "Password must be at least 6 characters long.",
-            Toast.LENGTH_LONG,
-        ).show()
+    } else if (!ValidatePassword(password = password, activity = activity)) {
+        //Do Nothing
     } else {
         val res = viewModel.Register(
             firstName = firstName,
@@ -302,6 +322,35 @@ fun onRegisterClick(
             onRegisterNavigate()
         }
     }
+}
+
+/**
+ * @return true if password is valid, false otherwise
+ * */
+fun ValidatePassword(
+    password: String,
+    confirm : String = "",
+    activity: Activity
+) : Boolean {
+    var valid = false
+
+    if (password != confirm) {
+        Toast.makeText(
+            activity,
+            "Passwords do not match.",
+            Toast.LENGTH_LONG,
+        ).show()
+    } else if (password.length < 6) {
+        Toast.makeText(
+            activity,
+            "Password must be at least 6 characters long.",
+            Toast.LENGTH_LONG,
+        ).show()
+    } else {
+        valid = true
+    }
+
+    return valid
 }
 
 /***
@@ -425,14 +474,14 @@ fun PasswordField(
  * */
 @Composable
 fun SecQuestionPage(
-    firstName : String,
-    middleName : String,
-    lastName : String,
-    email : String,
-    password : String,
-    address : String,
-    userName : String,
-    phone : String,
+    firstName: String,
+    middleName: String,
+    lastName: String,
+    email: String,
+    password: String,
+    address: String,
+    userName: String,
+    phone: String,
     activity: Activity,
     viewModel: MainViewModel,
     onRegisterNavigate: () -> Unit
@@ -442,20 +491,24 @@ fun SecQuestionPage(
     var selectedOption by remember { mutableStateOf(options[0]) }
     var answer by remember { mutableStateOf("") }
 
-    Text(text = "Security Question")
+    Text("Security Question")
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .wrapContentSize(Alignment.TopStart)
+            .border(2.dp, Color.Black)
+            .padding(horizontal = 10.dp),
     ) {
         Text(
             text = selectedOption,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .clickable(onClick = { expanded = true })
-                .padding(16.dp)
+                .padding(vertical = 15.dp),
+            textAlign = TextAlign.Center
         )
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
@@ -467,8 +520,7 @@ fun SecQuestionPage(
                         selectedOption = option
                         expanded = false
                     },
-                    text = {Text(option)},
-                    trailingIcon = { if (!expanded) Icon(Icons.Rounded.ArrowDropDown, "Drop down not expanded icon") else Icon(Icons.Rounded.ArrowDropUp, "Drop down expanded icon")}
+                    text = { Text(option, textAlign = TextAlign.Center) },
                 )
             }
         }
@@ -520,4 +572,134 @@ fun getSecQuestions() : List<String> {
         "What is the name of your great grandfather?",
         "Who was your favorite teacher in high school?"
     )
+}
+
+@Preview
+@Composable
+fun SecQuestionPagePreview() {
+    SecQuestionPage(
+        firstName = "",
+        middleName = "",
+        lastName = "",
+        email = "",
+        password = "",
+        address = "",
+        userName = "",
+        phone = "",
+        activity = Activity(),
+        viewModel = MainViewModel(),
+        onRegisterNavigate = {}
+    )
+}
+
+@Composable
+fun SeqQPassResetPage(
+    viewModel: MainViewModel,
+    activity: Activity,
+    onResetPassword : () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val options = getSecQuestions()
+    var selectedOption by remember { mutableStateOf(options[0]) }
+    var answer by remember { mutableStateOf("") }
+    var passwordReset by remember { mutableStateOf(false) }
+
+    Text(text = "Reset Password", fontSize = 15.sp)
+
+    if (!passwordReset) {
+        Text("Select your security question and write your answer to reset your password.")
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = selectedOption,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { expanded = true })
+                    .padding(16.dp)
+                    .border(2.dp, Color.Black)
+                ,
+                textAlign = TextAlign.Center
+            )
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedOption = option
+                            expanded = false
+                        },
+                        text = { Text(option, textAlign = TextAlign.Center) }
+                    )
+                }
+            }
+        }
+
+        OutlinedTextField(
+            value = answer,
+            onValueChange = { answer = it },
+            label = { Text("Answer") },
+            keyboardOptions = KeyboardOptions.Default,
+            leadingIcon = {
+                Icon(
+                    Icons.Rounded.QuestionAnswer,
+                    contentDescription = "Answer edit Icon"
+                )
+            },
+        )
+
+        Button(onClick = {
+            if (answer == "") {
+                Toast.makeText(
+                    activity,
+                    "Answer cannot be left blank.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            } else {
+                if (viewModel.isCorrectSecQuestion(selectedOption, answer))
+                    passwordReset = true
+            }
+        }) {
+            Text("Submit")
+        }
+    } else {
+        ResetPasswordPage(viewModel = viewModel, activity = activity) { onResetPassword() }
+    }
+}
+
+@Preview
+@Composable
+fun SeqQPassResetPage() {
+    SeqQPassResetPage(viewModel = MainViewModel(), activity = Activity()) {
+    }
+}
+
+@Composable
+fun ResetPasswordPage(
+    viewModel : MainViewModel,
+    activity : Activity,
+    onResetPassword: () -> Unit
+) {
+    var password by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+
+    PasswordField(value = password, onValueChange = { password = it })
+
+    PasswordField(value = confirm, onValueChange = { confirm = it })
+
+    Button(onClick = {
+        if (ValidatePassword(password = password, confirm = confirm, activity = activity)) {
+            viewModel.UpdateUserData(password = password)
+            onResetPassword()
+        }
+    }) {
+        Text("Submit")
+    }
 }
