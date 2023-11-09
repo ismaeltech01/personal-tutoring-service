@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = pageModifier,
                                 onLoginClick = { navController.navigate("login") },
                                 onRegisterClick = { navController.navigate("register") },
-                                onTutorClick = { navController.navigate("agreement") },
+                                onTutorClick = { navController.navigate("become-tutor") },
                                 loggedIn = loggedIn,
                                 fullName = fullName,
                                 userName = userName,
