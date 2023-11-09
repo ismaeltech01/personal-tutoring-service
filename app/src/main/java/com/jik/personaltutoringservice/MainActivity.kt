@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.jik.personaltutoringservice.ui.AgreementPage
+import com.jik.personaltutoringservice.ui.BecomeTutorPage
 import com.jik.personaltutoringservice.ui.CoursesPage
 import com.jik.personaltutoringservice.ui.HomePage
 import com.jik.personaltutoringservice.ui.LoginPage
@@ -180,6 +181,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("register") {
                             RegisterPage(viewModel, this@MainActivity) { navController.navigate("profile") }
+                        }
+                        composable("become-tutor") {
+                            BecomeTutorPage()
                         }
                     }
 
