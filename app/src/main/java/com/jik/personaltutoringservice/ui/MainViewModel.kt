@@ -100,7 +100,6 @@ class MainViewModel : ViewModel() {
                 "One or more fields are empty.",
                 Toast.LENGTH_SHORT,
             ).show()
-            result = -1
         } else {
             auth.signInWithEmailAndPassword(email.toString(), password)
                 .addOnCompleteListener(activity) { task ->
@@ -124,6 +123,8 @@ class MainViewModel : ViewModel() {
                             "Authentication failed.",
                             Toast.LENGTH_LONG,
                         ).show()
+
+                        result = -1
                     }
                 }
             }
@@ -147,7 +148,9 @@ class MainViewModel : ViewModel() {
         address : String,
         email : String?,
         password : String,
-        activity : Activity
+        activity : Activity,
+        selectedOption : String,
+        answer : String
     ) : Int {
         //Returns -1 if registration failed, otherwise returns 0 on success
         var result = 0
@@ -169,6 +172,7 @@ class MainViewModel : ViewModel() {
                         UpdateAuthData()
                         CreateUserDataDocument()
                         UpdateUserData(phone = phone, displayName = userName, firstName = firstName, middleName = middleName, lastName = lastName, address = address, imageUrl = "https://www.pikpng.com/pngl/m/359-3596107_3d-phone-png.png")
+                        UpdateSecQuestion(question = selectedOption, answer = answer)
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.exception)
@@ -233,6 +237,7 @@ class MainViewModel : ViewModel() {
         middleName: String = "",
         lastName: String = "",
         displayName: String? = "",
+        userName: String? = "",
         phone: String = "",
         address: String = "",
         email: String? = "",
@@ -310,8 +315,13 @@ class MainViewModel : ViewModel() {
         question : String,
         answer : String
     ) {
-        val data = mapOf("secQuestion" to question, "secAnswer" to answer)
-        db.collection("users").document(uidState.value).set(data)
+        //val data = mapOf("secQuestion" to question, "secAnswer" to answer)
+        if (uidState.value != "") {
+            db.collection("users").document(uidState.value).update("secQuestion", question, "secAnswer", answer)
+        } else {
+            Log.e(TAG, "Error: uidState is empty")
+            db.collection("users").document(auth.uid.toString()).update("secQuestion", question, "secAnswer", answer)
+        }
     }
 
     fun isCorrectSecQuestion(

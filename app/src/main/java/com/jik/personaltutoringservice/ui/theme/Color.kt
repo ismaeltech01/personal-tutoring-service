@@ -3,9 +3,9 @@ package com.jik.personaltutoringservice.ui.theme
 import androidx.compose.ui.graphics.Color
 
 //Dark default color scheme (for reference)
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Black = Color(32, 32, 32)
+val Grey = Color(64, 64,64)
+val LightGrey = Color(192, 192, 192)
 
 //Light default color Scheme (for reference)
 val Purple40 = Color(0xFF6650a4)

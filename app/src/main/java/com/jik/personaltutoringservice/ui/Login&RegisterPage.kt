@@ -2,6 +2,8 @@ package com.jik.personaltutoringservice.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues.TAG
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -26,8 +28,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.AccountBox
 import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.ArrowDropUp
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
@@ -80,6 +80,8 @@ fun LoginPage(
 
     var passwordReset by remember { mutableStateOf(false) }
 
+    var loginAttempts by remember { mutableStateOf(0) }
+
     ExitBar { onExit() }
 
     if (!passwordReset) {
@@ -104,7 +106,8 @@ fun LoginPage(
 
             PasswordField(
                 value = passwdState,
-                onValueChange = { passwdState = it }
+                onValueChange = { passwdState = it },
+                isConfirm = false
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -133,6 +136,9 @@ fun LoginPage(
                         val res = viewModel.LogIn(emailState, passwdState, activity)
                         if (res != -1) {
                             navigate()
+                        } else {
+                            loginAttempts += 1
+                            passwordReset = true
                         }
                     }
                 })
@@ -154,7 +160,8 @@ fun LoginPage(
             activity = activity,
             onResetPassword = onResetPassword,
             onCancel = onExit,
-            onExit = { passwordReset = false }
+            onExit = { passwordReset = false },
+            loginAttempts = loginAttempts
         )
     }
 }
@@ -167,39 +174,15 @@ fun RegisterPage(
     onRegisterNavigate: () -> Unit,
     onExit: () -> Unit
 ) {
-    var firstNameState by remember {
-        mutableStateOf("")
-    }
-
-    var middleNameState by remember {
-        mutableStateOf("")
-    }
-
-    var lastNameState by remember {
-        mutableStateOf("")
-    }
-
-    var userNameState by remember {
-        mutableStateOf("")
-    }
-
-    var phoneState by remember {
-        mutableStateOf("")
-    }
-
-    var addressState by remember {
-        mutableStateOf("")
-    }
-
-    var emailState by remember {
-        mutableStateOf("")
-    }
-
-
-    var passwordState by remember {
-        mutableStateOf("")
-    }
-
+    var firstNameState by remember { mutableStateOf("") }
+    var middleNameState by remember { mutableStateOf("") }
+    var lastNameState by remember { mutableStateOf("") }
+    var userNameState by remember { mutableStateOf("") }
+    var phoneState by remember { mutableStateOf("") }
+    var addressState by remember { mutableStateOf("") }
+    var emailState by remember { mutableStateOf("") }
+    var passwordState by remember { mutableStateOf("") }
+    var confirmState by remember { mutableStateOf("") }
     var toSecQuestion by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -210,9 +193,9 @@ fun RegisterPage(
     )
     {
         item {
-            ExitBar { onExit() }
-
             if (!toSecQuestion) {
+                ExitBar { onExit() }
+
                 Image(
                     Icons.Rounded.AccountBox,
                     contentDescription = "Register icon",
@@ -262,7 +245,14 @@ fun RegisterPage(
 
                 PasswordField(
                     value = passwordState,
-                    onValueChange = { passwordState = it }
+                    onValueChange = { passwordState = it },
+                    isConfirm = false
+                )
+
+                PasswordField(
+                    value = confirmState,
+                    onValueChange = { confirmState = it },
+                    isConfirm = true
                 )
 
                 Text(
@@ -277,31 +267,135 @@ fun RegisterPage(
 
                     Spacer(modifier = Modifier.width(20.dp))
 
-                    Button(onClick = { toSecQuestion = true })
+                    Button(onClick = {
+                        onContinueClick(
+                            firstName = firstNameState,
+                            middleName = middleNameState,
+                            lastName = lastNameState,
+                            email = emailState,
+                            password = passwordState,
+                            confirm = confirmState,
+                            activity = activity,
+                            onSuccess = { toSecQuestion = true }
+                        )
+                    })
                     {
                         Text("Continue")
                     }
                 }
             } else {
-                SecQuestionPage(
-                    firstName = firstNameState,
-                    middleName = middleNameState,
-                    lastName = lastNameState,
-                    email = emailState,
-                    userName = userNameState,
-                    password = passwordState,
-                    address = addressState,
-                    phone = phoneState,
-                    activity = activity,
-                    viewModel = viewModel,
-                    onRegisterNavigate = onRegisterNavigate,
-                    onCancel = onExit,
-                    onExit = { toSecQuestion = false }
-                )
+                var expanded by remember { mutableStateOf(false) }
+                val options = getSecQuestions()
+                var selectedOption by remember { mutableStateOf(options[0]) }
+                var answer by remember { mutableStateOf("") }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    ExitBar { onExit() }
+
+                    Text(
+                        "Security Question",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(.8f)
+                            .wrapContentSize(Alignment.TopStart)
+                            .border(2.dp, Color.Black)
+                            .padding(horizontal = 10.dp),
+                    ) {
+                        Text(
+                            text = selectedOption,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable(onClick = { expanded = true })
+                                .padding(vertical = 10.dp),
+                            textAlign = TextAlign.Center
+                        )
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            options.forEach { option ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        selectedOption = option
+                                        expanded = false
+                                    },
+                                    text = { Text(option, textAlign = TextAlign.Center) },
+                                )
+                            }
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = answer,
+                        onValueChange = { answer = it },
+                        label = { Text("Answer") },
+                        keyboardOptions = KeyboardOptions.Default,
+                        leadingIcon = {
+                            Icon(
+                                Icons.Rounded.QuestionAnswer,
+                                contentDescription = "Answer edit Icon"
+                            )
+                        },
+                    )
+
+                    Row {
+                        Button(onClick = onExit) {
+                            Text("Cancel")
+                        }
+
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        Button(onClick = {
+                            if (answer == "") {
+                                Toast.makeText(
+                                    activity,
+                                    "Answer cannot be left blank.",
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                            } else if (selectedOption == "") {
+                                Log.e(TAG, "Error: selectedOption is empty")
+                            } else {
+                                val res = viewModel.Register(
+                                    firstName = firstNameState,
+                                    middleName = middleNameState,
+                                    lastName = lastNameState,
+                                    userName = userNameState,
+                                    phone = phoneState,
+                                    address = addressState,
+                                    email = emailState,
+                                    password = passwordState,
+                                    activity = activity,
+                                    selectedOption = selectedOption,
+                                    answer = answer
+                                )
+
+                                if (res != -1) {
+                                    onRegisterNavigate()
+                                }
+                            }
+                        }) {
+                            Text("Submit")
+                        }
+                    }
+                }
             }
         }
     }
 }
+
 
 fun onRegisterClick(
     firstName : String,
@@ -315,6 +409,17 @@ fun onRegisterClick(
     activity: Activity,
     viewModel: MainViewModel,
     onRegisterNavigate: () -> Unit
+) {
+}
+fun onContinueClick(
+    firstName : String,
+    middleName : String,
+    lastName : String,
+    email : String,
+    password : String,
+    confirm : String,
+    activity: Activity,
+    onSuccess : () -> Unit
 ) {
     val validFirstName = isValidName(firstName)
     val validMiddleName = isValidName(middleName)
@@ -336,23 +441,10 @@ fun onRegisterClick(
             "Invalid email. Try again.",
             Toast.LENGTH_LONG,
         ).show()
-    } else if (!ValidatePassword(password = password, activity = activity)) {
+    } else if (!ValidatePassword(password = password, confirm = confirm, activity = activity)) {
         //Do Nothing
     } else {
-        val res = viewModel.Register(
-            firstName = firstName,
-            middleName = middleName,
-            lastName = lastName,
-            userName = userName,
-            phone = phone,
-            address = address,
-            email = email,
-            password = password,
-            activity = activity
-        )
-        if (res != -1) {
-            onRegisterNavigate()
-        }
+        onSuccess()
     }
 }
 
@@ -366,7 +458,7 @@ fun ValidatePassword(
 ) : Boolean {
     var valid = false
 
-    if (password != confirm) {
+    if (confirm != "" && password != confirm) {
         Toast.makeText(
             activity,
             "Passwords do not match.",
@@ -476,7 +568,8 @@ fun EmailField(
 @Composable
 fun PasswordField(
     value : String,
-    onValueChange : (String) -> Unit
+    onValueChange : (String) -> Unit,
+    isConfirm : Boolean
 ) {
     var passwdVisible by remember {
         mutableStateOf(false)
@@ -485,7 +578,7 @@ fun PasswordField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text("Password") },
+        label = { if (!isConfirm) Text("Password") else Text("Confirm Password")},
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         leadingIcon = { Icon(Icons.Rounded.Lock, contentDescription = "Password Icon") },
         trailingIcon = {
@@ -502,113 +595,12 @@ fun PasswordField(
 
 @Composable
 fun SecQuestionPage(
-    firstName: String,
-    middleName: String,
-    lastName: String,
-    email: String,
-    password: String,
-    address: String,
-    userName: String,
-    phone: String,
     activity: Activity,
     viewModel: MainViewModel,
-    onRegisterNavigate: () -> Unit,
+    onRegister: () -> Unit,
     onExit : () -> Unit,
     onCancel : () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val options = getSecQuestions()
-    var selectedOption by remember { mutableStateOf(options[0]) }
-    var answer by remember { mutableStateOf("") }
-
-    ExitBar { onExit() }
-
-    Column () {
-        Text("Security Question", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize(.8f)
-                .wrapContentSize(Alignment.TopStart)
-                .border(2.dp, Color.Black)
-                .padding(horizontal = 10.dp),
-        ) {
-            Text(
-                text = selectedOption,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable(onClick = { expanded = true })
-                    .padding(vertical = 10.dp),
-                textAlign = TextAlign.Center
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        onClick = {
-                            selectedOption = option
-                            expanded = false
-                        },
-                        text = { Text(option, textAlign = TextAlign.Center) },
-                    )
-                }
-            }
-        }
-
-        OutlinedTextField(
-            value = answer,
-            onValueChange = { answer = it },
-            label = { Text("Answer") },
-            keyboardOptions = KeyboardOptions.Default,
-            leadingIcon = {
-                Icon(
-                    Icons.Rounded.QuestionAnswer,
-                    contentDescription = "Answer edit Icon"
-                )
-            },
-        )
-
-        Row {
-            Button(onClick = onCancel) {
-                Text("Cancel")
-            }
-
-            Spacer(modifier = Modifier.width(20.dp))
-
-            Button(onClick = {
-                if (answer == "") {
-                    Toast.makeText(
-                        activity,
-                        "Answer cannot be left blank.",
-                        Toast.LENGTH_LONG,
-                    ).show()
-                } else {
-                    onRegisterClick(
-                        firstName = firstName,
-                        middleName = middleName,
-                        lastName = lastName,
-                        email = email,
-                        userName = userName,
-                        password = password,
-                        address = address,
-                        phone = phone,
-                        activity = activity,
-                        viewModel = viewModel,
-                        onRegisterNavigate = onRegisterNavigate
-                    )
-                    viewModel.UpdateSecQuestion(selectedOption, answer)
-                }
-            }) {
-                Text("Submit")
-            }
-        }
-    }
 }
 
 fun getSecQuestions() : List<String> {
@@ -627,17 +619,9 @@ fun getSecQuestions() : List<String> {
 @Composable
 fun SecQuestionPagePreview() {
     SecQuestionPage(
-        firstName = "",
-        middleName = "",
-        lastName = "",
-        email = "",
-        password = "",
-        address = "",
-        userName = "",
-        phone = "",
         activity = Activity(),
         viewModel = MainViewModel(),
-        onRegisterNavigate = {},
+        onRegister = {},
         onExit = {},
         onCancel = {}
     )
@@ -649,7 +633,8 @@ fun SeqQPassResetPage(
     activity: Activity,
     onResetPassword : () -> Unit,
     onExit : () -> Unit,
-    onCancel : () -> Unit
+    onCancel : () -> Unit,
+    loginAttempts : Int
 ) {
     var expanded by remember { mutableStateOf(false) }
     val options = getSecQuestions()
@@ -657,7 +642,7 @@ fun SeqQPassResetPage(
     var answer by remember { mutableStateOf("") }
     var passwordReset by remember { mutableStateOf(false) }
 
-    ExitBar { onExit() }
+    if (loginAttempts < 3) ExitBar { onExit() }
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -758,7 +743,8 @@ fun SeqQPassResetPagePreview() {
         activity = Activity(),
         onCancel = {},
         onExit = {},
-        onResetPassword = {}
+        onResetPassword = {},
+        loginAttempts = 0
     )
 }
 
@@ -771,9 +757,17 @@ fun ResetPasswordPage(
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
 
-    PasswordField(value = password, onValueChange = { password = it })
+    PasswordField(
+        value = password,
+        onValueChange = { password = it },
+        isConfirm = false
+    )
 
-    PasswordField(value = confirm, onValueChange = { confirm = it })
+    PasswordField(
+        value = confirm,
+        onValueChange = { confirm = it },
+        isConfirm = true
+    )
 
     Button(onClick = {
         if (ValidatePassword(password = password, confirm = confirm, activity = activity)) {

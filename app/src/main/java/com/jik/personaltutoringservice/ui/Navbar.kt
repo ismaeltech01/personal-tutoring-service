@@ -34,7 +34,7 @@ val IconModifier = Modifier
 fun Navbar(modifier : Modifier, homeOnClick : () -> Unit, searchOnClick : () -> Unit, profileOnClick : () -> Unit, messagesOnClick : () -> Unit, moreOnClick : () -> Unit) {
     Row (
         horizontalArrangement = Arrangement.Center,
-        modifier = modifier.background(NavyBlue)
+        modifier = modifier
     ) {
         Button(onClick = homeOnClick, modifier = Modifier
             .padding(1.dp)
