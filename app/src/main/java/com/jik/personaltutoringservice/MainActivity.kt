@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
             val email by viewModel.emailState.collectAsState()
             val phone by viewModel.phoneState.collectAsState()
             val address by viewModel.addressState.collectAsState()
+            val imageUrl by viewModel.imageUrl.collectAsState()
             val cardNum by viewModel.cardNumState.collectAsState()
             val expDate by viewModel.expDateState.collectAsState()
             val secCode by viewModel.secCodeState.collectAsState()
@@ -107,11 +108,9 @@ class MainActivity : ComponentActivity() {
                                 email = email,
                                 phone = phone,
                                 address = address,
-                                isTutor = isTutor
+                                isTutor = isTutor,
+                                imageUrl = imageUrl
                             )
-                        }
-                        composable("agreement") {
-                            AgreementPage()
                         }
                         composable("messaging") {
                             MessagingPage()
@@ -177,7 +176,9 @@ class MainActivity : ComponentActivity() {
                                         "",
                                         Toast.LENGTH_LONG,
                                     ).show()
-                                })
+                                },
+                                onExit = {navController.navigate("profile")}
+                            )
                         }
                         composable("register") {
                             RegisterPage(viewModel, this@MainActivity) { navController.navigate("profile") }

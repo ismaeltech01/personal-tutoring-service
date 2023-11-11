@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.AccountBox
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.ArrowDropUp
 import androidx.compose.material.icons.rounded.Email
@@ -63,7 +64,8 @@ fun LoginPage(
     viewModel: MainViewModel,
     activity: Activity,
     navigate: () -> Unit,
-    onResetPassword: () -> Unit
+    onResetPassword: () -> Unit,
+    onExit : () -> Unit
 ) {
     var emailState by remember {
         mutableStateOf("")
@@ -82,6 +84,10 @@ fun LoginPage(
             modifier = Modifier.fillMaxSize()
         )
         {
+            ExitBar { onExit() }
+
+            //Spacer()
+
             Image(
                 Icons.Rounded.AccountBox,
                 contentDescription = "Login icon",
@@ -604,73 +610,74 @@ fun SeqQPassResetPage(
     var answer by remember { mutableStateOf("") }
     var passwordReset by remember { mutableStateOf(false) }
 
-    Text(text = "Reset Password", fontSize = 15.sp)
+    Column {
+        Text(text = "Reset Password", fontSize = 15.sp)
 
-    if (!passwordReset) {
-        Text("Select your security question and write your answer to reset your password.")
+        if (!passwordReset) {
+            Text("Select your security question and write your answer to reset your password.")
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.TopStart)
-        ) {
-            Text(
-                text = selectedOption,
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = { expanded = true })
-                    .padding(16.dp)
-                    .border(2.dp, Color.Black)
-                ,
-                textAlign = TextAlign.Center
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth()
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.TopStart)
             ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        onClick = {
-                            selectedOption = option
-                            expanded = false
-                        },
-                        text = { Text(option, textAlign = TextAlign.Center) }
-                    )
+                Text(
+                    text = selectedOption,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = { expanded = true })
+                        .padding(16.dp)
+                        .border(2.dp, Color.Black),
+                    textAlign = TextAlign.Center
+                )
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    options.forEach { option ->
+                        DropdownMenuItem(
+                            onClick = {
+                                selectedOption = option
+                                expanded = false
+                            },
+                            text = { Text(option, textAlign = TextAlign.Center) }
+                        )
+                    }
                 }
             }
-        }
 
-        OutlinedTextField(
-            value = answer,
-            onValueChange = { answer = it },
-            label = { Text("Answer") },
-            keyboardOptions = KeyboardOptions.Default,
-            leadingIcon = {
-                Icon(
-                    Icons.Rounded.QuestionAnswer,
-                    contentDescription = "Answer edit Icon"
-                )
-            },
-        )
+            OutlinedTextField(
+                value = answer,
+                onValueChange = { answer = it },
+                label = { Text("Answer") },
+                keyboardOptions = KeyboardOptions.Default,
+                leadingIcon = {
+                    Icon(
+                        Icons.Rounded.QuestionAnswer,
+                        contentDescription = "Answer edit Icon"
+                    )
+                },
+            )
 
-        Button(onClick = {
-            if (answer == "") {
-                Toast.makeText(
-                    activity,
-                    "Answer cannot be left blank.",
-                    Toast.LENGTH_LONG,
-                ).show()
-            } else {
-                if (viewModel.isCorrectSecQuestion(selectedOption, answer))
-                    passwordReset = true
+            Button(onClick = {
+                if (answer == "") {
+                    Toast.makeText(
+                        activity,
+                        "Answer cannot be left blank.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                } else {
+                    if (viewModel.isCorrectSecQuestion(selectedOption, answer))
+                        passwordReset = true
+                }
+            }) {
+                Text("Submit")
             }
-        }) {
-            Text("Submit")
+        } else {
+            ResetPasswordPage(viewModel = viewModel, activity = activity) { onResetPassword() }
         }
-    } else {
-        ResetPasswordPage(viewModel = viewModel, activity = activity) { onResetPassword() }
     }
 }
 
@@ -701,5 +708,20 @@ fun ResetPasswordPage(
         }
     }) {
         Text("Submit")
+    }
+}
+
+@Composable
+fun ExitBar(
+    onExit : () -> Unit
+) {
+    Row (
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Image(Icons.Rounded.ArrowBack, "Back arrow", modifier = Modifier
+            .clickable(onClick = onExit)
+            .size(60.dp)
+            .padding(15.dp))
     }
 }

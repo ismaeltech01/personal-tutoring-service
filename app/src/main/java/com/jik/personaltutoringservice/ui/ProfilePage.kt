@@ -5,6 +5,7 @@ import android.content.ContentValues.TAG
 import android.graphics.fonts.FontStyle
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Email
@@ -26,12 +28,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.ComposableOpenTarget
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
@@ -52,9 +58,9 @@ fun ProfilePage(
     email : String,
     phone : String,
     address : String,
-    isTutor : Boolean
+    isTutor : Boolean,
+    imageUrl : String
 ) {
-
     //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -63,9 +69,13 @@ fun ProfilePage(
     ) {
         //TODO: Find way to store & load images (maybe using AsyncImage)
         Image(
-            Icons.Rounded.AccountCircle,
-            contentDescription = "Profile Image",
-            modifier = Modifier.size(100.dp)
+            painter = rememberAsyncImagePainter(imageUrl),
+            contentDescription = "Circle Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(128.dp)
+                .clip(CircleShape)
+                .border(5.dp, Color.Gray, CircleShape)
         )
 
         NameDisplay(fullName = fullName)
@@ -141,4 +151,10 @@ fun ParseFullName(fullName : String) : String {
         Log.e(TAG, "NameDisplay:failure -> fullName is likely too short", e)
     }
     return name
+}
+
+@Preview
+@Composable
+fun ImagePreview() {
+
 }

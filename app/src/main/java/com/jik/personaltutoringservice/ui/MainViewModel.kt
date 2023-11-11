@@ -78,6 +78,10 @@ class MainViewModel : ViewModel() {
 
     private val _tutorRate = MutableStateFlow(BigDecimal("0"))
     val tutorRate = _tutorRate.asStateFlow()
+
+    private val _imageUrl = MutableStateFlow("")
+    val imageUrl = _imageUrl.asStateFlow()
+
     /***/
 
     /** Logges In User based on input data.
@@ -164,7 +168,7 @@ class MainViewModel : ViewModel() {
 
                         UpdateAuthData()
                         CreateUserDataDocument()
-                        UpdateUserData(phone = phone, displayName = userName, firstName = firstName, middleName = middleName, lastName = lastName, address = address)
+                        UpdateUserData(phone = phone, displayName = userName, firstName = firstName, middleName = middleName, lastName = lastName, address = address, imageUrl = "https://www.pikpng.com/pngl/m/359-3596107_3d-phone-png.png")
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.exception)
@@ -232,7 +236,8 @@ class MainViewModel : ViewModel() {
         phone: String = "",
         address: String = "",
         email: String? = "",
-        password: String? = ""
+        password: String? = "",
+        imageUrl : String? = ""
         ) {
         if (uidState.value != "") {
             if (firstName != "" || middleName != "" || lastName != "") {
@@ -281,6 +286,11 @@ class MainViewModel : ViewModel() {
             if (address != "") {
                 db.collection("users").document(uidState.value).update("address", address)
                 _address.value = address
+            }
+
+            if (imageUrl != "") {
+                db.collection("users").document(uidState.value).update("imageUrl", imageUrl)
+                _phone.value = phone
             }
 
             if (email != "") {
@@ -389,6 +399,7 @@ class MainViewModel : ViewModel() {
                         _fullName.value = document.data?.get("fullName").toString()
                         _phone.value = document.data?.get("phone").toString()
                         _address.value = document.data?.get("address").toString()
+                        _imageUrl.value = document.data?.get("imageUrl").toString()
                     } else {
                         Log.d(TAG, "FetchUserData:failure -> No document found.")
                     }
