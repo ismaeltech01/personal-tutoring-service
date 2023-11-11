@@ -59,7 +59,7 @@ fun ProfilePage(
     phone : String,
     address : String,
     isTutor : Boolean,
-    imageUrl : String
+    imageUrl : String,
 ) {
     //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
     Column (
@@ -67,16 +67,23 @@ fun ProfilePage(
         verticalArrangement = Arrangement.Center,
         modifier = modifier
     ) {
-        //TODO: Find way to store & load images (maybe using AsyncImage)
-        Image(
-            painter = rememberAsyncImagePainter(imageUrl),
-            contentDescription = "Circle Image",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(128.dp)
-                .clip(CircleShape)
-                .border(5.dp, Color.Gray, CircleShape)
-        )
+        if (loggedIn) {
+            Image(
+                painter = rememberAsyncImagePainter(imageUrl),
+                contentDescription = "Circle Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(128.dp)
+                    .clip(CircleShape)
+                    .border(5.dp, Color.Gray, CircleShape)
+            )
+        } else {
+            Icon(
+                Icons.Rounded.AccountCircle,
+                contentDescription = "Guest picture",
+                modifier = Modifier.size(100.dp)
+            )
+        }
 
         NameDisplay(fullName = fullName)
         Spacer(modifier = Modifier.height(3.dp))

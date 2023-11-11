@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -177,11 +178,17 @@ class MainActivity : ComponentActivity() {
                                         Toast.LENGTH_LONG,
                                     ).show()
                                 },
-                                onExit = {navController.navigate("profile")}
+                                onExit = {navController.navigate("profile")},
+                                onSecQExit = { navController.navigate("login") }
                             )
                         }
                         composable("register") {
-                            RegisterPage(viewModel, this@MainActivity) { navController.navigate("profile") }
+                            RegisterPage(
+                                viewModel,
+                                this@MainActivity,
+                                onRegisterNavigate = { navController.navigate("profile") },
+                                onExit = { navController.navigate("profile") }
+                            )
                         }
                         composable("become-tutor") {
                             BecomeTutorPage()
