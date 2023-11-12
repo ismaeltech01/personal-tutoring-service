@@ -33,41 +33,33 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingsPage(
+    fullName : String,
+    userName : String,
+    phone : String,
+    address: String,
+    email: String,
+    password: String,
     viewModel: MainViewModel,
     activity: Activity,
     navigate: () -> Unit
 ) {
-    var firstNameState by remember { mutableStateOf("") }
+    val names = GetNames(fullName = fullName)
+    val initUserName = userName
+    val initPhone = phone
+    val initAddress = address
+    val initEmail = email
+    val initPassword = password
 
-    var editFirstName by remember { mutableStateOf(false) }
+    var firstNameState by remember { mutableStateOf(names[0]) }
+    var middleNameState by remember { mutableStateOf(if (names[1] == "*") "" else names[1]) }
+    var lastNameState by remember { mutableStateOf(names[2]) }
+    var usernameState by remember { mutableStateOf(userName) }
+    var phoneState by remember { mutableStateOf(phone) }
+    var addressState by remember { mutableStateOf(address) }
+    var emailState by remember { mutableStateOf(email) }
+    var passwdState by remember { mutableStateOf(password) }
+    var confirmState by remember { mutableStateOf(password) }
 
-    var middleNameState by remember { mutableStateOf("") }
-
-    var editMiddleName by remember { mutableStateOf(false) }
-
-    var lastNameState by remember { mutableStateOf("") }
-
-    var editLastName by remember { mutableStateOf(false) }
-
-    var usernameState by remember { mutableStateOf("") }
-
-    var editUserNameState by remember { mutableStateOf(false) }
-
-    var phoneState by remember { mutableStateOf("") }
-
-    var editPhoneState by remember { mutableStateOf(false) }
-
-    var addressState by remember { mutableStateOf("") }
-
-    var editAddressState by remember { mutableStateOf(false) }
-
-    var emailState by remember { mutableStateOf("") }
-
-    var editEmailState by remember { mutableStateOf(false) }
-
-    var passwdState by remember { mutableStateOf("") }
-
-    var editPasswdState by remember { mutableStateOf(false) }
 
     LazyColumn(
         verticalArrangement = Arrangement.Center,
@@ -77,73 +69,77 @@ fun SettingsPage(
     )
     {
         item {
-            TextField(
+            NameField(
                 value = firstNameState,
                 onValueChange = { firstNameState = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                leadingIcon = { Icon(Icons.Rounded.Security, contentDescription = "Security Code Icon") },
-                trailingIcon = {
-                    val icon = if (!editFirstName) Icons.Filled.Edit else Icons.Filled.EditOff
-                    val description = if (!editFirstName) "Edit On" else "Edit Off"
-
-                    IconButton(onClick = { editFirstName = !editFirstName }) {
-                        Icon(icon, description)
-                    }
-                },
-                enabled = editFirstName
+                text = "First Name"
             )
 
-//            NameField(
-//                value = middleNameState,
-//                onValueChange = { middleNameState = it },
-//                text = "Middle Name (Optional)"
-//            )
-//
-//            NameField(
-//                value = lastNameState,
-//                onValueChange = { lastNameState = it },
-//                text = "Last Name"
-//            )
-//
-//            UsernameField(
-//                value = usernameState,
-//                onValueChange = { usernameState = it }
-//            )
-//
-//            PhoneField(
-//                value = phoneState,
-//                onValueChange = {
-//                    //Used to restrict user input to numbers
-//                    if (it.length <= 10 && !Regex("[^0-9]").containsMatchIn(it)) phoneState = it
-//                }
-//            )
-//
-//            AddressField(
-//                value = addressState,
-//                onValueChange = { addressState = it }
-//            )
-//
-//            EmailField(
-//                value = emailState,
-//                onValueChange = { emailState = it }
-//            )
-//
-//            PasswordField(
-//                value = passwdState,
-//                onValueChange = { passwdState = it }
-//            )
-//
-//            Text(
-//                text = "NOTE: Email & Password will be used to Login!",
-//                modifier = Modifier.padding(vertical = 10.dp)
-//            )
+            NameField(
+                value = middleNameState,
+                onValueChange = { middleNameState = it },
+                text = "Middle Name (Optional)"
+            )
+
+            NameField(
+                value = lastNameState,
+                onValueChange = { lastNameState = it },
+                text = "Last Name"
+            )
+
+            UsernameField(
+                value = usernameState,
+                onValueChange = { usernameState = it }
+            )
+
+            PhoneField(
+                value = phoneState,
+                onValueChange = {
+                    //Used to restrict user input to numbers
+                    if (it.length <= 10 && !Regex("[^0-9]").containsMatchIn(it)) phoneState = it
+                }
+            )
+
+            AddressField(
+                value = addressState,
+                onValueChange = { addressState = it }
+            )
+
+            EmailField(
+                value = emailState,
+                onValueChange = { emailState = it }
+            )
+
+            PasswordField(
+                value = passwdState,
+                onValueChange = { passwdState = it },
+                isConfirm = false
+            )
+
+            PasswordField(
+                value = passwdState,
+                onValueChange = { passwdState = it },
+                isConfirm = true
+            )
 
             Button(onClick = {
-                val allValid = ValidateInputs(firstNameState, activity = activity)
+                val allValid = ValidateInputs(
+                    firstName = firstNameState,
+                    middleName = middleNameState,
+                    lastName = lastNameState,
+                    email = emailState,
+                    password = passwdState,
+                    confirm = confirmState,
+                    address = addressState,
+                    activity = activity
+                )
 
                 //TODO: Add validation that user data is not the same as previous data in UpdateUserData()
-                if (allValid) { viewModel.UpdateUserData() }
-
+                //Use the initial variables to check for this ^
+                if (allValid) {
+                    viewModel.UpdateUserData()
+                    navigate()
+                }
             })
             {
                 Text("Save Changes")
@@ -158,6 +154,7 @@ fun ValidateInputs(
     lastName : String = "",
     email : String = "",
     password : String = "",
+    confirm : String = "",
     address : String = "",
     activity: Activity
 ) : Boolean {
@@ -183,8 +180,13 @@ fun ValidateInputs(
         invalidCount++
     }
 
-    if (password != "" && password.length < 6) {
+    if (!ValidatePassword(password, confirm, activity)) {
         ShowToast(activity, "password")
+        invalidCount++
+    }
+
+    if (!ValidateAddress(address)) {
+        ShowToast(activity, "address")
         invalidCount++
     }
 
@@ -198,8 +200,10 @@ fun ShowToast(activity: Activity, type : String, text : String = "") {
         toastStr = "$text cannot contain characters outside of A-Z, a-z, & -"
     } else if (type == "email") {
         toastStr = "Invalid email. Try again."
-    } else {
+    } else if (type == "password") {
         toastStr = "Password must be at least 6 characters long."
+    } else {
+        toastStr = "Address is invalid."
     }
 
     Toast.makeText(
@@ -207,4 +211,23 @@ fun ShowToast(activity: Activity, type : String, text : String = "") {
         toastStr,
         Toast.LENGTH_LONG,
     ).show()
+}
+
+/**
+ * @return if address is valid true, else false
+ * */
+fun ValidateAddress(
+    address : String
+) : Boolean {
+    return true
+}
+
+/**
+ * @return A List of strings representing each name in order.
+ *          firstName index == 0
+ *          middelName index == 1
+ *          lastName index == 2
+ * */
+fun GetNames(fullName : String) : List<String> {
+    return fullName.split(" ")
 }

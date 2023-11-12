@@ -295,7 +295,7 @@ class MainViewModel : ViewModel() {
 
             if (imageUrl != "") {
                 db.collection("users").document(uidState.value).update("imageUrl", imageUrl)
-                _phone.value = phone
+                _imageUrl.value = imageUrl.toString()
             }
 
             if (email != "") {
@@ -306,6 +306,7 @@ class MainViewModel : ViewModel() {
             if (password != "") {
                 auth.currentUser?.updatePassword(password.toString())
             }
+
         } else {
             Log.w(TAG, "UpdateUserData:failure -> uid is empty")
         }
@@ -565,6 +566,37 @@ class MainViewModel : ViewModel() {
     ) {
         _appProfit.value = commission.multiply(total)
         _tutorProfit.value = total.subtract(appProfit.value).setScale(2)
+    }
+
+    /**
+     * Function used to search for tutors in database.
+     * NOT DONE!!!!!
+     *
+     * @return A list of tutors and their attributes as key-value pairs
+     * */
+    fun SearchTutors() : Map<String, Map<String, String>> {
+        //TODO
+        val uidString = uidState.value
+        val searched : Map<String, Map<String, String>> = mapOf()
+
+        if (uidString != "") {
+            db.collection("relations").document(uidString).collection("tutors").get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        if (doc.id != "sample") {
+                            tutorsState[doc.id] = doc.data as Map<String, String>
+                            Log.d(TAG, "${doc.id} => ${doc.data}")
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting tutors documents: ", exception)
+                }
+        } else {
+            Log.w(TAG, "FetchTutorsRelations:failure -> uid is empty")
+        }
+
+        return searched
     }
 
 }

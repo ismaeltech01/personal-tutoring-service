@@ -6,6 +6,7 @@ import android.graphics.fonts.FontStyle
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,27 +16,39 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.ContentPasteGo
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.ComposableOpenTarget
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -60,82 +73,135 @@ fun ProfilePage(
     address : String,
     isTutor : Boolean,
     imageUrl : String,
+    viewModel: MainViewModel
 ) {
+    var clickedImage by remember { mutableStateOf(false) }
+    var urlInput by remember { mutableStateOf(imageUrl) }
+
     //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-    ) {
-        if (loggedIn) {
-            Image(
-                painter = rememberAsyncImagePainter(imageUrl),
-                contentDescription = "Circle Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(128.dp)
-                    .clip(CircleShape)
-                    .border(5.dp, Color.Gray, CircleShape)
-            )
-        } else {
-            Icon(
-                Icons.Rounded.AccountCircle,
-                contentDescription = "Guest picture",
-                modifier = Modifier.size(100.dp)
-            )
-        }
-
-        NameDisplay(fullName = fullName)
-        Spacer(modifier = Modifier.height(3.dp))
-
-        if (!loggedIn) {
-            Button(
-                onClick = onLoginClick,
-                modifier = Modifier.fillMaxWidth(.5f)
-            ) {
-                Text(text = "Login", color = Color.White)
+    if (!clickedImage) {
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = modifier
+        ) {
+            if (loggedIn) {
+                ImageFrame(imageUrl = imageUrl, onClick = { clickedImage = true })
+            } else {
+                Icon(
+                    Icons.Rounded.AccountCircle,
+                    contentDescription = "Guest picture",
+                    modifier = Modifier.size(100.dp)
+                )
             }
 
-            Button(
-                onClick = onRegisterClick,
-                modifier = Modifier.fillMaxWidth(.5f)
-            ) {
-                Text(text = "Register", color = Color.White)
-            }
-        } else {
-            Row {
-                Icon(Icons.Rounded.Person, "Username Icon")
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(userName)
-            }
+            NameDisplay(fullName = fullName)
+            Spacer(modifier = Modifier.height(3.dp))
 
-            Row {
-                Icon(Icons.Rounded.Email, "Email Icon")
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(email)
-            }
-
-            Row {
-                Icon(Icons.Rounded.Phone, "Phone Icon")
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(phone)
-            }
-
-            Row {
-                Icon(Icons.Rounded.Home, "Home Icon")
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(address)
-            }
-            if (!isTutor) {
-                Spacer(modifier = Modifier.height(5.dp))
+            if (!loggedIn) {
                 Button(
-                    onClick = onTutorClick
+                    onClick = onLoginClick,
+                    modifier = Modifier.fillMaxWidth(.5f)
                 ) {
-                    Text("Become a Tutor")
+                    Text(text = "Login", color = Color.White)
+                }
+
+                Button(
+                    onClick = onRegisterClick,
+                    modifier = Modifier.fillMaxWidth(.5f)
+                ) {
+                    Text(text = "Register", color = Color.White)
+                }
+            } else {
+                Row {
+                    Icon(Icons.Rounded.Person, "Username Icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(userName)
+                }
+
+                Row {
+                    Icon(Icons.Rounded.Email, "Email Icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(email)
+                }
+
+                Row {
+                    Icon(Icons.Rounded.Phone, "Phone Icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(phone)
+                }
+
+                Row {
+                    Icon(Icons.Rounded.Home, "Home Icon")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(address)
+                }
+                if (!isTutor) {
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Button(
+                        onClick = onTutorClick
+                    ) {
+                        Text("Become a Tutor")
+                    }
                 }
             }
         }
+    } else {
+        ExitBar { clickedImage = false }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = modifier
+        ) {
+            Text(text = "Change Profile Image", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            ImageFrame(imageUrl = urlInput)
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            TextField(
+                value = urlInput,
+                onValueChange = { urlInput = it },
+                label = { Text("Image Url") },
+                keyboardOptions = KeyboardOptions.Default,
+                trailingIcon = {
+                    val clipboard = LocalClipboardManager.current
+
+                    IconButton(onClick = { urlInput = clipboard.getText()?.text.toString() }) {
+                        Icon(Icons.Rounded.ContentPasteGo, "Remove & Paste icon")
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Button(onClick = {
+                viewModel.UpdateUserData(imageUrl = urlInput)
+                clickedImage = false
+            }) {
+                Text(text = "Save Changes")
+            }
+        }
     }
+}
+
+@Composable
+fun ImageFrame(
+    imageUrl: String,
+    onClick: () -> Unit = {}
+) {
+    Image(
+        painter = rememberAsyncImagePainter(imageUrl),
+        contentDescription = "Circle Image",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(128.dp)
+            .clip(CircleShape)
+            .border(5.dp, Color.Gray, CircleShape)
+            .clickable(onClick = onClick)
+    )
 }
 
 @Composable

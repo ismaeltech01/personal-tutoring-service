@@ -63,8 +63,9 @@ fun PersonalTutoringServiceTheme(
         }
     }
 
+    //Change colorScheme param to be adaptive if switching between dark & light theme is desired
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
         content = content
     )

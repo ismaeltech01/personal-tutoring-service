@@ -95,7 +95,9 @@ class MainActivity : ComponentActivity() {
                             HomePage(modifier = pageModifier)
                         }
                         composable("search") {
-                            SearchPage()
+                            SearchPage(
+                                viewModel = viewModel
+                            )
                         }
                         composable("profile") {
                             ProfilePage(
@@ -110,7 +112,8 @@ class MainActivity : ComponentActivity() {
                                 phone = phone,
                                 address = address,
                                 isTutor = isTutor,
-                                imageUrl = imageUrl
+                                imageUrl = imageUrl,
+                                viewModel = viewModel
                             )
                         }
                         composable("messaging") {
@@ -153,7 +156,16 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("settings") {
-                            SettingsPage(viewModel = viewModel, activity = this@MainActivity) {
+                            SettingsPage(
+                                fullName = fullName,
+                                userName = userName,
+                                email = email,
+                                password = "",
+                                address = address,
+                                phone = phone,
+                                viewModel = viewModel,
+                                activity = this@MainActivity
+                            ) {
                                 navController.navigate("other")
                             }
                         }
