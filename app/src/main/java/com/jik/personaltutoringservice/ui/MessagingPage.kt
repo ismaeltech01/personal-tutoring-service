@@ -14,9 +14,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeCompilerApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -42,9 +55,58 @@ val MessageList = listOf(
     Message("Joseph","Seems to be working wonderful so far"),
     Message("Joseph","Seems to be working wonderful so far"),
 )
-@Composable
-fun MessagingPage() {
 
+@Composable
+fun MessagingPage(
+    userName: String,
+    tutors: Map<String, Map<String, String>>,
+    viewModel: MainViewModel
+) {
+    var receiver by remember { mutableStateOf("") }
+    var showChatroom by remember { mutableStateOf(false) }
+
+    if (!showChatroom) {
+        LazyColumn() {
+            item {
+                for (entry in tutors) {
+                    val tutorId = entry.key
+                    val values = entry.value
+
+                    Button(onClick = {
+                        receiver = values["userName"].toString()
+                    }) {
+                        //Contains User card that on clicked, would take you to the relevant chatroom
+                    }
+                }
+            }
+        }
+    } else {
+        ChatRoom(sender = userName, receiver = receiver, viewModel = viewModel)
+    }
+}
+
+@Composable
+fun ChatRoom(
+    sender: String,
+    receiver: String,
+    viewModel: MainViewModel
+) {
+    var messageIn by remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = messageIn,
+        onValueChange = { messageIn = it },
+        label = { Text("Message") },
+        keyboardOptions = KeyboardOptions.Default,
+        trailingIcon = {
+
+            IconButton(onClick = {
+                viewModel.SendMessage(message = messageIn, sender = "", receiver = "")
+            }) {
+                Icon(Icons.Rounded.Send, "Send Icon")
+            }
+        }
+    )
 }
 @Composable
         /*

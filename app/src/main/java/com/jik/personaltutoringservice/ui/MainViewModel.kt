@@ -634,4 +634,17 @@ class MainViewModel : ViewModel() {
         return searched
     }
 
+    /**
+     * @return TBD
+     * */
+    fun GetChatroom() : String {
+        return ""
+    }
+    fun SendMessage(
+        message: String,
+        sender: String,
+        receiver: String
+    ) {
+    }
+
 }

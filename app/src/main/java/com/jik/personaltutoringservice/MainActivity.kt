@@ -119,7 +119,11 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("messaging") {
-                            MessagingPage()
+                            MessagingPage(
+                                userName = userName,
+                                tutors = tutors,
+                                viewModel = viewModel
+                            )
                         }
                         composable("other") {
                             OtherPage(
