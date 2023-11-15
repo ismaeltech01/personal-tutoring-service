@@ -19,6 +19,7 @@ import java.math.BigDecimal
 class MainViewModel : ViewModel() {
     //auth val holds authentication instance (to interact with FirebaseAuth)
     private val auth = FirebaseAuth.getInstance()
+
     //db val holds database instance (to interact with Firebase Firestore)
     private val db = Firebase.firestore
 
@@ -53,13 +54,14 @@ class MainViewModel : ViewModel() {
 
     private val _secCode = MutableStateFlow("")
     val secCodeState = _secCode.asStateFlow()
+
     /***/
 
     private val _isTutor = MutableStateFlow(false)
     val isTutorState = _isTutor.asStateFlow()
 
     private val _tutors = mutableStateMapOf<String, Map<String, String>>()
-    val tutorsState =_tutors
+    val tutorsState = _tutors
 
     private val _clients = mutableStateMapOf<String, Map<String, String>>()
     val clientsState = _clients
@@ -68,7 +70,7 @@ class MainViewModel : ViewModel() {
     private val _payerUserName = MutableStateFlow("")
     val payerUserName = _payerUserName.asStateFlow()
 
-    val commission : BigDecimal = BigDecimal(".20").setScale(2)
+    val commission: BigDecimal = BigDecimal(".20").setScale(2)
 
     private val _appProfit = MutableStateFlow(BigDecimal("0"))
     val appProfit = _appProfit.asStateFlow()
@@ -91,7 +93,7 @@ class MainViewModel : ViewModel() {
      * @param [password] User's Password
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
      * */
-    fun LogIn(email : String?, password : String, activity : Activity) : Int {
+    fun LogIn(email: String?, password: String, activity: Activity): Int {
         var result = 0
 
         if (email == "" || password == "") {
@@ -127,7 +129,7 @@ class MainViewModel : ViewModel() {
                         result = -1
                     }
                 }
-            }
+        }
         return result
     }
 
@@ -140,22 +142,22 @@ class MainViewModel : ViewModel() {
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
      * */
     fun Register(
-        firstName : String,
-        middleName : String,
-        lastName : String,
-        userName : String?,
-        phone : String,
-        address : String,
-        email : String?,
-        password : String,
-        activity : Activity,
-        selectedOption : String,
-        answer : String
-    ) : Int {
+        firstName: String,
+        middleName: String,
+        lastName: String,
+        userName: String?,
+        phone: String,
+        address: String,
+        email: String?,
+        password: String,
+        activity: Activity,
+        selectedOption: String,
+        answer: String
+    ): Int {
         //Returns -1 if registration failed, otherwise returns 0 on success
         var result = 0
 
-        if (firstName == "" || lastName == "" || userName == "" || phone == "" || address == "" || email == "" ||  password == "") {
+        if (firstName == "" || lastName == "" || userName == "" || phone == "" || address == "" || email == "" || password == "") {
             Toast.makeText(
                 activity,
                 "One or more fields are empty.",
@@ -171,7 +173,15 @@ class MainViewModel : ViewModel() {
 
                         UpdateAuthData()
                         CreateUserDataDocument()
-                        UpdateUserData(phone = phone, displayName = userName, firstName = firstName, middleName = middleName, lastName = lastName, address = address, imageUrl = "https://www.pikpng.com/pngl/m/359-3596107_3d-phone-png.png")
+                        UpdateUserData(
+                            phone = phone,
+                            displayName = userName,
+                            firstName = firstName,
+                            middleName = middleName,
+                            lastName = lastName,
+                            address = address,
+                            imageUrl = "https://www.pikpng.com/pngl/m/359-3596107_3d-phone-png.png"
+                        )
                         UpdateSecQuestion(question = selectedOption, answer = answer)
                     } else {
                         // If sign in fails, display a message to the user.
@@ -182,7 +192,7 @@ class MainViewModel : ViewModel() {
                             Toast.LENGTH_LONG,
                         ).show()
                     }
-            }
+                }
         }
 
         return result
@@ -242,13 +252,16 @@ class MainViewModel : ViewModel() {
         address: String = "",
         email: String? = "",
         password: String? = "",
-        imageUrl : String? = ""
-        ) {
+        imageUrl: String? = ""
+    ) {
         if (uidState.value != "") {
             if (firstName != "" || middleName != "" || lastName != "") {
                 val names = fullNameState.value.split(" ").toMutableList()
                 if (names.size != 3) {
-                    Log.w(TAG, "UpdateUserData:failure -> Invalid fullNameState:${fullNameState.value}")
+                    Log.w(
+                        TAG,
+                        "UpdateUserData:failure -> Invalid fullNameState:${fullNameState.value}"
+                    )
                 }
 
                 if (firstName != "") {
@@ -313,39 +326,51 @@ class MainViewModel : ViewModel() {
     }
 
     fun UpdateSecQuestion(
-        question : String,
-        answer : String
+        question: String,
+        answer: String
     ) {
         //val data = mapOf("secQuestion" to question, "secAnswer" to answer)
         if (uidState.value != "") {
-            db.collection("users").document(uidState.value).update("secQuestion", question, "secAnswer", answer)
+            db.collection("users").document(uidState.value)
+                .update("secQuestion", question, "secAnswer", answer)
         } else {
             Log.e(TAG, "Error: uidState is empty")
-            db.collection("users").document(auth.uid.toString()).update("secQuestion", question, "secAnswer", answer)
+            db.collection("users").document(auth.uid.toString())
+                .update("secQuestion", question, "secAnswer", answer)
         }
     }
 
     fun isCorrectSecQuestion(
-        question : String,
-        answer : String
-    ) : Boolean {
-        var match = false
-
-        db.collection("users").document(uidState.value).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-
-                    match = document.data?.get("secQuestion").toString() == question && document.data?.get("secAnswer").toString() == answer
-                } else {
+        email: String,
+        question: String,
+        answer: String,
+        activity: Activity,
+        onMatch : () -> Unit
+    ) {
+        db.collection("secQuestions").whereEqualTo("email", email).get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
                     Log.d(TAG, "FetchUserData:failure -> No document found.")
+                } else {
+                    for (doc in documents) {
+                        val secQuestion = doc.data?.get("secQuestion").toString()
+                        val secAnswer = doc.data?.get("secAnswer").toString()
+
+                        if (secQuestion == question && secAnswer == answer) {
+                            onMatch()
+                        } else {
+                            Toast.makeText(
+                                activity,
+                                "Incorrect Email, Question, or Answer. Try again.",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                        Log.d(TAG, "${doc.id} => ${doc.data}")
+                    }
                 }
-            }
-            .addOnFailureListener { exception ->
+            }.addOnFailureListener { exception ->
                 Log.d(TAG, "get() failed with ", exception)
             }
-
-        return match
     }
 
     fun UpdateCardInfo(
@@ -570,22 +595,32 @@ class MainViewModel : ViewModel() {
 
     /**
      * Function used to search for tutors in database.
-     * NOT DONE!!!!!
      *
      * @return A list of tutors and their attributes as key-value pairs
      * */
-    fun SearchTutors() : Map<String, Map<String, String>> {
+    fun SearchTutors(
+        price: Int,
+        distance: Int,
+        rating: Int,
+        available: Boolean,
+    ) : Map<String, Map<String, String>> {
         //TODO
         val uidString = uidState.value
-        val searched : Map<String, Map<String, String>> = mapOf()
+        val searched : MutableMap<String, Map<String, String>> = mutableMapOf()
 
         if (uidString != "") {
             db.collection("relations").document(uidString).collection("tutors").get()
                 .addOnSuccessListener { docs ->
                     for (doc in docs) {
                         if (doc.id != "sample") {
-                            tutorsState[doc.id] = doc.data as Map<String, String>
-                            Log.d(TAG, "${doc.id} => ${doc.data}")
+                            val docPrice = doc.data.get("price").toString().toInt()
+                            val docRating = doc.data.get("rating").toString().toInt()
+                            val docAvailable = doc.data.get("available") as Boolean
+
+                            if (docPrice >= price && docRating >= rating && docAvailable == available) {
+                                searched[doc.id] = doc.data as Map<String, String>
+                                Log.d(TAG, "${doc.id} => ${doc.data}")
+                            }
                         }
                     }
                 }

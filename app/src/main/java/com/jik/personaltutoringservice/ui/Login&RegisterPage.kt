@@ -641,6 +641,7 @@ fun SeqQPassResetPage(
     var selectedOption by remember { mutableStateOf(options[0]) }
     var answer by remember { mutableStateOf("") }
     var passwordReset by remember { mutableStateOf(false) }
+    var email by remember { mutableStateOf("") }
 
     if (loginAttempts < 3) ExitBar { onExit() }
 
@@ -653,6 +654,22 @@ fun SeqQPassResetPage(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        //Email text field
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            leadingIcon = {
+                Icon(
+                    Icons.Rounded.Email,
+                    contentDescription = "Email icon"
+                )
+            },
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         if (!passwordReset) {
             Text(
                 "Select your security question and write your answer to reset your password.",
@@ -660,6 +677,7 @@ fun SeqQPassResetPage(
             )
             
             Spacer(modifier = Modifier.height(10.dp))
+
 
             Box(
                 modifier = Modifier
@@ -722,8 +740,13 @@ fun SeqQPassResetPage(
                             Toast.LENGTH_LONG,
                         ).show()
                     } else {
-                        if (viewModel.isCorrectSecQuestion(selectedOption, answer))
-                            passwordReset = true
+                        viewModel.isCorrectSecQuestion(
+                            question = selectedOption,
+                            answer = answer,
+                            email = email,
+                            activity = activity,
+                            onMatch = { passwordReset = true }
+                        )
                     }
                 }) {
                     Text("Submit")
