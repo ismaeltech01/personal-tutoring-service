@@ -94,7 +94,10 @@ class MainActivity : ComponentActivity() {
                         //Each composable under the NavHost is a path/destination to travel to
                         // and the respective component to load for such destination
                         composable("home") {
-                            HomePage(modifier = pageModifier)
+                            HomePage(
+                                modifier = pageModifier,
+                                tutors = tutors
+                            )
                         }
                         composable("search") {
                             SearchPage(
