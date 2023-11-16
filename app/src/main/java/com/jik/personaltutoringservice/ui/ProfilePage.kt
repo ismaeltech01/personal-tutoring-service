@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -191,7 +192,7 @@ fun ProfilePage(
 fun ImageFrame(
     imageUrl: String,
     onClick: () -> Unit = {},
-    size: Dp = 128.dp
+    size: Dp = 100.dp
 ) {
     val modifier = if (onClick != {}) Modifier.clickable(onClick = onClick) else Modifier
 

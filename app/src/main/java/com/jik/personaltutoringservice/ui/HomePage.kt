@@ -25,9 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.firebase.ui.auth.data.model.User
 import com.jik.personaltutoringservice.R
+import com.jik.personaltutoringservice.ui.UserCard
 
-//******NOTE: This page is just a test. Can be removed or kept if desired
 val HomePageModifier = Modifier
     .fillMaxHeight(.85f)
     .fillMaxWidth()
@@ -35,6 +36,8 @@ val HomePageModifier = Modifier
 // TODO: I need to make the icons clickable and either take them to something
 @Composable
 fun HomePage(modifier: Modifier, tutors : Map<String, Map<String, String>>) {
+
+
     Column (modifier = modifier) {
         Text(
             text = "Current Tutors",
@@ -45,27 +48,42 @@ fun HomePage(modifier: Modifier, tutors : Map<String, Map<String, String>>) {
                 .align(Alignment.CenterHorizontally)
         )
 
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-             for(entry in tutors) {
-                 val fullname = ParseFullName(entry.value["fullName"].toString())
+        for(entry in tutors){
+           val fullname = ParseFullName(entry.value["fullName"].toString())
+           val userName = entry.value["userName"].toString()
+           val raTe = entry.value["rate"].toString()
+           val profilePic = entry.value["imageUrl"].toString()
+           val loc = entry.value["location"].toString()
 
-                 Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                     Image(
-                         painter = painterResource(id = R.drawable.profileimage),
-                         contentDescription = "Profile Image",
-                         modifier = Modifier
-                             .size(75.dp)
-                             .clip(CircleShape)
-                             .border(5.dp, Color.White, CircleShape)
-                     )
-
-                     Text(text = fullname)
-                 }
-                 Spacer(modifier = Modifier.width(5.dp))
+           Column {
 
 
-             }
-        }
+                UserCard(fullName = fullname, userName = userName, rate = raTe, imageUrl = profilePic, onClick = {}, location = loc )
+            }
+       }
+
+
+//        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+//             for(entry in tutors) {
+//                 val fullname = ParseFullName(entry.value["fullName"].toString())
+//
+//                 Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+//                     Image(
+//                         painter = painterResource(id = R.drawable.profileimage),
+//                         contentDescription = "Profile Image",
+//                         modifier = Modifier
+//                             .size(75.dp)
+//                             .clip(CircleShape)
+//                             .border(5.dp, Color.White, CircleShape)
+//                     )
+//
+//                     Text(text = fullname)
+//                 }
+//                 Spacer(modifier = Modifier.width(5.dp))
+//
+//
+//             }
+//        }
         Text(
             text = "Suggested",
             fontSize = 25.sp,

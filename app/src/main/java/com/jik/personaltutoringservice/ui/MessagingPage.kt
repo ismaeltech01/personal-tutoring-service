@@ -43,17 +43,7 @@ val MessageList = listOf(
     Message("Joseph","Seems to be working wonderful so far"),
     Message("Joseph","Seems to be working wonderful so far"),
     Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
+    Message("Joseph","Seems to be working wonderful so far")
 )
 
 @Composable
