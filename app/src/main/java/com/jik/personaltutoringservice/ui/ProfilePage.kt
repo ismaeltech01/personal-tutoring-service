@@ -190,7 +190,8 @@ fun ProfilePage(
 @Composable
 fun ImageFrame(
     imageUrl: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    size: Dp = 128.dp
 ) {
     val modifier = if (onClick != {}) Modifier.clickable(onClick = onClick) else Modifier
 
@@ -199,7 +200,7 @@ fun ImageFrame(
         contentDescription = "Circle Image",
         contentScale = ContentScale.Crop,
         modifier = modifier
-            .size(128.dp)
+            .size(size)
             .clip(CircleShape)
             .border(5.dp, Color.Gray, CircleShape)
     )
