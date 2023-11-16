@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 
 
 object Experience
@@ -47,7 +49,9 @@ object Distance
     const val moreThanFiftyMiles = "More than 50 miles, therefore, no preference"
 }
 @Composable
-fun BecomeTutorPage() {
+fun BecomeTutorPage(
+    onSubmit: () -> Unit
+) {
 
     LazyColumn (
         modifier = Modifier
@@ -57,7 +61,7 @@ fun BecomeTutorPage() {
     ){
         item{
 
-                Text("Tutoring Application", modifier = Modifier.padding(16.dp),fontSize = 50.sp)
+                Text("Tutoring Application", modifier = Modifier.padding(16.dp), fontSize = 50.sp)
                 Text("Please fill in all the fields of the application", fontSize = 25.sp)
 
                 val experienceRadio = remember {
@@ -256,7 +260,7 @@ fun BecomeTutorPage() {
                         Text(Distance.moreThanFiftyMiles)
                     }
 
-                    Button(onClick = {},
+                    Button(onClick = onSubmit ,
                         modifier = Modifier
                             .fillMaxWidth()
                         ){
@@ -271,5 +275,5 @@ fun BecomeTutorPage() {
 @Preview(showBackground = true)
 @Composable
 fun BecomeTutorPagePreview(){
-    BecomeTutorPage()
+    BecomeTutorPage(onSubmit = {})
 }

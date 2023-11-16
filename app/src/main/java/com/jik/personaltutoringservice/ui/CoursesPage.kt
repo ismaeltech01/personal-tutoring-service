@@ -51,7 +51,7 @@ import org.w3c.dom.Text
 
 //NOTE: This page is just a test. Can be removed or kept if desired
 @Composable
-fun CoursesPage(){
+fun CoursesPage(onSaveChange: () -> Unit){
 
     var checkedStateMath by remember { mutableStateOf(false) }
     var checkedStatePiano by remember { mutableStateOf(false) }
@@ -104,7 +104,7 @@ fun CoursesPage(){
                 Text(text = "Tennis", modifier = Modifier.padding(16.dp),fontSize = 30.sp)
             }
 
-            Button(onClick = {},
+            Button(onClick = onSaveChange,
                 modifier = Modifier
                     .fillMaxWidth()
 
@@ -120,7 +120,7 @@ fun CoursesPage(){
 @Preview(showBackground = true)
 @Composable
 fun CoursePreview(){
-    CoursesPage()
+    CoursesPage(onSaveChange = {})
 }
 
 
