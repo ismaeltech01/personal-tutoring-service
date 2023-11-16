@@ -192,15 +192,16 @@ fun ImageFrame(
     imageUrl: String,
     onClick: () -> Unit = {}
 ) {
+    val modifier = if (onClick != {}) Modifier.clickable(onClick = onClick) else Modifier
+
     Image(
         painter = rememberAsyncImagePainter(imageUrl),
         contentDescription = "Circle Image",
         contentScale = ContentScale.Crop,
-        modifier = Modifier
+        modifier = modifier
             .size(128.dp)
             .clip(CircleShape)
             .border(5.dp, Color.Gray, CircleShape)
-            .clickable(onClick = onClick)
     )
 }
 

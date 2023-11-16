@@ -31,6 +31,8 @@ fun UserCard(
             .fillMaxWidth(.85f)
     ) {
         Row {
+            ImageFrame(imageUrl = imageUrl)
+
             Column {
                 Text(text = ParseFullName(fullName))
 

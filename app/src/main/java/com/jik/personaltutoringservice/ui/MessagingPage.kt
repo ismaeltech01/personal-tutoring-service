@@ -75,6 +75,7 @@ fun MessagingPage(
                     Button(onClick = {
                         receiver = values["userName"].toString()
                     }) {
+
                         //Contains User card that on clicked, would take you to the relevant chatroom
                     }
                 }
@@ -121,7 +122,6 @@ fun MessagingCard(msg: Message) {
                 .size(40.dp)
                 .clip(CircleShape)
                 .border(1.5.dp, Color.White, CircleShape)
-
         )
 
         Spacer(modifier = Modifier.width(6.dp))
@@ -139,6 +139,7 @@ fun MessagingCard(msg: Message) {
 
     }
 }
+
 @Composable
 //Makes a list of messages, we need to ensure data entry follows this format
 //want to add image handling, we can use this same option for the conversation as well
