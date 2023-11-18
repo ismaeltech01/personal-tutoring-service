@@ -67,12 +67,7 @@ class MainActivity : ComponentActivity() {
                 viewModel.UpdateAuthData()
                 viewModel.FetchUserData()
                 viewModel.FetchUserBankingInfo()
-
-                if (isTutor) {
-                    viewModel.FetchClientsRelations()
-                } else {
-                    viewModel.FetchTutorsRelations()
-                }
+                viewModel.FetchRelations()
             }
 
             //Modifier applied to all pages of the app

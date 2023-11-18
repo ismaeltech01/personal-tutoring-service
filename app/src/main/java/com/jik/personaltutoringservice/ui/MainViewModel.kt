@@ -117,11 +117,7 @@ class MainViewModel : ViewModel() {
                         UpdateAuthData()
                         FetchUserData()
                         FetchUserBankingInfo()
-                        if (isTutorState.value) {
-                            FetchClientsRelations()
-                        } else {
-                            FetchTutorsRelations()
-                        }
+                        FetchRelations()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -415,12 +411,12 @@ class MainViewModel : ViewModel() {
     fun CreateUserDataDocument() {
         val data = mapOf("email" to emailState.value)
         val bankingData = mapOf("cardNum" to cardNumState.value, "expDate" to expDateState.value, "secCode" to secCodeState.value)
+        val relationsData = mapOf("tutors" to "", "clients" to "")
 
         db.collection("users").document(uidState.value).set(data)
         db.collection("banking").document(uidState.value).set(bankingData)
         db.collection("relations").document(uidState.value).set(mapOf("init" to true))
-        db.collection("relations").document(uidState.value).collection("tutors").document("sample").set(mapOf("init" to true))
-        db.collection("relations").document(uidState.value).collection("clients").document("sample").set(mapOf("init" to true))
+        db.collection("relations").document(uidState.value).set(relationsData)
     }
 
     /** Gets User Data from Database & updates app state accordingly
@@ -503,22 +499,35 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun FetchClientsRelations() {
+    fun FetchRelations() {
         val uidString = uidState.value
+        val tList = mutableListOf<String>()
 
         if (uidString != "") {
-            db.collection("relations").document(uidString).collection("clients").get()
-                .addOnSuccessListener { docs ->
-                    for (doc in docs) {
-                        if (doc.id != "sample") {
-                            tutorsState[doc.id] = doc.data as Map<String, String>
-                            Log.d(TAG, "${doc.id} => ${doc.data}")
-                        }
+            db.collection("relations").document(uidString).get()
+                .addOnSuccessListener { doc ->
+                    for (email in doc.data?.get("tutors") as List<String>) {
+                        tList.add(email)
+                        Log.d(TAG, "$email")
                     }
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting tutors documents: ", exception)
                 }
+
+            Log.d(TAG, "is tList empty? : ${tList.isEmpty()}")
+            if (tList.isNotEmpty()) {
+                db.collection("users").where(Filter.inArray("email", tList)).get()
+                    .addOnSuccessListener { docs ->
+                        for (doc in docs) {
+                            tutorsState[doc.id] = doc.data as Map<String, String>
+                            Log.d(TAG, "${doc.id} => ${doc.data}")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.w(TAG, "Error getting tutors documents: ", exception)
+                    }
+            }
         } else {
             Log.w(TAG, "FetchClientsRelations:failure -> uid is empty")
         }
@@ -643,10 +652,11 @@ class MainViewModel : ViewModel() {
     }
 
     fun HireTutor(
-        hireId: String
+        hireEmail: String
     ) {
         val uidString = auth.currentUser?.uid.toString()
 
-        db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireId))
+        db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireEmail))
+        FetchRelations()
     }
 }

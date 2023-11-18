@@ -1,6 +1,8 @@
 package com.jik.personaltutoringservice.ui
 
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -36,8 +38,6 @@ val HomePageModifier = Modifier
 // TODO: I need to make the icons clickable and either take them to something
 @Composable
 fun HomePage(modifier: Modifier, tutors : Map<String, Map<String, String>>) {
-
-
     Column (modifier = modifier) {
         Text(
             text = "Current Tutors",
@@ -48,17 +48,23 @@ fun HomePage(modifier: Modifier, tutors : Map<String, Map<String, String>>) {
                 .align(Alignment.CenterHorizontally)
         )
 
-        for(entry in tutors){
-           val fullname = ParseFullName(entry.value["fullName"].toString())
+        for(entry in tutors) {
+           val fullname = entry.value["fullName"].toString()
            val userName = entry.value["userName"].toString()
            val raTe = entry.value["rate"].toString()
            val profilePic = entry.value["imageUrl"].toString()
            val loc = entry.value["location"].toString()
+            Log.d(TAG, "Displaying tutor in home: $fullname")
 
-           Column {
-
-
-                UserCard(fullName = fullname, userName = userName, rate = raTe, imageUrl = profilePic, onClick = {}, location = loc )
+            Column {
+                UserCard(
+                    fullName = fullname,
+                    userName = userName,
+                    rate = raTe,
+                    imageUrl = profilePic,
+                    onClick = {},
+                    location = loc
+                )
             }
        }
 

@@ -446,12 +446,12 @@ fun onContinueClick(
         ).show()
     } else if (!ValidatePassword(password = password, confirm = confirm, activity = activity)) {
         //Do Nothing
-    } else if (!ValidateAddress(address = address)) {
-        Toast.makeText(
-            activity,
-            "Invalid Address Format. Correct format example: Arlington, TX",
-            Toast.LENGTH_LONG,
-        ).show()
+//    } else if (!ValidateAddress(address = address)) {
+//        Toast.makeText(
+//            activity,
+//            "Invalid Address Format. Correct format example: Arlington, TX",
+//            Toast.LENGTH_LONG,
+//        ).show()
     } else {
         onSuccess()
     }

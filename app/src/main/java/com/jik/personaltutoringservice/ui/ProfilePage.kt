@@ -153,7 +153,7 @@ fun ProfilePage(
                 }
                 if (searched) {
                     Button(onClick = {
-                        viewModel.HireTutor(uId)
+                        viewModel.HireTutor(email)
                         onHire()
                     }
                     ) {
