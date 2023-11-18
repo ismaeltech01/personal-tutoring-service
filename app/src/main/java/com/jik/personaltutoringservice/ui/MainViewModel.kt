@@ -506,10 +506,22 @@ class MainViewModel : ViewModel() {
         if (uidString != "") {
             db.collection("relations").document(uidString).get()
                 .addOnSuccessListener { doc ->
+                    Log.d(TAG, "Got relations")
                     for (email in doc.data?.get("tutors") as List<String>) {
                         tList.add(email)
                         Log.d(TAG, "$email")
                     }
+
+                    db.collection("users").where(Filter.inArray("email", tList)).get()
+                        .addOnSuccessListener { docs ->
+                            for (doc in docs) {
+                                tutorsState[doc.id] = doc.data as Map<String, String>
+                                Log.d(TAG, "${doc.id} => ${doc.data}")
+                            }
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.w(TAG, "Error getting tutors documents: ", exception)
+                        }
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting tutors documents: ", exception)
@@ -517,16 +529,7 @@ class MainViewModel : ViewModel() {
 
             Log.d(TAG, "is tList empty? : ${tList.isEmpty()}")
             if (tList.isNotEmpty()) {
-                db.collection("users").where(Filter.inArray("email", tList)).get()
-                    .addOnSuccessListener { docs ->
-                        for (doc in docs) {
-                            tutorsState[doc.id] = doc.data as Map<String, String>
-                            Log.d(TAG, "${doc.id} => ${doc.data}")
-                        }
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.w(TAG, "Error getting tutors documents: ", exception)
-                    }
+
             }
         } else {
             Log.w(TAG, "FetchClientsRelations:failure -> uid is empty")
