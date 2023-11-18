@@ -6,10 +6,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,6 +87,8 @@ class MainViewModel : ViewModel() {
     private val _imageUrl = MutableStateFlow("")
     val imageUrl = _imageUrl.asStateFlow()
 
+    private val _searchTutors = mutableStateMapOf<String, Map<String, String>>()
+    val searchTutors = _searchTutors
     /***/
 
     /** Logges In User based on input data.
@@ -175,7 +180,7 @@ class MainViewModel : ViewModel() {
                         CreateUserDataDocument()
                         UpdateUserData(
                             phone = phone,
-                            displayName = userName,
+                            userName = userName,
                             firstName = firstName,
                             middleName = middleName,
                             lastName = lastName,
@@ -246,7 +251,6 @@ class MainViewModel : ViewModel() {
         firstName: String = "",
         middleName: String = "",
         lastName: String = "",
-        displayName: String? = "",
         userName: String? = "",
         phone: String = "",
         address: String = "",
@@ -281,9 +285,9 @@ class MainViewModel : ViewModel() {
                     .update("fullName", fullNameState.value)
             }
 
-            if (displayName != "") {
+            if (userName != "") {
                 val profileUpdates = UserProfileChangeRequest.Builder()
-                    .setDisplayName(displayName)
+                    .setDisplayName(userName)
                     .build()
 
                 auth.currentUser!!.updateProfile(profileUpdates)
@@ -293,7 +297,8 @@ class MainViewModel : ViewModel() {
                         }
                     }
 
-                _userName.value = auth.currentUser?.displayName.toString()
+                db.collection("users").document(uidState.value).update("userName", userName)
+                _userName.value = userName.toString()
             }
 
             if (phone != "") {
@@ -605,31 +610,9 @@ class MainViewModel : ViewModel() {
         available: Boolean,
     ) : Map<String, Map<String, String>> {
         //TODO
-        val uidString = uidState.value
         val searched : MutableMap<String, Map<String, String>> = mutableMapOf()
+        Log.d(TAG, "Searching tutors....")
 
-        if (uidString != "") {
-            db.collection("relations").document(uidString).collection("tutors").get()
-                .addOnSuccessListener { docs ->
-                    for (doc in docs) {
-                        if (doc.id != "sample") {
-                            val docPrice = doc.data.get("price").toString().toInt()
-                            val docRating = doc.data.get("rating").toString().toInt()
-                            val docAvailable = doc.data.get("available") as Boolean
-
-                            if (docPrice >= price && docRating >= rating && docAvailable == available) {
-                                searched[doc.id] = doc.data as Map<String, String>
-                                Log.d(TAG, "${doc.id} => ${doc.data}")
-                            }
-                        }
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.w(TAG, "Error getting tutors documents: ", exception)
-                }
-        } else {
-            Log.w(TAG, "FetchTutorsRelations:failure -> uid is empty")
-        }
 
         return searched
     }
@@ -657,5 +640,13 @@ class MainViewModel : ViewModel() {
         val data = mapOf("uId" to uid, "fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
 
         db.collection("reporting").document(uid).set(data)
+    }
+
+    fun HireTutor(
+        hireId: String
+    ) {
+        val uidString = auth.currentUser?.uid.toString()
+
+        db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireId))
     }
 }

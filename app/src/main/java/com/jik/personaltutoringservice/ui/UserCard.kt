@@ -23,7 +23,7 @@ fun UserCard(
     imageUrl: String,
     location: String = "",
     rate: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card (
         modifier = Modifier

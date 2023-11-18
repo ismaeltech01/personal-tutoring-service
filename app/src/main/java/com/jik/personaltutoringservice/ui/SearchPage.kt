@@ -1,5 +1,9 @@
 package com.jik.personaltutoringservice.ui
 
+import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,21 +48,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun SearchPage(
-    viewModel: MainViewModel
+    mainVM: MainViewModel,
+    searchVM: SearchViewModel = viewModel()
 ) {
-    val dummyVal : Map<String, Map<String, String>> = mapOf()
-
+    val tutors = searchVM.tutors
     var searchIn by remember { mutableStateOf("") }
     //NOTE: searchedTutors might cause issues since a map might not be observable
-    var searchedTutors by remember { mutableStateOf(dummyVal) }
+//    var searchedTutors by remember { mutableStateListOf<Map<String, String>>() }
+//    var searchedTutors by remember { mutableStateMapOf<String, Map<String, String>>() }
     var showDialog by remember { mutableStateOf(false) }
     //Filtering
-    var priceFilter by remember { mutableStateOf(120) }
-    var distanceFilter by remember { mutableStateOf(100) }
-    var ratingFilter by remember { mutableStateOf(1) }
+    var priceFilter by remember { mutableIntStateOf(120) }
+    var distanceFilter by remember { mutableIntStateOf(100) }
+    var ratingFilter by remember { mutableIntStateOf(1) }
     var availableFilter by remember { mutableStateOf(true) }
 
     //Sorting
@@ -65,6 +75,18 @@ fun SearchPage(
     var distanceSort by remember { mutableStateOf(false) }
     var ratingSort by remember { mutableStateOf(false) }
 //    var searchResults by remember { mutableStateMapOf<String, Map<String, String>>(dummyVal) }
+    var showTutor by remember { mutableStateOf(false) }
+    var tFullName by remember { mutableStateOf("") }
+    var tUserName by remember { mutableStateOf("") }
+    var tUID by remember { mutableStateOf("") }
+    var tEmail by remember { mutableStateOf("") }
+    var tPhone by remember { mutableStateOf("") }
+    var tAddress by remember { mutableStateOf("") }
+    var tImgUrl by remember { mutableStateOf("") }
+    var tPrice by remember { mutableStateOf("") }
+    var tRating by remember { mutableStateOf("") }
+    var tAvailable by remember { mutableStateOf(false) }
+
 
     if (showDialog)
         SortFilterDialog(
@@ -85,44 +107,110 @@ fun SearchPage(
             toggleRatingSort = { ratingSort = !ratingSort }
         )
 
-    Column {
-        //Search, Filter, & Sort in top
-        Column {
-            OutlinedTextField(
-                value = searchIn,
-                onValueChange = { searchIn = it },
-                label = { Text("Search") },
-                keyboardOptions = KeyboardOptions.Default,
-                trailingIcon = {
+    if (!showTutor) {
+        LazyColumn (
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                //Search, Filter, & Sort in top
+                Column {
+                    OutlinedTextField(
+                        value = searchIn,
+                        onValueChange = { searchIn = it },
+                        label = { Text("Search") },
+                        keyboardOptions = KeyboardOptions.Default,
+                        trailingIcon = {
 
-                    IconButton(onClick = {
-                        searchedTutors = viewModel.SearchTutors(
-                            price = priceFilter,
-                            distance = distanceFilter,
-                            rating = ratingFilter,
-                            available = availableFilter,
-                        )
-                    }) {
-                        Icon(Icons.Rounded.Search, "Search Icon")
+                            IconButton(onClick = {
+                                searchVM.updateTutors(
+                                    price = priceFilter.toDouble(),
+                                    rating = ratingFilter.toDouble(),
+                                    available = availableFilter
+                                )
+                            }) {
+                                Icon(Icons.Rounded.Search, "Search Icon")
+                            }
+                        }
+                    )
+
+                    Button(onClick = { showDialog = true }) {
+                        Text(text = "Sort & Filter")
                     }
                 }
-            )
 
-            Button(onClick = { showDialog = true }) {
-                Text(text = "Sort & Filter")
+                Spacer(modifier = Modifier.height(5.dp))
+            }
+            item {
+                //Tutors
+                for (pair in tutors) {
+                    val fullName = pair.value["fullName"].toString()
+                    val userName = pair.value["userName"].toString()
+                    val price = pair.value["price"].toString()
+                    val rating = pair.value["rating"].toString()
+                    val available = pair.value["available"] as Boolean
+                    val imageUrl = pair.value["imageUrl"].toString()
+                    val phone = pair.value["phone"].toString()
+                    val email = pair.value["email"].toString()
+                    val address = pair.value["address"].toString()
+                    val uId = pair.key
+                    Log.d(TAG, "Displaying user: $fullName")
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    UserCard(
+                        fullName = fullName,
+                        userName = userName,
+                        imageUrl = imageUrl,
+                        rate = price
+                    ) {
+                        //onClick
+                        tFullName = fullName
+                        tUserName = userName
+                        tPrice = price
+                        tRating = rating
+                        tAvailable = available
+                        tImgUrl = imageUrl
+                        tPhone = phone
+                        tEmail = email
+                        tAddress = address
+                        showTutor = true
+                        tUID = uId
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
             }
         }
-
-
+    } else {
+        ExitBar { showTutor = false }
+        ProfilePage(
+            modifier = Modifier.fillMaxWidth(),
+            onLoginClick = { /*TODO*/ },
+            onRegisterClick = { /*TODO*/ },
+            onTutorClick = { /*TODO*/ },
+            loggedIn = true,
+            fullName = tFullName,
+            userName = tUserName,
+            email = tEmail,
+            phone = tPhone,
+            address = tAddress,
+            isTutor = true,
+            viewMode = true,
+            searched = true,
+            imageUrl = tImgUrl,
+            viewModel = mainVM,
+            onHire = { showTutor = false },
+            uId = tUID
+        )
     }
 }
 
 @Composable
 fun SortFilterDialog(
-    onDismiss : () -> Unit,
+    onDismiss: () -> Unit,
     priceFilter: Float,
     updatePriceFilter: (Float) -> Unit,
-    distanceFilter : Float,
+    distanceFilter: Float,
     updateDistanceFilter: (Float) -> Unit,
     ratingFilter: Float,
     updateRatingFilter: (Float) -> Unit,
@@ -131,7 +219,7 @@ fun SortFilterDialog(
     priceSortSet: Boolean,
     distanceSortSet: Boolean,
     ratingSortSet: Boolean,
-    togglePriceSort : () -> Unit,
+    togglePriceSort: () -> Unit,
     toggleDistanceSort: () -> Unit,
     toggleRatingSort: () -> Unit,
 ) {
@@ -141,7 +229,7 @@ fun SortFilterDialog(
             usePlatformDefaultWidth = false
         )
     ) {
-        Card (
+        Card(
             modifier = Modifier
                 .fillMaxWidth(.95f)
                 .fillMaxHeight(.80f)

@@ -101,7 +101,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("search") {
                             SearchPage(
-                                viewModel = viewModel
+                                mainVM = viewModel
                             )
                         }
                         composable("profile") {
@@ -117,6 +117,8 @@ class MainActivity : ComponentActivity() {
                                 phone = phone,
                                 address = address,
                                 isTutor = isTutor,
+                                viewMode = false,
+                                searched = false,
                                 imageUrl = imageUrl,
                                 viewModel = viewModel
                             )
@@ -182,7 +184,8 @@ class MainActivity : ComponentActivity() {
                             ReportingPage(
                                 tutors = tutors,
                                 clients = clients,
-                                isTutor = isTutor
+                                isTutor = isTutor,
+                                viewModel = viewModel
                             )
                         }
                         //Login & Registration pages

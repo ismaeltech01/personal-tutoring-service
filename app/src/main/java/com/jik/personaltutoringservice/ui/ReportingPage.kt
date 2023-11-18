@@ -86,7 +86,7 @@ fun ReportingPage(
                     val userName = pair.value["userName"].toString()
                     val email = pair.value["email"].toString()
 
-                    UserCard(
+                    ReportUserCard(
                         fullName = fullName,
                         userName = userName,
                         enableReport = true,
@@ -115,7 +115,7 @@ fun ReportingPage(
                         val fullName = ParseFullName(pair.value["fullName"].toString())
                         val userName = pair.value["userName"].toString()
 
-                        UserCard(
+                        ReportUserCard(
                             fullName = fullName,
                             userName = userName,
                             enableReport = true,
@@ -144,7 +144,7 @@ fun ReportingPage(
 }
 
 @Composable
-fun UserCard(
+fun ReportUserCard(
     picture : String = "",
     fullName : String,
     userName : String,
@@ -248,7 +248,7 @@ fun ReportConfirmPage(
 
         Text("The following user will be reported: ")
 
-        UserCard(
+        ReportUserCard(
             fullName = fullName,
             userName = userName,
             enableReport = false

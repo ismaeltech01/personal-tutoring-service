@@ -73,7 +73,11 @@ fun ProfilePage(
     phone : String,
     address : String,
     isTutor : Boolean,
+    viewMode: Boolean,
+    searched: Boolean,
+    onHire: () -> Unit = {},
     imageUrl : String,
+    uId: String = "",
     viewModel: MainViewModel
 ) {
     var clickedImage by remember { mutableStateOf(false) }
@@ -87,7 +91,7 @@ fun ProfilePage(
             modifier = modifier
         ) {
             if (loggedIn) {
-                ImageFrame(imageUrl = imageUrl, onClick = { clickedImage = true }, size = 128.dp)
+                ImageFrame(imageUrl = imageUrl, clickable = true, onClick = { clickedImage = true }, size = 128.dp)
             } else {
                 Icon(
                     Icons.Rounded.AccountCircle,
@@ -137,12 +141,23 @@ fun ProfilePage(
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(address)
                 }
+
+                Spacer(modifier = Modifier.height(5.dp))
+
                 if (!isTutor) {
-                    Spacer(modifier = Modifier.height(5.dp))
                     Button(
                         onClick = onTutorClick
                     ) {
                         Text("Become a Tutor")
+                    }
+                }
+                if (searched) {
+                    Button(onClick = {
+                        viewModel.HireTutor(uId)
+                        onHire()
+                    }
+                    ) {
+                        Text("Hire Tutor")
                     }
                 }
             }
@@ -196,10 +211,11 @@ fun ProfilePage(
 @Composable
 fun ImageFrame(
     imageUrl: String,
+    clickable: Boolean = false,
     onClick: () -> Unit = {},
     size: Dp = 100.dp
 ) {
-    val modifier = if (onClick != {}) Modifier.clickable(onClick = onClick) else Modifier
+    val modifier = if (clickable) Modifier.clickable(onClick = onClick) else Modifier
 
     Image(
         painter = rememberAsyncImagePainter(imageUrl),
