@@ -647,4 +647,15 @@ class MainViewModel : ViewModel() {
     ) {
     }
 
+    fun ReportUser(
+        uid : String,
+        fullName: String,
+        userName: String,
+        email: String,
+        reason: String
+    ) {
+        val data = mapOf("uId" to uid, "fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
+
+        db.collection("reporting").document(uid).set(data)
+    }
 }

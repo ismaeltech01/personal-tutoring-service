@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
+import java.io.File
 
 @Composable
 fun LoginPage(
@@ -275,6 +276,7 @@ fun RegisterPage(
                             email = emailState,
                             password = passwordState,
                             confirm = confirmState,
+                            address = addressState,
                             activity = activity,
                             onSuccess = { toSecQuestion = true }
                         )
@@ -418,6 +420,7 @@ fun onContinueClick(
     email : String,
     password : String,
     confirm : String,
+    address: String,
     activity: Activity,
     onSuccess : () -> Unit
 ) {
@@ -443,6 +446,12 @@ fun onContinueClick(
         ).show()
     } else if (!ValidatePassword(password = password, confirm = confirm, activity = activity)) {
         //Do Nothing
+    } else if (!ValidateAddress(address = address)) {
+        Toast.makeText(
+            activity,
+            "Invalid Address Format. Correct format example: Arlington, TX",
+            Toast.LENGTH_LONG,
+        ).show()
     } else {
         onSuccess()
     }
@@ -539,6 +548,20 @@ fun PhoneField(
 
 @Composable
 fun AddressField(
+    value : String,
+    onValueChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text("Address") },
+        keyboardOptions = KeyboardOptions.Default,
+        leadingIcon = { Icon(Icons.Rounded.Home, contentDescription = "Address Icon") }
+    )
+}
+
+@Composable
+fun StateField(
     value : String,
     onValueChange: (String) -> Unit
 ) {
@@ -815,4 +838,27 @@ fun ExitBar(
             .size(60.dp)
             .padding(15.dp))
     }
+}
+
+/**
+ * @return True if the address is valid, False otherwise
+ * */
+fun ValidateAddress(address: String) : Boolean {
+    var isValid = false
+    val addressPattern = Regex("([a-zA-Z]+), ([A-Z]{2})$")
+    val file = File("/java/com/jik/personaltutoringservice/ui/data/bannedWords.txt")
+
+    file.forEachLine {
+        val dataPattern = Regex("([a-zA-Z ]+): ([A-Z]{2})$")
+        val dataMatch = dataPattern.find(it)
+        val addressMatch = addressPattern.find(address)
+
+        if (dataMatch != null && addressMatch != null) {
+            val state = dataMatch.groups[2]?.value
+            val addressState = addressMatch.groups[2]?.value
+            if (state == addressState) isValid = true
+        }
+    }
+
+    return isValid
 }

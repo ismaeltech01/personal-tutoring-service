@@ -87,7 +87,7 @@ fun ProfilePage(
             modifier = modifier
         ) {
             if (loggedIn) {
-                ImageFrame(imageUrl = imageUrl, onClick = { clickedImage = true })
+                ImageFrame(imageUrl = imageUrl, onClick = { clickedImage = true }, size = 128.dp)
             } else {
                 Icon(
                     Icons.Rounded.AccountCircle,
@@ -188,6 +188,11 @@ fun ProfilePage(
     }
 }
 
+/**
+ * @param To modify the size of the ImageFrame,
+ * DO NOT modify the hardcoded value (size : Int = 100.dp) in the function.
+ * Pass in the size you need for size as a parameter.
+ * */
 @Composable
 fun ImageFrame(
     imageUrl: String,

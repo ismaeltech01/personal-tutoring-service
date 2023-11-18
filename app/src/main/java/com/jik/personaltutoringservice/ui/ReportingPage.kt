@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jik.personaltutoringservice.MainActivity
 import com.jik.personaltutoringservice.R
 import java.io.File
 import java.util.regex.Pattern
@@ -44,27 +45,20 @@ import java.util.regex.Pattern
 fun ReportingPage(
     tutors : Map<String, Map<String, String>>,
     clients : Map<String, Map<String, String>>,
-    isTutor : Boolean
+    isTutor : Boolean,
+    viewModel: MainViewModel
 ) {
-    var confirmState by remember {
-        mutableStateOf(false)
-    }
+    var confirmState by remember { mutableStateOf(false) }
 
-    var reportUIDState by remember {
-        mutableStateOf("")
-    }
+    var reportUIDState by remember { mutableStateOf("") }
 
-    var reportPicState by remember {
-        mutableStateOf("")
-    }
+    var reportPicState by remember { mutableStateOf("") }
 
-    var reportFullNameState by remember {
-        mutableStateOf("")
-    }
+    var reportFullNameState by remember { mutableStateOf("") }
 
-    var reportUserNameState by remember {
-        mutableStateOf("")
-    }
+    var reportUserNameState by remember { mutableStateOf("") }
+
+    var reportEmailState by remember { mutableStateOf("") }
 
 
     if (tutors.isEmpty()) {
@@ -90,6 +84,7 @@ fun ReportingPage(
                 for (pair in tutors) {
                     val fullName = ParseFullName(pair.value["fullName"].toString())
                     val userName = pair.value["userName"].toString()
+                    val email = pair.value["email"].toString()
 
                     UserCard(
                         fullName = fullName,
@@ -100,6 +95,7 @@ fun ReportingPage(
                             reportUIDState = pair.key
                             reportFullNameState = fullName
                             reportUserNameState = userName
+                            reportEmailState = email
                         }
                     )
                 }
@@ -137,10 +133,12 @@ fun ReportingPage(
     } else {
         ReportConfirmPage(
             uid = reportUIDState,
-            picture = reportPicState,
+            imageUrl = reportPicState,
             userName = reportUserNameState,
             fullName = reportFullNameState,
-            onBackClick = { confirmState = false }
+            email = reportEmailState,
+            onBackClick = { confirmState = false },
+            viewModel = viewModel
         )
     }
 }
@@ -223,19 +221,16 @@ fun UserCard(
 
 @Composable
 fun ReportConfirmPage(
-    picture: String,
+    imageUrl: String,
     uid : String,
     fullName : String,
     userName : String,
-    onBackClick : () -> Unit
+    email: String,
+    onBackClick : () -> Unit,
+    viewModel: MainViewModel
 ) {
-    var textState by remember {
-        mutableStateOf("")
-    }
-
-    var reportState by remember {
-        mutableStateOf(false)
-    }
+    var textState by remember { mutableStateOf("") }
+    var reportState by remember { mutableStateOf(false) }
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -269,7 +264,13 @@ fun ReportConfirmPage(
         Button(
             modifier = Modifier.background(if (reportState) Color.Red else Color.Transparent),
             onClick = {
-                ReportUser(uid)
+                viewModel.ReportUser(
+                    uid = uid,
+                    fullName = fullName,
+                    userName = userName,
+                    email = email,
+                    reason = textState
+                )
                 reportState = true
             },
             enabled = !reportState
@@ -282,15 +283,15 @@ fun ReportConfirmPage(
 @Preview
 @Composable
 fun ReportConfirmPagePreview() {
-    ReportConfirmPage(picture = "", uid = "", fullName = "Patrick Spam", userName = "spamspam" ) {
-
-    }
-}
-
-fun ReportUser(
-    uid : String
-) {
-    //TODO: Maybe make simple react console for reporting
+    ReportConfirmPage(
+        imageUrl = "",
+        uid = "",
+        fullName = "Patrick Spam",
+        userName = "spamspam",
+        email = "email@email.com",
+        viewModel = MainViewModel(),
+        onBackClick = {}
+    )
 }
 
 /**
@@ -303,7 +304,7 @@ fun ScanText(
 ) : Boolean {
     var isValid : Boolean = true
     val lowerCased = text.lowercase()
-    val file = File("/java/com/jik/personaltutoringservice/ui/banned/bannedWords.txt")
+    val file = File("/java/com/jik/personaltutoringservice/ui/data/bannedWords.txt")
 
     file.forEachLine {
         val matches = Pattern.matches("\\b$it\\b", lowerCased)

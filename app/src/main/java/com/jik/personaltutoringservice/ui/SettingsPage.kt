@@ -214,15 +214,6 @@ fun ShowToast(activity: Activity, type : String, text : String = "") {
 }
 
 /**
- * @return if address is valid true, else false
- * */
-fun ValidateAddress(
-    address : String
-) : Boolean {
-    return true
-}
-
-/**
  * @return A List of strings representing each name in order.
  *          firstName index == 0
  *          middelName index == 1
