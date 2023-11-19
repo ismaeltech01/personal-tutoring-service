@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -93,9 +95,10 @@ fun ConfirmTransactionDialog(
     rate : BigDecimal
 ) {
     val rawHours = BigDecimal(minutes).divide(BigDecimal(60), 2, RoundingMode.HALF_UP)
-    val rawTotal= rate.multiply(rawHours)
+    val rawTotal = rate.multiply(rawHours)
     val hours = rawHours.setScale(2).toString()
     val total = rawTotal.setScale(2).toString()
+    val fontSize = 10.sp
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -124,8 +127,12 @@ fun ConfirmTransactionDialog(
                     text = "Confirm Transaction",
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(10.dp)
+                        .padding(10.dp),
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold
                 )
+
+                Spacer(modifier = Modifier.height(15.dp))
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -136,7 +143,7 @@ fun ConfirmTransactionDialog(
                         textAlign = TextAlign.Left,
                         modifier = Modifier
                             .padding(horizontal = 10.dp),
-                        fontSize = 10.sp
+//                        fontSize = 10.sp
                     )
 
                     Text(
@@ -144,7 +151,7 @@ fun ConfirmTransactionDialog(
                         textAlign = TextAlign.Right,
                         modifier = Modifier
                             .padding(horizontal = 10.dp),
-                        fontSize = 10.sp
+//                        fontSize = 10.sp
                     )
                 }
 
@@ -157,7 +164,7 @@ fun ConfirmTransactionDialog(
                         textAlign = TextAlign.Left,
                         modifier = Modifier
                             .padding(horizontal = 10.dp),
-                        fontSize = 10.sp
+//                        fontSize = 10.sp
                     )
 
                     Text(
@@ -165,7 +172,7 @@ fun ConfirmTransactionDialog(
                         textAlign = TextAlign.Right,
                         modifier = Modifier
                             .padding(horizontal = 10.dp),
-                        fontSize = 10.sp
+//                        fontSize = 10.sp
                     )
                 }
 
@@ -180,7 +187,7 @@ fun ConfirmTransactionDialog(
                         textAlign = TextAlign.Left,
                         modifier = Modifier
                             .padding(horizontal = 10.dp),
-                        fontSize = 10.sp
+//                        fontSize = 10.sp
                     )
 
                     Text(
@@ -188,9 +195,11 @@ fun ConfirmTransactionDialog(
                         textAlign = TextAlign.Right,
                         modifier = Modifier
                             .padding(horizontal = 10.dp),
-                        fontSize = 10.sp
+//                        fontSize = 10.sp
                     )
                 }
+
+                Spacer(modifier = Modifier.height(15.dp))
 
                 Button(onClick = onConfirm) {
                     Text("Submit")

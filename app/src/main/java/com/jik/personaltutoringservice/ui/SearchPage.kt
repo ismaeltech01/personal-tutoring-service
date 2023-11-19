@@ -233,7 +233,7 @@ fun SortFilterDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth(.95f)
-                .fillMaxHeight(.80f)
+                .padding(20.dp)
         ) {
             LazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally,

@@ -1,6 +1,8 @@
 package com.jik.personaltutoringservice.ui
 
 import android.app.Activity
+import android.content.ContentValues.TAG
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -17,9 +22,11 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -35,11 +42,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.jik.personaltutoringservice.MainActivity
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun PaymentsPage(
@@ -184,40 +196,62 @@ fun PayTutorPage(
     userEmail: String,
     tutorEmail: String,
     onExit: () -> Unit,
+    onEditCard: () -> Unit,
     viewModel: MainViewModel,
-    onEditCard: () -> Unit
+    activity: Activity
 ) {
     var minutes by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
+    var payComplete by remember { mutableStateOf(false) }
 
     ExitBar { onExit() }
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Row {
-            Text(text = "Rate: ")
-            Text(text = "$ ${rate.toString()}", fontWeight = FontWeight.Bold)
-        }
-        
-        Spacer(modifier = Modifier.height(15.dp))
+    if (!payComplete) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row {
+                Text(text = "Rate: ")
+                Text(text = "$ ${rate.toString()}", fontWeight = FontWeight.Bold)
+            }
 
-        OutlinedTextField(
-            value = minutes,
-            onValueChange = { minutes = it },
-            label = { Text("Minutes") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            leadingIcon = { Icon(Icons.Rounded.AccessTime, contentDescription = "Minutes icon") }
+            Spacer(modifier = Modifier.height(15.dp))
+
+            OutlinedTextField(
+                value = minutes,
+                onValueChange = { minutes = it },
+                label = { Text("Minutes") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                leadingIcon = {
+                    Icon(
+                        Icons.Rounded.AccessTime,
+                        contentDescription = "Minutes icon"
+                    )
+                }
+            )
+
+            Button(onClick = {
+                if (minutes.contains(' ') || minutes == "" || minutes.toInt() <= 0) {
+                    Toast.makeText(
+                        activity,
+                        "Invalid minutes input. Make sure it is not 0, empty, or has spaces.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    showDialog = true
+                }
+            }) {
+                Text(text = "Pay")
+            }
+        }
+    } else {
+        PayCompletePage(
+            rate = rate,
+            minutes = minutes.toInt(),
+            onExit = onExit
         )
-        
-        Button(onClick = {
-            showDialog = true
-        }) {
-            Text(text = "Pay")
-        }
     }
-
 
     if (showDialog) {
         if (invalidCard) {
@@ -228,15 +262,186 @@ fun PayTutorPage(
             ConfirmTransactionDialog(
                 onDismiss = { showDialog = false },
                 onConfirm = {
-                    viewModel.InitTransaction(
+                    Log.d(TAG, "Tutor Email in Confirm: $tutorEmail")
+                    val res = viewModel.InitTransaction(
                         payerEmail = userEmail,
                         payeeEmail = tutorEmail,
-                        hours = BigDecimal(minutes).setScale(2).divide(BigDecimal(60))
+                        rate = rate,
+                        hours = BigDecimal(minutes).setScale(2).divide(BigDecimal(60), 2, RoundingMode.HALF_UP)
                         )
+                    if (res == 0) {
+                        showDialog = false
+                        payComplete = true
+                    }
                 },
                 minutes = minutes.toInt(),
                 rate = rate
             )
         }
     }
+}
+
+@Composable
+fun PayCompletePage(
+    rate: BigDecimal,
+    minutes: Int,
+    onExit: () -> Unit
+) {
+    val fontSize = 20.sp
+    val subTxtFontSize = 15.sp
+    val rawHours = BigDecimal(minutes).divide(BigDecimal(60), 2, RoundingMode.HALF_UP)
+    val rawTotal = rate.multiply(rawHours)
+    val hours = rawHours.setScale(2).toString()
+    val total = rawTotal.setScale(2).toString()
+    val commission = rawTotal.multiply(BigDecimal(.20)).setScale(2, RoundingMode.HALF_UP)
+    val tutorProfit = rawTotal.multiply(BigDecimal(.80)).setScale(2, RoundingMode.HALF_UP)
+
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            Icons.Rounded.CheckCircle,
+            contentDescription = "Complete icon",
+            modifier = Modifier
+                .size(60.dp)
+                .padding(top = 10.dp),
+            tint = Color.Green
+        )
+
+        Text(
+            text = "Confirm Transaction",
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(10.dp),
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Tutor Rate (Hourly)",
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+                fontSize = fontSize
+            )
+
+            Text(
+                text = "$ $rate",
+                textAlign = TextAlign.Right,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+                fontSize = fontSize
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Hours",
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+                fontSize = fontSize
+            )
+
+            Text(
+                text = "x $hours",
+                textAlign = TextAlign.Right,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+                fontSize = fontSize
+        )
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+    ) {
+        Text(
+            text = "Total",
+            textAlign = TextAlign.Left,
+            modifier = Modifier
+                .padding(horizontal = 10.dp),
+            fontSize = fontSize
+        )
+
+        Text(
+            text = "$ $total",
+            textAlign = TextAlign.Right,
+            modifier = Modifier
+                .padding(horizontal = 10.dp),
+            fontSize = fontSize
+        )
+    }
+
+    //Tutor Profit
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = "Tutor (80%)",
+            textAlign = TextAlign.Left,
+            modifier = Modifier
+                .padding(horizontal = 10.dp),
+            fontSize = subTxtFontSize
+        )
+
+        Text(
+            text = "$ $tutorProfit",
+            textAlign = TextAlign.Right,
+            modifier = Modifier
+                .padding(horizontal = 10.dp),
+            fontSize = subTxtFontSize
+        )
+    }
+
+    //Commission
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "Commission (20%)",
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+                fontSize = subTxtFontSize
+            )
+
+            Text(
+                text = "$ $commission",
+                textAlign = TextAlign.Right,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+                fontSize = subTxtFontSize
+            )
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+        Button(onClick = onExit) {
+            Text(text = "Awesome!")
+        }
+    }
+}
+
+@Preview(
+    showBackground = true
+)
+@Composable
+fun PayCompletePagePreview() {
+    PayCompletePage(rate = BigDecimal(10), minutes = 100, onExit = {})
 }

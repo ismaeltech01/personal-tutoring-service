@@ -553,6 +553,7 @@ class MainViewModel : ViewModel() {
     fun InitTransaction(
         payerEmail: String,
         payeeEmail : String,
+        rate: BigDecimal,
         hours : BigDecimal
     ) : Int {
         if (!ConfirmBankingInfo()) {
@@ -560,35 +561,20 @@ class MainViewModel : ViewModel() {
             return -1
         }
 
-        var docSuccess: Boolean = false
 //        var tutorCardNum = ""
 //        var tutorExpDate = ""
 //        var tutorSecCode = ""
-        //TODO: Modify security rules for firebase (may lead to access denied when modifying tutor stuff)
-        db.collection("users").whereEqualTo("email", payeeEmail).get()
-            .addOnSuccessListener { docs ->
-                val doc = docs.documents[0]
-                _tutorRate.value = BigDecimal(doc.data?.get("tutorRate").toString())
-
-                Log.d(TAG, "${doc.id} => ${doc.data}")
-                docSuccess = true
-            }
-            .addOnFailureListener { exception ->
-                Log.w(TAG, "Error getting tutors documents: ", exception)
-            }
 
 //        if (!ConfirmBankingInfo(tutorCardNum, tutorExpDate, tutorSecCode)) {
 //            Log.e(TAG, "Error in InitTransaction: Tutor (userName: $payeeUserName) card info not valid")
 //            return -2
 //          }
-        if (tutorRate.value.longValueExact() == 0L) {
+        return if (rate == BigDecimal.ZERO) {
             Log.w(TAG, "Error in InitTransaction:tutorRate is 0")
-            return -3
-        } else if (!docSuccess) {
-            return -4
+            -3
         } else {
             ProfitManagement(tutorRate.value.multiply(hours))
-            return 0
+            0
         }
     }
 
@@ -611,7 +597,8 @@ class MainViewModel : ViewModel() {
             .addOnSuccessListener { doc ->
                 val profit = doc.data?.get("profit").toString()
                 val newProfit = BigDecimal(profit).add(appProfit)
-                db.collection("banking").document("app").update("profit", newProfit.toString())
+                Log.d(TAG, "App Profit: ${newProfit.toString()}")
+                db.collection("banking").document("app").update("profits", newProfit.toString())
             }
             .addOnFailureListener { exception ->
                 Log.d(TAG, "get failed with ", exception)
@@ -620,7 +607,8 @@ class MainViewModel : ViewModel() {
         val tProfit = total.subtract(appProfit).setScale(2)
         _tutorProfit.value = tProfit
 
-        db.collection("users").document(uidString).update("profit", tProfit)
+//        db.collection("users").document(uidString).update("profit", tProfit)
+        //TODO: Add way to show a tutor's profit
     }
 
     /**

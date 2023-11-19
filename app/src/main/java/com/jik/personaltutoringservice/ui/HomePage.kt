@@ -1,6 +1,7 @@
 package com.jik.personaltutoringservice.ui
 
 
+import android.app.Activity
 import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -46,14 +47,18 @@ fun HomePage(
     modifier: Modifier,
     tutors: Map<String, Map<String, String>>,
     onEditCard: () -> Unit,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    activity: Activity
 ) {
     var showPayPage by remember { mutableStateOf(false) }
     var tutorRate by remember { mutableStateOf("") }
     var tutorEmail by remember { mutableStateOf("") }
 
     if (!showPayPage) {
-        Column(modifier = modifier) {
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
                 text = "Current Tutors",
                 fontSize = 25.sp,
@@ -66,9 +71,10 @@ fun HomePage(
             for (entry in tutors) {
                 val fullname = entry.value["fullName"].toString()
                 val userName = entry.value["userName"].toString()
+                val email = entry.value["email"].toString()
                 val raTe = entry.value["price"].toString()
                 val profilePic = entry.value["imageUrl"].toString()
-                val loc = entry.value["location"].toString()
+                val loc = entry.value["address"].toString()
                 Log.d(TAG, "Displaying tutor in home: $fullname")
 
                 Column {
@@ -84,6 +90,7 @@ fun HomePage(
                         onPay = {
                             showPayPage = true
                             tutorRate = raTe
+                            tutorEmail = email
                         }
                     )
                 }
@@ -147,6 +154,7 @@ this is going to be where the name of suggested tutor are displayed after advert
             onExit = { showPayPage = false },
             onEditCard = onEditCard,
             viewModel = viewModel,
+            activity = activity
         )
     }
 }

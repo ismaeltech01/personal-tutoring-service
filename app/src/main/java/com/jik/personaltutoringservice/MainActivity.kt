@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -93,7 +94,8 @@ class MainActivity : ComponentActivity() {
                                 modifier = pageModifier,
                                 tutors = tutors,
                                 onEditCard = { navController.navigate("payments") },
-                                viewModel = viewModel
+                                viewModel = viewModel,
+                                activity = this@MainActivity
                             )
                         }
                         composable("search") {

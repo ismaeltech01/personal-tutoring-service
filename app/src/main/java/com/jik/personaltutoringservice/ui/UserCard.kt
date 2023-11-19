@@ -39,7 +39,7 @@ fun UserCard(
     val modifier = if (onClick != {}) Modifier.clickable(onClick = onClick) else Modifier
 
     Card (
-        modifier = modifier.fillMaxWidth(.85f)
+        modifier = modifier.fillMaxWidth(if (isHome) .95f else .85f)
     ) {
         Row {
             ImageFrame(imageUrl = imageUrl)
