@@ -17,6 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +34,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.firebase.ui.auth.data.model.User
 import com.jik.personaltutoringservice.R
 import com.jik.personaltutoringservice.ui.UserCard
+import java.math.BigDecimal
 
 val HomePageModifier = Modifier
     .fillMaxHeight(.85f)
@@ -37,36 +42,52 @@ val HomePageModifier = Modifier
 
 // TODO: I need to make the icons clickable and either take them to something
 @Composable
-fun HomePage(modifier: Modifier, tutors : Map<String, Map<String, String>>) {
-    Column (modifier = modifier) {
-        Text(
-            text = "Current Tutors",
-            fontSize = 25.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(15.dp)
-                .align(Alignment.CenterHorizontally)
-        )
+fun HomePage(
+    modifier: Modifier,
+    tutors: Map<String, Map<String, String>>,
+    onEditCard: () -> Unit,
+    viewModel: MainViewModel
+) {
+    var showPayPage by remember { mutableStateOf(false) }
+    var tutorRate by remember { mutableStateOf("") }
+    var tutorEmail by remember { mutableStateOf("") }
 
-        for(entry in tutors) {
-           val fullname = entry.value["fullName"].toString()
-           val userName = entry.value["userName"].toString()
-           val raTe = entry.value["rate"].toString()
-           val profilePic = entry.value["imageUrl"].toString()
-           val loc = entry.value["location"].toString()
-            Log.d(TAG, "Displaying tutor in home: $fullname")
+    if (!showPayPage) {
+        Column(modifier = modifier) {
+            Text(
+                text = "Current Tutors",
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(15.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
 
-            Column {
-                UserCard(
-                    fullName = fullname,
-                    userName = userName,
-                    rate = raTe,
-                    imageUrl = profilePic,
-                    onClick = {},
-                    location = loc
-                )
+            for (entry in tutors) {
+                val fullname = entry.value["fullName"].toString()
+                val userName = entry.value["userName"].toString()
+                val raTe = entry.value["price"].toString()
+                val profilePic = entry.value["imageUrl"].toString()
+                val loc = entry.value["location"].toString()
+                Log.d(TAG, "Displaying tutor in home: $fullname")
+
+                Column {
+                    UserCard(
+                        fullName = fullname,
+                        userName = userName,
+                        rate = raTe,
+                        imageUrl = profilePic,
+                        isHome = true,
+                        location = loc,
+                        //TODO: what to do when user decides to fire tutor
+                        onFire = {  },
+                        onPay = {
+                            showPayPage = true
+                            tutorRate = raTe
+                        }
+                    )
+                }
             }
-       }
 
 
 //        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
@@ -90,31 +111,42 @@ fun HomePage(modifier: Modifier, tutors : Map<String, Map<String, String>>) {
 //
 //             }
 //        }
-        Text(
-            text = "Suggested",
-            fontSize = 25.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(15.dp)
-                .align((Alignment.CenterHorizontally))
-        )
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Text(
+                text = "Suggested",
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(15.dp)
+                    .align((Alignment.CenterHorizontally))
+            )
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
 // TODO: Add functionally that integrated with advertisment to display tutors in catogories intreseted in
-            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                Image(
-                    painter = painterResource(id = R.drawable.profileimage),
-                    contentDescription = "Profile Image",
-                    modifier = Modifier
-                        .size(75.dp)
-                        .clip(CircleShape)
-                        .border(5.dp, Color.White, CircleShape)
-                )
-/*
+                Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+                    Image(
+                        painter = painterResource(id = R.drawable.profileimage),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(75.dp)
+                            .clip(CircleShape)
+                            .border(5.dp, Color.White, CircleShape)
+                    )
+                    /*
 this is going to be where the name of suggested tutor are displayed after advertisements are made
  */
 //                Text(text = fullname)
+                }
             }
-        }
 
+        }
+    } else {
+        PayTutorPage(
+            rate = BigDecimal(tutorRate),
+            userEmail = viewModel.email,
+            tutorEmail = tutorEmail,
+            invalidCard = !viewModel.ConfirmBankingInfo(),
+            onExit = { showPayPage = false },
+            onEditCard = onEditCard,
+            viewModel = viewModel,
+        )
     }
 }

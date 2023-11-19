@@ -121,7 +121,8 @@ fun SearchPage(
                         trailingIcon = {
 
                             IconButton(onClick = {
-                                searchVM.updateTutors(
+                                searchVM.searchTutors(
+                                    name = searchIn,
                                     price = priceFilter.toDouble(),
                                     rating = ratingFilter.toDouble(),
                                     available = availableFilter
@@ -160,21 +161,22 @@ fun SearchPage(
                         fullName = fullName,
                         userName = userName,
                         imageUrl = imageUrl,
-                        rate = price
-                    ) {
-                        //onClick
-                        tFullName = fullName
-                        tUserName = userName
-                        tPrice = price
-                        tRating = rating
-                        tAvailable = available
-                        tImgUrl = imageUrl
-                        tPhone = phone
-                        tEmail = email
-                        tAddress = address
-                        showTutor = true
-                        tUID = uId
-                    }
+                        rate = price,
+                        onClick = {
+                            //onClick
+                            tFullName = fullName
+                            tUserName = userName
+                            tPrice = price
+                            tRating = rating
+                            tAvailable = available
+                            tImgUrl = imageUrl
+                            tPhone = phone
+                            tEmail = email
+                            tAddress = address
+                            showTutor = true
+                            tUID = uId
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(10.dp))
                 }

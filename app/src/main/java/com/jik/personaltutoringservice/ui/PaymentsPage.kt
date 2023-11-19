@@ -2,16 +2,23 @@ package com.jik.personaltutoringservice.ui
 
 import android.app.Activity
 import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.CreditCard
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material3.Button
@@ -22,12 +29,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.jik.personaltutoringservice.MainActivity
+import java.math.BigDecimal
 
 @Composable
 fun PaymentsPage(
@@ -163,4 +175,68 @@ fun ValidExpiration(expDate : String) : Boolean {
         return false;
     }
     return month in 1..12 && year <= 99
+}
+
+@Composable
+fun PayTutorPage(
+    rate: BigDecimal,
+    invalidCard: Boolean,
+    userEmail: String,
+    tutorEmail: String,
+    onExit: () -> Unit,
+    viewModel: MainViewModel,
+    onEditCard: () -> Unit
+) {
+    var minutes by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
+
+    ExitBar { onExit() }
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Row {
+            Text(text = "Rate: ")
+            Text(text = "$ ${rate.toString()}", fontWeight = FontWeight.Bold)
+        }
+        
+        Spacer(modifier = Modifier.height(15.dp))
+
+        OutlinedTextField(
+            value = minutes,
+            onValueChange = { minutes = it },
+            label = { Text("Minutes") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            leadingIcon = { Icon(Icons.Rounded.AccessTime, contentDescription = "Minutes icon") }
+        )
+        
+        Button(onClick = {
+            showDialog = true
+        }) {
+            Text(text = "Pay")
+        }
+    }
+
+
+    if (showDialog) {
+        if (invalidCard) {
+            InvalidCardDialog(onDismiss = {}) {
+                onEditCard()
+            }
+        } else {
+            ConfirmTransactionDialog(
+                onDismiss = { showDialog = false },
+                onConfirm = {
+                    viewModel.InitTransaction(
+                        payerEmail = userEmail,
+                        payeeEmail = tutorEmail,
+                        hours = BigDecimal(minutes).setScale(2).divide(BigDecimal(60))
+                        )
+                },
+                minutes = minutes.toInt(),
+                rate = rate
+            )
+        }
+    }
 }

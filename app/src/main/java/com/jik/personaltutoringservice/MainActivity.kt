@@ -91,7 +91,9 @@ class MainActivity : ComponentActivity() {
                         composable("home") {
                             HomePage(
                                 modifier = pageModifier,
-                                tutors = tutors
+                                tutors = tutors,
+                                onEditCard = { navController.navigate("payments") },
+                                viewModel = viewModel
                             )
                         }
                         composable("search") {

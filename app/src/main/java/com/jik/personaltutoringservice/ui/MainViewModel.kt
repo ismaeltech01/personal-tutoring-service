@@ -38,9 +38,11 @@ class MainViewModel : ViewModel() {
 
     private val _email = MutableStateFlow("")
     val emailState = _email.asStateFlow()
+    val email = emailState.value
 
     private val _fullName = MutableStateFlow("Guest * Guest")
     val fullNameState = _fullName.asStateFlow()
+    val fullName = fullNameState.value
 
     private val _phone = MutableStateFlow("")
     val phoneState = _phone.asStateFlow()
@@ -549,12 +551,12 @@ class MainViewModel : ViewModel() {
      *          -4 == Error retrieving tutor's info
      * */
     fun InitTransaction(
-        payerUID : String,
-        payeeUserName : String,
+        payerEmail: String,
+        payeeEmail : String,
         hours : BigDecimal
     ) : Int {
-        if (!ConfirmBankingInfo(cardNumState.value, expDateState.value, secCodeState.value)) {
-            Log.e(TAG, "Error in InitTransaction: User (uid: $payerUID) card info not valid")
+        if (!ConfirmBankingInfo()) {
+            Log.e(TAG, "Error in InitTransaction: User (uid: $payerEmail) card info not valid")
             return -1
         }
 
@@ -563,7 +565,7 @@ class MainViewModel : ViewModel() {
 //        var tutorExpDate = ""
 //        var tutorSecCode = ""
         //TODO: Modify security rules for firebase (may lead to access denied when modifying tutor stuff)
-        db.collection("users").whereEqualTo("userName", payeeUserName).get()
+        db.collection("users").whereEqualTo("email", payeeEmail).get()
             .addOnSuccessListener { docs ->
                 val doc = docs.documents[0]
                 _tutorRate.value = BigDecimal(doc.data?.get("tutorRate").toString())
@@ -590,12 +592,8 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun ConfirmBankingInfo(
-        cardNum : String,
-        expDate : String,
-        secCode: String
-    ) : Boolean {
-        return cardNum.length == 16 && expDate.length == 4 && secCode.length == 3
+    fun ConfirmBankingInfo() : Boolean {
+        return cardNumState.value.length == 16 && expDateState.value.length == 4 && secCodeState.value.length == 3
     }
 
     /**
@@ -606,8 +604,23 @@ class MainViewModel : ViewModel() {
     fun ProfitManagement(
         total : BigDecimal
     ) {
-        _appProfit.value = commission.multiply(total)
-        _tutorProfit.value = total.subtract(appProfit.value).setScale(2)
+        val appProfit = commission.multiply(total)
+        val uidString = auth.currentUser?.uid.toString()
+
+        db.collection("banking").document("app").get()
+            .addOnSuccessListener { doc ->
+                val profit = doc.data?.get("profit").toString()
+                val newProfit = BigDecimal(profit).add(appProfit)
+                db.collection("banking").document("app").update("profit", newProfit.toString())
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "get failed with ", exception)
+            }
+
+        val tProfit = total.subtract(appProfit).setScale(2)
+        _tutorProfit.value = tProfit
+
+        db.collection("users").document(uidString).update("profit", tProfit)
     }
 
     /**
