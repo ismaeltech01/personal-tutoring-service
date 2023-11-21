@@ -670,4 +670,12 @@ class MainViewModel : ViewModel() {
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireEmail))
         FetchRelations()
     }
+
+    fun BecomeTutor(
+
+    ) {
+
+        val tutorData = mapOf("isTutor" to true, "price" to 0.0, "rating" to "0.0")
+        db.collection("users").document(auth.currentUser?.uid.toString()).update(tutorData)
+    }
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.ktx.Firebase
 
 
 object Experience
@@ -61,8 +62,8 @@ fun BecomeTutorPage(
     ){
         item{
 
-                Text("Tutoring Application", modifier = Modifier.padding(16.dp), fontSize = 50.sp)
-                Text("Please fill in all the fields of the application", fontSize = 25.sp)
+                Text("Tutoring Application", modifier = Modifier.padding(16.dp), fontSize = 35.sp)
+                Text("Please fill in all the fields of the application", fontSize = 15.sp)
 
                 val experienceRadio = remember {
                     mutableStateOf("")
@@ -73,29 +74,29 @@ fun BecomeTutorPage(
                 }
 
                 var monday by remember {
-                    mutableStateOf("Write in the time frame you're available. eg: 9am-5pm")
+                    mutableStateOf(" ")
                 }
 
                 var tuesday by remember {
-                    mutableStateOf("Write in the time frame you're available. eg: 9am-5pm")
+                    mutableStateOf(" ")
                 }
                 var wednesday by remember {
-                    mutableStateOf("Write in the time frame you're available. eg: 9am-5pm")
+                    mutableStateOf(" ")
                 }
                 var thursday by remember {
-                    mutableStateOf("Write in the time frame you're available. eg: 9am-5pm")
+                    mutableStateOf(" ")
                 }
                 var friday by remember {
-                    mutableStateOf("Write in the time frame you're available. eg: 9am-5pm")
+                    mutableStateOf(" ")
                 }
                 var saturday by remember {
-                    mutableStateOf("Write in the time frame you're available. eg: 9am-5pm")
+                    mutableStateOf(" ")
                 }
                 var sunday by remember {
-                    mutableStateOf("Write in the time frame you're available. eg: 9am-5pm")
+                    mutableStateOf(" ")
                 }
                 var hourlyPrice by remember {
-                    mutableStateOf("")
+                    mutableStateOf(" ")
                 }
 
                 Spacer(modifier = Modifier.size(16.dp))
@@ -150,7 +151,7 @@ fun BecomeTutorPage(
                         Text("Monday")
                         TextField(value = monday, onValueChange = {
                             newText -> monday = newText
-                        })
+                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
                     }
 
                     Row {
@@ -158,7 +159,7 @@ fun BecomeTutorPage(
                         Text("Tuesday")
                         TextField(value = tuesday, onValueChange = {
                                 newText -> tuesday = newText
-                        })
+                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
                     }
 
                     Row {
@@ -166,7 +167,7 @@ fun BecomeTutorPage(
                         Text("Wednesday")
                         TextField(value = wednesday, onValueChange = {
                                 newText -> wednesday = newText
-                        })
+                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
                     }
 
                     Row {
@@ -174,7 +175,7 @@ fun BecomeTutorPage(
                         Text("Thursday")
                         TextField(value = thursday, onValueChange = {
                                 newText -> thursday = newText
-                        })
+                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
                     }
 
                     Row {
@@ -182,7 +183,7 @@ fun BecomeTutorPage(
                         Text("Friday")
                         TextField(value = friday, onValueChange = {
                                 newText -> friday = newText
-                        })
+                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
                     }
 
                     Row {
@@ -198,7 +199,7 @@ fun BecomeTutorPage(
                         Text("Sunday")
                         TextField(value = sunday, onValueChange = {
                                 newText -> sunday = newText
-                        })
+                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
                     }
 
                     Spacer(modifier = Modifier.size(16.dp))
