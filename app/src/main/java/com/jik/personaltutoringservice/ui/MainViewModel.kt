@@ -671,11 +671,19 @@ class MainViewModel : ViewModel() {
         FetchRelations()
     }
 
-    fun BecomeTutor(
+    fun BecomeTutorPage(
 
     ) {
 
         val tutorData = mapOf("isTutor" to true, "price" to 0.0, "rating" to "0.0")
         db.collection("users").document(auth.currentUser?.uid.toString()).update(tutorData)
     }
+
+    fun CoursePage(
+
+    ){
+        val courseData = mapOf("Math" to true, "Piano" to true, "Tennis" to true, "Coding" to true, "French" to true, "Math" to false, "Piano" to false, "Tennis" to false, "Coding" to false, "French" to false)
+        db.collection("users").document(auth.currentUser?.uid.toString()).update(courseData)
+    }
+
 }
