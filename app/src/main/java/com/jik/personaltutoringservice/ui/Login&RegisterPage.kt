@@ -680,7 +680,8 @@ fun SeqQPassResetPage(
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
     ) {
 
         Text(text = "Reset Password", fontSize = 15.sp, fontWeight = FontWeight.Bold)
@@ -786,7 +787,25 @@ fun SeqQPassResetPage(
                 }
             }
         } else {
-            ResetPasswordPage(viewModel = viewModel, activity = activity) { onResetPassword() }
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Click send to receive a password reset link in your email.",
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Button(onClick = {
+                    viewModel.ResetPassword(email = email)
+                }) {
+                    Text(text = "Send Link")
+                }
+            }
+//            ResetPasswordPage(email = email, viewModel = viewModel, activity = activity) { onResetPassword() }
         }
     }
 }
@@ -806,6 +825,7 @@ fun SeqQPassResetPagePreview() {
 
 @Composable
 fun ResetPasswordPage(
+    email: String,
     viewModel : MainViewModel,
     activity : Activity,
     onResetPassword: () -> Unit
@@ -827,7 +847,8 @@ fun ResetPasswordPage(
 
     Button(onClick = {
         if (ValidatePassword(password = password, confirm = confirm, activity = activity)) {
-            viewModel.UpdateUserData(password = password)
+            Log.d(TAG, "Updating Password....")
+//            viewModel.UpdateUserData(password = password)
             onResetPassword()
         }
     }) {

@@ -49,6 +49,7 @@ val MessageList = listOf(
 @Composable
 fun MessagingPage(
     userName: String,
+    email: String,
     tutors: Map<String, Map<String, String>>,
     viewModel: MainViewModel
 ) {
@@ -72,7 +73,7 @@ fun MessagingPage(
             }
         }
     } else {
-        ChatRoom(sender = userName, receiver = receiver, viewModel = viewModel)
+        ChatRoom(sender = email, receiver = receiver, viewModel = viewModel)
     }
 }
 

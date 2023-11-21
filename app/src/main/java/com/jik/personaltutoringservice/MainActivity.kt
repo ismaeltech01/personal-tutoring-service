@@ -125,6 +125,7 @@ class MainActivity : ComponentActivity() {
                         composable("messaging") {
                             MessagingPage(
                                 userName = userName,
+                                email = email,
                                 tutors = tutors,
                                 viewModel = viewModel
                             )

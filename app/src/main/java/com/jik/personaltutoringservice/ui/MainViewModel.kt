@@ -185,7 +185,7 @@ class MainViewModel : ViewModel() {
                             address = address,
                             imageUrl = "https://static.wikia.nocookie.net/fictionalcrossover/images/0/0c/Bugdroid.png/revision/latest?cb=20161215134435"
                         )
-                        UpdateSecQuestion(question = selectedOption, answer = answer)
+                        UpdateSecQuestion(email = email.toString(), question = selectedOption, answer = answer)
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.exception)
@@ -329,18 +329,13 @@ class MainViewModel : ViewModel() {
     }
 
     fun UpdateSecQuestion(
+        email: String,
         question: String,
         answer: String
     ) {
+        val data = mapOf("email" to email, "secQuestion" to question, "secAnswer" to answer)
         //val data = mapOf("secQuestion" to question, "secAnswer" to answer)
-        if (uidState.value != "") {
-            db.collection("users").document(uidState.value)
-                .update("secQuestion", question, "secAnswer", answer)
-        } else {
-            Log.e(TAG, "Error: uidState is empty")
-            db.collection("users").document(auth.uid.toString())
-                .update("secQuestion", question, "secAnswer", answer)
-        }
+        db.collection("secQuestions").document(auth.uid.toString()).update(data)
     }
 
     fun isCorrectSecQuestion(
@@ -354,6 +349,11 @@ class MainViewModel : ViewModel() {
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
                     Log.d(TAG, "FetchUserData:failure -> No document found.")
+                    Toast.makeText(
+                        activity,
+                        "An account with the email does not exist.",
+                        Toast.LENGTH_LONG,
+                    ).show()
                 } else {
                     for (doc in documents) {
                         val secQuestion = doc.data?.get("secQuestion").toString()
@@ -669,5 +669,9 @@ class MainViewModel : ViewModel() {
 
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireEmail))
         FetchRelations()
+    }
+
+    fun ResetPassword(email: String) {
+        auth.sendPasswordResetEmail(email)
     }
 }
