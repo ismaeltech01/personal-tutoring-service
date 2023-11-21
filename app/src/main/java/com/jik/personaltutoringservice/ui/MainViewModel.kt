@@ -183,7 +183,7 @@ class MainViewModel : ViewModel() {
                             middleName = middleName,
                             lastName = lastName,
                             address = address,
-                            imageUrl = "https://www.pikpng.com/pngl/m/359-3596107_3d-phone-png.png"
+                            imageUrl = "https://static.wikia.nocookie.net/fictionalcrossover/images/0/0c/Bugdroid.png/revision/latest?cb=20161215134435"
                         )
                         UpdateSecQuestion(question = selectedOption, answer = answer)
                     } else {
@@ -191,7 +191,7 @@ class MainViewModel : ViewModel() {
                         Log.w(TAG, "createUserWithEmail:failure", task.exception)
                         Toast.makeText(
                             activity,
-                            "Registration failed.",
+                            "Registration failed. User with email already exists.",
                             Toast.LENGTH_LONG,
                         ).show()
                     }
@@ -413,7 +413,7 @@ class MainViewModel : ViewModel() {
     fun CreateUserDataDocument() {
         val data = mapOf("email" to emailState.value)
         val bankingData = mapOf("cardNum" to cardNumState.value, "expDate" to expDateState.value, "secCode" to secCodeState.value)
-        val relationsData = mapOf("tutors" to "", "clients" to "")
+        val relationsData = mapOf("tutors" to listOf<String>(), "clients" to listOf<String>())
 
         db.collection("users").document(uidState.value).set(data)
         db.collection("banking").document(uidState.value).set(bankingData)
@@ -509,21 +509,28 @@ class MainViewModel : ViewModel() {
             db.collection("relations").document(uidString).get()
                 .addOnSuccessListener { doc ->
                     Log.d(TAG, "Got relations")
-                    for (email in doc.data?.get("tutors") as List<String>) {
-                        tList.add(email)
-                        Log.d(TAG, "$email")
+                    Log.d(TAG, "Tutors list: ${doc.data?.get("tutors").toString()}")
+
+                    val tutors = doc.data?.get("tutors")
+                    if (tutors is List<*>) {
+                        for (email in doc.data?.get("tutors") as List<String>) {
+                            tList.add(email)
+                            Log.d(TAG, "$email")
+                        }
                     }
 
-                    db.collection("users").where(Filter.inArray("email", tList)).get()
-                        .addOnSuccessListener { docs ->
-                            for (doc in docs) {
-                                tutorsState[doc.id] = doc.data as Map<String, String>
-                                Log.d(TAG, "${doc.id} => ${doc.data}")
+                    if (tList.isNotEmpty()) {
+                        db.collection("users").where(Filter.inArray("email", tList)).get()
+                            .addOnSuccessListener { docs ->
+                                for (doc in docs) {
+                                    tutorsState[doc.id] = doc.data as Map<String, String>
+                                    Log.d(TAG, "${doc.id} => ${doc.data}")
+                                }
                             }
-                        }
-                        .addOnFailureListener { exception ->
-                            Log.w(TAG, "Error getting tutors documents: ", exception)
-                        }
+                            .addOnFailureListener { exception ->
+                                Log.w(TAG, "Error getting tutors documents: ", exception)
+                            }
+                    }
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting tutors documents: ", exception)

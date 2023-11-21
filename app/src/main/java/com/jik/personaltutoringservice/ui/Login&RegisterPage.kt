@@ -277,6 +277,7 @@ fun RegisterPage(
                             password = passwordState,
                             confirm = confirmState,
                             address = addressState,
+                            phone = phoneState,
                             activity = activity,
                             onSuccess = { toSecQuestion = true }
                         )
@@ -296,7 +297,7 @@ fun RegisterPage(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    ExitBar { onExit() }
+                    ExitBar { toSecQuestion = false }
 
                     Text(
                         "Security Question",
@@ -421,6 +422,7 @@ fun onContinueClick(
     password : String,
     confirm : String,
     address: String,
+    phone: String,
     activity: Activity,
     onSuccess : () -> Unit
 ) {
@@ -444,7 +446,14 @@ fun onContinueClick(
             "Invalid email. Try again.",
             Toast.LENGTH_LONG,
         ).show()
+    } else if (phone.length < 10) {
+        Toast.makeText(
+            activity,
+            "Invalid phone. Too short.",
+            Toast.LENGTH_LONG,
+        ).show()
     } else if (!ValidatePassword(password = password, confirm = confirm, activity = activity)) {
+        Log.d(TAG, "Invalid password.")
         //Do Nothing
 //    } else if (!ValidateAddress(address = address)) {
 //        Toast.makeText(
@@ -453,6 +462,7 @@ fun onContinueClick(
 //            Toast.LENGTH_LONG,
 //        ).show()
     } else {
+        Log.d(TAG, "Valid Register input.")
         onSuccess()
     }
 }
