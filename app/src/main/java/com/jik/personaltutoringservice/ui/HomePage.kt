@@ -93,6 +93,7 @@ fun HomePage(
                             tutorEmail = email
                         }
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
 

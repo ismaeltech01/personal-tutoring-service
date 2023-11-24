@@ -4,9 +4,14 @@ package com.jik.personaltutoringservice.ui
 //Thew flag for unused
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MailOutline
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Button
@@ -30,12 +37,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.jik.personaltutoringservice.R
 
 data class Message(val sender: String, val body: String)
@@ -51,23 +60,52 @@ fun MessagingPage(
     userName: String,
     email: String,
     tutors: Map<String, Map<String, String>>,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    modifier: Modifier
 ) {
     var receiver by remember { mutableStateOf("") }
     var showChatroom by remember { mutableStateOf(false) }
 
     if (!showChatroom) {
-        LazyColumn() {
+        LazyColumn(
+            modifier = modifier.padding(15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             item {
                 for (entry in tutors) {
                     val tutorId = entry.key
                     val values = entry.value
+                    val userName = entry.value["userName"].toString()
+                    val imgUrl = entry.value["imageUrl"].toString()
+                    val fullName = entry.value["fullName"].toString()
 
-                    Button(onClick = {
-                        receiver = values["userName"].toString()
-                    }) {
+                    Row (
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ImageFrame(imageUrl = imgUrl)
+                        Spacer(modifier = Modifier.width(10.dp))
 
-                        //Contains User card that on clicked, would take you to the relevant chatroom
+                        Column {
+                            Column {
+                                Text(text = ParseFullName(fullName), fontSize = 20.sp)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row {
+                                    Icon(Icons.Rounded.Person, "Person icon")
+                                    Text(userName)
+                                }
+                            }
+
+                            Button(onClick = {
+                                receiver = userName
+                                showChatroom = true
+                            }) {
+                                Row {
+                                    Icon(Icons.Rounded.MailOutline, "Message Icon")
+                                    Text(text = "Message")
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -85,20 +123,39 @@ fun ChatRoom(
 ) {
     var messageIn by remember { mutableStateOf("") }
 
-    OutlinedTextField(
-        value = messageIn,
-        onValueChange = { messageIn = it },
-        label = { Text("Message") },
-        keyboardOptions = KeyboardOptions.Default,
-        trailingIcon = {
+    Column (
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column (
+            modifier = Modifier
+                .weight(.7f)
+        ) {
 
-            IconButton(onClick = {
-                viewModel.SendMessage(message = messageIn, sender = "", receiver = "")
-            }) {
-                Icon(Icons.Rounded.Send, "Send Icon")
-            }
         }
-    )
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(.95f)
+                .weight(.3f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = messageIn,
+                onValueChange = { messageIn = it },
+                label = { Text("Message") },
+                keyboardOptions = KeyboardOptions.Default,
+                trailingIcon = {
+
+                    IconButton(onClick = {
+                        viewModel.SendMessage(message = messageIn, sender = "", receiver = "")
+                    }) {
+                        Icon(Icons.Rounded.Send, "Send Icon")
+                    }
+                }
+            )
+        }
+    }
 }
 @Composable
         /*

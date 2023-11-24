@@ -103,7 +103,7 @@ fun BecomeTutorPage(
                 Text("What is your level of experience on your specialty?")
                 Column {
 
-                    Row{
+                    Row {
                         RadioButton(
                             selected = experienceRadio.value == Experience.beginner,
                             onClick = { experienceRadio.value = Experience.beginner },

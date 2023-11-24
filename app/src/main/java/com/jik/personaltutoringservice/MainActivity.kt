@@ -127,7 +127,8 @@ class MainActivity : ComponentActivity() {
                                 userName = userName,
                                 email = email,
                                 tutors = tutors,
-                                viewModel = viewModel
+                                viewModel = viewModel,
+                                modifier = pageModifier
                             )
                         }
                         composable("other") {

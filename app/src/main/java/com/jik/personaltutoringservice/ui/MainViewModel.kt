@@ -580,7 +580,7 @@ class MainViewModel : ViewModel() {
             Log.w(TAG, "Error in InitTransaction:tutorRate is 0")
             -3
         } else {
-            ProfitManagement(tutorRate.value.multiply(hours))
+            ProfitManagement(rate.multiply(hours))
             0
         }
     }
@@ -597,14 +597,16 @@ class MainViewModel : ViewModel() {
     fun ProfitManagement(
         total : BigDecimal
     ) {
+        Log.d(TAG, "$total")
         val appProfit = commission.multiply(total)
         val uidString = auth.currentUser?.uid.toString()
 
         db.collection("banking").document("app").get()
             .addOnSuccessListener { doc ->
-                val profit = doc.data?.get("profit").toString()
+                val profit = doc.data?.get("profits").toString()
+                Log.d(TAG, "Profit: $profit")
                 val newProfit = BigDecimal(profit).add(appProfit)
-                Log.d(TAG, "App Profit: ${newProfit.toString()}")
+                Log.d(TAG, "App Profit: $appProfit")
                 db.collection("banking").document("app").update("profits", newProfit.toString())
             }
             .addOnFailureListener { exception ->
