@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val loggedIn by viewModel.loggedInState.collectAsState()
             val fullName by viewModel.fullNameState.collectAsState()
-            val userName by viewModel.userName.collectAsState()
+            val userName by viewModel.userNameState.collectAsState()
             val email by viewModel.emailState.collectAsState()
             val phone by viewModel.phoneState.collectAsState()
             val address by viewModel.addressState.collectAsState()
@@ -131,7 +131,8 @@ class MainActivity : ComponentActivity() {
                                 email = email,
                                 tutors = tutors,
                                 viewModel = viewModel,
-                                modifier = pageModifier
+                                modifier = pageModifier,
+                                onToSearch = { navController.navigate("search") }
                             )
                         }
                         composable("other") {
@@ -196,7 +197,7 @@ class MainActivity : ComponentActivity() {
                         composable("login") {
                             LoginPage(viewModel,
                                 this@MainActivity,
-                                navigate = { navController.navigate("profile") },
+                                navigateSuccess = { navController.navigate("profile") },
                                 onResetPassword = {
                                     navController.navigate("login")
 

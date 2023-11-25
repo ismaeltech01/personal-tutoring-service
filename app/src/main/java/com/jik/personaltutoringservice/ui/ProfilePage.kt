@@ -58,8 +58,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 
-//TODO: Implement way to tell if user is a tutor or not
-//TODO: Check if user is looking at someone else's profile or their own
 @Composable
 fun ProfilePage(
     modifier : Modifier,
@@ -121,7 +119,7 @@ fun ProfilePage(
                 Row {
                     Icon(Icons.Rounded.Person, "Username Icon")
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(userName)
+                    Text(text = userName)
                 }
 
                 Row {

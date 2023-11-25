@@ -61,57 +61,71 @@ fun MessagingPage(
     email: String,
     tutors: Map<String, Map<String, String>>,
     viewModel: MainViewModel,
-    modifier: Modifier
+    modifier: Modifier,
+    onToSearch: () -> Unit
 ) {
     var receiver by remember { mutableStateOf("") }
     var showChatroom by remember { mutableStateOf(false) }
 
-    if (!showChatroom) {
-        LazyColumn(
-            modifier = modifier.padding(15.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                for (entry in tutors) {
-                    val tutorId = entry.key
-                    val values = entry.value
-                    val userName = entry.value["userName"].toString()
-                    val imgUrl = entry.value["imageUrl"].toString()
-                    val fullName = entry.value["fullName"].toString()
+    if (tutors.isNotEmpty()) {
+        if (!showChatroom) {
+            LazyColumn(
+                modifier = modifier.padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    for (entry in tutors) {
+                        val tutorId = entry.key
+                        val values = entry.value
+                        val userName = entry.value["userName"].toString()
+                        val imgUrl = entry.value["imageUrl"].toString()
+                        val fullName = entry.value["fullName"].toString()
 
-                    Row (
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ImageFrame(imageUrl = imgUrl)
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ImageFrame(imageUrl = imgUrl)
+                            Spacer(modifier = Modifier.width(10.dp))
 
-                        Column {
                             Column {
-                                Text(text = ParseFullName(fullName), fontSize = 20.sp)
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Row {
-                                    Icon(Icons.Rounded.Person, "Person icon")
-                                    Text(userName)
+                                Column {
+                                    Text(text = ParseFullName(fullName), fontSize = 20.sp)
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Row {
+                                        Icon(Icons.Rounded.Person, "Person icon")
+                                        Text(userName)
+                                    }
                                 }
-                            }
 
-                            Button(onClick = {
-                                receiver = userName
-                                showChatroom = true
-                            }) {
-                                Row {
-                                    Icon(Icons.Rounded.MailOutline, "Message Icon")
-                                    Text(text = "Message")
+                                Button(onClick = {
+                                    receiver = userName
+                                    showChatroom = true
+                                }) {
+                                    Row {
+                                        Icon(Icons.Rounded.MailOutline, "Message Icon")
+                                        Text(text = "Message")
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        } else {
+            ChatRoom(sender = email, receiver = receiver, viewModel = viewModel)
         }
     } else {
-        ChatRoom(sender = email, receiver = receiver, viewModel = viewModel)
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(text = "You have not hired any tutors.")
+            Button(onClick = onToSearch) {
+                Text("Search Tutors")
+            }
+        }
     }
 }
 

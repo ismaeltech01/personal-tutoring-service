@@ -227,36 +227,47 @@ fun MonitoringWarningDialog(
     onDismiss : () -> Unit,
     onConfirm : () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(.95f)
+                .padding(vertical = 15.dp)
         ) {
-            Icon(
-                Icons.Rounded.WarningAmber,
-                contentDescription = "Banned word warning icon",
-                modifier = Modifier
-                    .size(60.dp)
-                    .padding(top = 10.dp),
-                tint = Color.Red
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    Icons.Rounded.WarningAmber,
+                    contentDescription = "Banned word warning icon",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(top = 10.dp),
+                    tint = Color.Red
+                )
 
-            Text(
-                text = "Banned Language Detected",
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(10.dp),
-                fontWeight = FontWeight.Bold
-            )
+                Text(
+                    text = "Banned Language Detected",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(10.dp),
+                    fontWeight = FontWeight.Bold
+                )
 
-            Text(
-                text = "Our Detection Systems have detected unethical, illegal, or banned language in your text input. If you think this is a mistake, contact the development team.",
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(15.dp)
-            )
+                Text(
+                    text = "Our Detection Systems have detected unethical, illegal, or banned language in your text input. If you think this is a mistake, contact the development team.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(15.dp)
+                )
 
-            Button(onClick = onConfirm) {
-                Text("Ok")
+                Button(onClick = onConfirm) {
+                    Text("Ok")
+                }
             }
         }
     }
@@ -272,4 +283,55 @@ fun MonitoringWarningPreview() {
         onDismiss = { /*TODO*/ },
         onConfirm = {}
     )
+}
+
+@Composable
+fun ResetPasswordDialog(
+    onConfirm: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(.95f)
+                .padding(vertical = 15.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Rounded.WarningAmber,
+                    contentDescription = "Too many login icon",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(top = 10.dp),
+                    tint = Color.Red
+                )
+
+                Text(
+                    text = "Too Many Failed Attempts",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(10.dp),
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Please reset your password.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(15.dp)
+                )
+
+                Button(onClick = onConfirm) {
+                    Text("Ok")
+                }
+            }
+        }
+    }
 }

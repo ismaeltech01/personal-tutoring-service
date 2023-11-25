@@ -34,7 +34,7 @@ class MainViewModel : ViewModel() {
     val uidState = _uid.asStateFlow()
 
     private val _userName = MutableStateFlow("Guest")
-    val userName = _userName.asStateFlow()
+    val userNameState = _userName.asStateFlow()
 
     private val _email = MutableStateFlow("")
     val emailState = _email.asStateFlow()
@@ -89,6 +89,9 @@ class MainViewModel : ViewModel() {
     private val _imageUrl = MutableStateFlow("")
     val imageUrl = _imageUrl.asStateFlow()
 
+    private val _passwordAttempts = MutableStateFlow(0)
+    val passwordAttempts = _passwordAttempts.asStateFlow().value
+
     /***/
 
     /** Logges In User based on input data.
@@ -98,9 +101,13 @@ class MainViewModel : ViewModel() {
      * @param [password] User's Password
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
      * */
-    fun LogIn(email: String?, password: String, activity: Activity): Int {
-        var result = 0
-
+    fun LogIn(
+        email: String?,
+        password: String,
+        activity: Activity,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
         if (email == "" || password == "") {
             Toast.makeText(
                 activity,
@@ -118,6 +125,7 @@ class MainViewModel : ViewModel() {
                         FetchUserData()
                         FetchUserBankingInfo()
                         FetchRelations()
+                        onSuccess()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -127,11 +135,10 @@ class MainViewModel : ViewModel() {
                             Toast.LENGTH_LONG,
                         ).show()
 
-                        result = -1
+                        onFailure()
                     }
                 }
         }
-        return result
     }
 
     /** Registers User based on input data.
@@ -153,10 +160,10 @@ class MainViewModel : ViewModel() {
         password: String,
         activity: Activity,
         selectedOption: String,
-        answer: String
-    ): Int {
+        answer: String,
+        onRegister: () -> Unit
+    ) {
         //Returns -1 if registration failed, otherwise returns 0 on success
-        var result = 0
 
         if (firstName == "" || lastName == "" || userName == "" || phone == "" || address == "" || email == "" || password == "") {
             Toast.makeText(
@@ -164,7 +171,6 @@ class MainViewModel : ViewModel() {
                 "One or more fields are empty.",
                 Toast.LENGTH_SHORT,
             ).show()
-            result = -1
         } else {
             auth.createUserWithEmailAndPassword(email.toString(), password)
                 .addOnCompleteListener(activity) { task ->
@@ -184,6 +190,7 @@ class MainViewModel : ViewModel() {
                             imageUrl = "https://static.wikia.nocookie.net/fictionalcrossover/images/0/0c/Bugdroid.png/revision/latest?cb=20161215134435"
                         )
                         UpdateSecQuestion(email = email.toString(), question = selectedOption, answer = answer)
+                        onRegister()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.exception)
@@ -195,8 +202,6 @@ class MainViewModel : ViewModel() {
                     }
                 }
         }
-
-        return result
     }
 
     /** Signs Out currently logged in user
@@ -229,7 +234,6 @@ class MainViewModel : ViewModel() {
     fun UpdateAuthData() {
         _loggedIn.value = auth.currentUser != null
         if (loggedInState.value) {
-            _userName.value = auth.currentUser?.displayName.toString()
             _email.value = auth.currentUser?.email.toString()
             _uid.value = auth.currentUser?.uid.toString()
         }
@@ -295,6 +299,7 @@ class MainViewModel : ViewModel() {
 
                 db.collection("users").document(uidState.value).update("userName", userName)
                 _userName.value = userName.toString()
+                Log.d(TAG, "User Name: ${userNameState.value}")
             }
 
             if (phone != "") {
@@ -654,5 +659,9 @@ class MainViewModel : ViewModel() {
 
     fun ResetPassword(email: String) {
         auth.sendPasswordResetEmail(email)
+    }
+
+    fun incrementPasswordAttempts() {
+
     }
 }
