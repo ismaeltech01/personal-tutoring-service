@@ -89,8 +89,6 @@ class MainViewModel : ViewModel() {
     private val _imageUrl = MutableStateFlow("")
     val imageUrl = _imageUrl.asStateFlow()
 
-    private val _searchTutors = mutableStateMapOf<String, Map<String, String>>()
-    val searchTutors = _searchTutors
     /***/
 
     /** Logges In User based on input data.
@@ -618,25 +616,6 @@ class MainViewModel : ViewModel() {
 
 //        db.collection("users").document(uidString).update("profit", tProfit)
         //TODO: Add way to show a tutor's profit
-    }
-
-    /**
-     * Function used to search for tutors in database.
-     *
-     * @return A list of tutors and their attributes as key-value pairs
-     * */
-    fun SearchTutors(
-        price: Int,
-        distance: Int,
-        rating: Int,
-        available: Boolean,
-    ) : Map<String, Map<String, String>> {
-        //TODO
-        val searched : MutableMap<String, Map<String, String>> = mutableMapOf()
-        Log.d(TAG, "Searching tutors....")
-
-
-        return searched
     }
 
     /**

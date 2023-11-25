@@ -6,6 +6,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,13 +50,29 @@ fun HomePage(
     tutors: Map<String, Map<String, String>>,
     onEditCard: () -> Unit,
     viewModel: MainViewModel,
-    activity: Activity
+    activity: Activity,
+    loggedIn: Boolean,
+    onSigninClick: () -> Unit
 ) {
     var showPayPage by remember { mutableStateOf(false) }
     var tutorRate by remember { mutableStateOf("") }
     var tutorEmail by remember { mutableStateOf("") }
 
-    if (!showPayPage) {
+    if (!loggedIn) {
+        Column (
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Please Signin to hire tutors")
+            Spacer(modifier = Modifier.height(5.dp))
+            Button(
+                onClick = onSigninClick
+            ) {
+                Text("Signin")
+            }
+        }
+    } else if (!showPayPage) {
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -55,7 +55,8 @@ import com.google.firebase.ktx.Firebase
 @Composable
 fun SearchPage(
     mainVM: MainViewModel,
-    searchVM: SearchViewModel = viewModel()
+    searchVM: SearchViewModel = viewModel(),
+    currentEmail: String
 ) {
     val tutors = searchVM.tutors
     var searchIn by remember { mutableStateOf("") }
@@ -125,7 +126,8 @@ fun SearchPage(
                                     name = searchIn,
                                     price = priceFilter.toDouble(),
                                     rating = ratingFilter.toDouble(),
-                                    available = availableFilter
+                                    available = availableFilter,
+                                    currentEmail = currentEmail
                                 )
                             }) {
                                 Icon(Icons.Rounded.Search, "Search Icon")

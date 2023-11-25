@@ -95,12 +95,15 @@ class MainActivity : ComponentActivity() {
                                 tutors = tutors,
                                 onEditCard = { navController.navigate("payments") },
                                 viewModel = viewModel,
-                                activity = this@MainActivity
+                                activity = this@MainActivity,
+                                onSigninClick = { navController.navigate("profile") },
+                                loggedIn = loggedIn
                             )
                         }
                         composable("search") {
                             SearchPage(
-                                mainVM = viewModel
+                                mainVM = viewModel,
+                                currentEmail = email
                             )
                         }
                         composable("profile") {
