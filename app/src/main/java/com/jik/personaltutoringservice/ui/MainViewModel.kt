@@ -2,11 +2,12 @@ package com.jik.personaltutoringservice.ui
 
 import android.app.Activity
 import android.content.ContentValues.TAG
+import android.provider.MediaStore.Audio.Radio
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
@@ -671,19 +672,27 @@ class MainViewModel : ViewModel() {
         FetchRelations()
     }
 
-    fun BecomeTutorPage(
+    fun BecomeTutor(
+        experience : RadioButtonDefaults,
+        availability : String,
+        distance : RadioButtonDefaults,
+        price : Number
 
-    ) {
+        ) {
 
-        val tutorData = mapOf("isTutor" to true, "price" to 0.0, "rating" to "0.0")
-        db.collection("users").document(auth.currentUser?.uid.toString()).update(tutorData)
+        val tutorData = mapOf("isTutor" to true, "price" to price, "distance" to distance, "availability" to availability, "experience" to experience)
+        db.collection("newTutors").document(auth.currentUser?.uid.toString()).update(tutorData)
     }
 
-    fun CoursePage(
-
+    fun Course(
+        math: CheckboxDefaults,
+        coding: CheckboxDefaults,
+        tennis: CheckboxDefaults,
+        french: CheckboxDefaults,
+        piano: CheckboxDefaults
     ){
         val courseData = mapOf("Math" to true, "Piano" to true, "Tennis" to true, "Coding" to true, "French" to true, "Math" to false, "Piano" to false, "Tennis" to false, "Coding" to false, "French" to false)
-        db.collection("users").document(auth.currentUser?.uid.toString()).update(courseData)
+        db.collection("courses").document(auth.currentUser?.uid.toString()).update(courseData)
     }
 
 }

@@ -51,6 +51,11 @@ object Distance
 }
 @Composable
 fun BecomeTutorPage(
+    viewModel : MainViewModel,
+    experience : RadioButtonDefaults,
+    availability : String,
+    distance : RadioButtonDefaults,
+    price : Number,
     onSubmit: () -> Unit
 ) {
 
@@ -234,14 +239,7 @@ fun BecomeTutorPage(
                         Text(Distance.fiveToTenMiles)
                     }
 
-                    Row {
-                        RadioButton(
-                            selected = experienceRadio.value == Experience.advanced,
-                            onClick = { experienceRadio.value = Experience.advanced },
-                            colors = RadioButtonDefaults.colors(Color.Blue)
-                        )
-                        Text(Experience.advanced)
-                    }
+
 
                     Row {
                         RadioButton(
@@ -261,11 +259,21 @@ fun BecomeTutorPage(
                         Text(Distance.moreThanFiftyMiles)
                     }
 
-                    Button(onClick = onSubmit ,
+                    Button(onClick = { 
+                            viewModel.BecomeTutor(
+                                experience = experience,
+                                availability = availability,
+                                distance = distance,
+                                price = price
+                            )
+
+
+                                     } ,
                         modifier = Modifier
                             .fillMaxWidth()
                         ){
                         Text("Submit",fontSize = 30.sp)
+                        
                     }
                 }
 
@@ -276,5 +284,15 @@ fun BecomeTutorPage(
 @Preview(showBackground = true)
 @Composable
 fun BecomeTutorPagePreview(){
-    BecomeTutorPage(onSubmit = {})
+    BecomeTutorPage(
+        viewModel = MainViewModel(),
+        experience = RadioButtonDefaults,
+        availability = "Mondays ",
+        distance = RadioButtonDefaults,
+        price = 10,
+
+
+
+
+        onSubmit = {})
 }
