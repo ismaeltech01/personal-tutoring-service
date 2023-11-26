@@ -46,7 +46,6 @@ val HomePageModifier = Modifier
 @Composable
 fun HomePage(
     modifier: Modifier,
-    tutors: Map<String, Map<String, String>>,
     onEditCard: () -> Unit,
     viewModel: MainViewModel,
     activity: Activity,
@@ -87,7 +86,7 @@ fun HomePage(
                     .align(Alignment.CenterHorizontally)
             )
 
-            for (entry in tutors) {
+            for (entry in viewModel.tutors) {
                 val fullname = entry.value["fullName"].toString()
                 val userName = entry.value["userName"].toString()
                 val email = entry.value["email"].toString()
@@ -107,6 +106,7 @@ fun HomePage(
                         onFire = {
                             tutorName = ParseFullName(fullname)
                             displayFireDialog = true
+                            tutorEmail = email
                         },
                         onPay = {
                             showPayPage = true

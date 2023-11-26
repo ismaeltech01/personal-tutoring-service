@@ -41,7 +41,6 @@ import com.jik.personaltutoringservice.ui.theme.PersonalTutoringServiceTheme
 
 //MainActivity is were main app is loaded
 class MainActivity : ComponentActivity() {
-//    private lateinit var auth: FirebaseAuth;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +91,7 @@ class MainActivity : ComponentActivity() {
                         composable("home") {
                             HomePage(
                                 modifier = pageModifier,
-                                tutors = tutors,
+//                                tutors = tutors,
                                 onEditCard = { navController.navigate("payments") },
                                 viewModel = viewModel,
                                 activity = this@MainActivity,

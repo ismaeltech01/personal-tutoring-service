@@ -67,6 +67,7 @@ class MainViewModel : ViewModel() {
 
     private val _tutors = mutableStateMapOf<String, Map<String, String>>()
     val tutorsState = _tutors
+    val tutors = tutorsState.entries
 
     private val _clients = mutableStateMapOf<String, Map<String, String>>()
     val clientsState = _clients
@@ -632,11 +633,30 @@ class MainViewModel : ViewModel() {
         fullName: String,
         userName: String,
         email: String,
-        reason: String
+        reason: String,
+        onSuccess: () -> Unit
     ) {
         val data = mapOf("uId" to uid, "fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
 
-        db.collection("reporting").document(uid).set(data)
+        db.collection("users").whereEqualTo("email", email).get()
+            .addOnSuccessListener { document ->
+                Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                val data = document.data
+
+                //Update state values (Used in app)
+                //* Update user info
+                _fullName.value = data?.get("fullName").toString()
+                _userName.value = data?.get("userName").toString()
+                _phone.value = data?.get("phone").toString()
+                _address.value = data?.get("address").toString()
+                _imageUrl.value = data?.get("imageUrl").toString()
+                _isTutor.value = data?.get("isTutor") as Boolean
+
+                db.collection("reporting").document(uid).set(data)
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "get() failed with ", exception)
+            }
     }
 
     //NOTE: Will crash if tutorId is empty
@@ -655,8 +675,10 @@ class MainViewModel : ViewModel() {
         tutorEmail: String
     ) {
         val uidString = auth.currentUser?.uid.toString()
+        Log.d(TAG, "tutorEmail: $tutorEmail")
         //Might crash or cause errors if tutorEmail is empty or is not present in array
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayRemove(tutorEmail))
+        FetchTutorsRelations()
     }
 
     fun ResetPassword(email: String) {

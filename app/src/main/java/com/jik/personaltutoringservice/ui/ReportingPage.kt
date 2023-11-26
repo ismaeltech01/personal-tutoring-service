@@ -53,17 +53,11 @@ fun ReportingPage(
     viewModel: MainViewModel
 ) {
     var confirmState by remember { mutableStateOf(false) }
-
     var reportUIDState by remember { mutableStateOf("") }
-
     var reportPicState by remember { mutableStateOf("") }
-
     var reportFullNameState by remember { mutableStateOf("") }
-
     var reportUserNameState by remember { mutableStateOf("") }
-
     var reportEmailState by remember { mutableStateOf("") }
-
 
     if (tutors.isEmpty()) {
         Column(
@@ -118,6 +112,7 @@ fun ReportingPage(
                     for (pair in clients) {
                         val fullName = ParseFullName(pair.value["fullName"].toString())
                         val userName = pair.value["userName"].toString()
+                        val uId = pair.value["uId"].toString()
 
                         ReportUserCard(
                             fullName = fullName,
@@ -128,6 +123,9 @@ fun ReportingPage(
                                 reportUIDState = pair.key
                                 reportFullNameState = fullName
                                 reportUserNameState = userName
+                                viewModel.ReportUser(
+
+                                )
                             }
                         )
                     }
@@ -162,7 +160,6 @@ fun ReportUserCard(
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
-//        if (enableReport) {
             Row (
                 horizontalArrangement = if (enableReport) Arrangement.Start else Arrangement.Center,
                 verticalAlignment = CenterVertically,
@@ -175,7 +172,6 @@ fun ReportUserCard(
                     if (picture == "") {
                         Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
                     } else {
-                        //TODO
                     }
                 }
 
@@ -203,23 +199,6 @@ fun ReportUserCard(
                 }
             }
         }
-//        } else {
-//            Column (
-//                horizontalAlignment = Alignment.Start,
-//                verticalArrangement = Arrangement.Center
-//            ) {
-//                if (picture == "") {
-//                    Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
-//                } else {
-//                    //TODO
-//                }
-//
-//                Text(fullName)
-//                Row {
-//                    Image(Icons.Rounded.Person, "UserName icon")
-//                    Text(userName)
-//                }
-//            }
     }
 }
 
@@ -308,13 +287,11 @@ fun ScanText(
     onBannedDetect: () -> Unit,
     onValidDetect: () -> Unit
 ) {
-//    var isValid = true
     val lowerCased = text.lowercase()
     val bannedWords = Data().bannedWords
 
     for (i in bannedWords.indices) {
         val bannedWord = bannedWords[i]
-//        val matches = Pattern.matches("\\b$bannedWord\\b", lowerCased)
         var wordList = lowerCased.split(" ").toMutableList()
 
         for (i in wordList.indices) {
