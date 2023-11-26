@@ -337,8 +337,8 @@ class MainViewModel : ViewModel() {
         answer: String
     ) {
         val data = mapOf("email" to email, "secQuestion" to question, "secAnswer" to answer)
-        //val data = mapOf("secQuestion" to question, "secAnswer" to answer)
-        db.collection("secQuestions").document(auth.uid.toString()).update(data)
+
+        db.collection("secQuestions").document(auth.currentUser?.uid.toString()).update(data)
     }
 
     fun isCorrectSecQuestion(
@@ -629,34 +629,17 @@ class MainViewModel : ViewModel() {
     }
 
     fun ReportUser(
-        uid : String,
         fullName: String,
         userName: String,
         email: String,
         reason: String,
         onSuccess: () -> Unit
     ) {
-        val data = mapOf("uId" to uid, "fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
+        val data = mutableMapOf("fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
+        val id = db.collection("users").document().id
 
-        db.collection("users").whereEqualTo("email", email).get()
-            .addOnSuccessListener { document ->
-                Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                val data = document.data
-
-                //Update state values (Used in app)
-                //* Update user info
-                _fullName.value = data?.get("fullName").toString()
-                _userName.value = data?.get("userName").toString()
-                _phone.value = data?.get("phone").toString()
-                _address.value = data?.get("address").toString()
-                _imageUrl.value = data?.get("imageUrl").toString()
-                _isTutor.value = data?.get("isTutor") as Boolean
-
-                db.collection("reporting").document(uid).set(data)
-            }
-            .addOnFailureListener { exception ->
-                Log.d(TAG, "get() failed with ", exception)
-            }
+        db.collection("reporting").document(id).set(data)
+        onSuccess()
     }
 
     //NOTE: Will crash if tutorId is empty

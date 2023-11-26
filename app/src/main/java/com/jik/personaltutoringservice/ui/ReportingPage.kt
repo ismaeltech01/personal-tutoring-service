@@ -112,6 +112,7 @@ fun ReportingPage(
                     for (pair in clients) {
                         val fullName = ParseFullName(pair.value["fullName"].toString())
                         val userName = pair.value["userName"].toString()
+                        val email = pair.value["email"].toString()
                         val uId = pair.value["uId"].toString()
 
                         ReportUserCard(
@@ -123,9 +124,6 @@ fun ReportingPage(
                                 reportUIDState = pair.key
                                 reportFullNameState = fullName
                                 reportUserNameState = userName
-                                viewModel.ReportUser(
-
-                                )
                             }
                         )
                     }
@@ -248,13 +246,12 @@ fun ReportConfirmPage(
             modifier = Modifier.background(if (reportState) Color.Red else Color.Transparent),
             onClick = {
                 viewModel.ReportUser(
-                    uid = uid,
                     fullName = fullName,
                     userName = userName,
                     email = email,
-                    reason = textState
+                    reason = textState,
+                    onSuccess = { reportState = true }
                 )
-                reportState = true
             },
             enabled = !reportState
         ) {
