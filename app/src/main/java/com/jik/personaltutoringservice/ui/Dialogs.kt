@@ -83,8 +83,7 @@ fun InvalidCardDialog(
 )
 @Composable
 fun InvalidCardDialogPreview() {
-    InvalidCardDialog(onDismiss = { /*TODO*/ }) {
-    }
+    InvalidCardDialog(onDismiss = {}) {}
 }
 
 @Composable
@@ -216,7 +215,7 @@ fun ConfirmTransactionDialog(
 fun ConfirmTransactionDialogPreview() {
     val total = BigDecimal("20.10")
     ConfirmTransactionDialog(
-        onDismiss = { /*TODO*/ },
+        onDismiss = {},
         onConfirm = {},
         minutes = 60,
         rate = BigDecimal("20.10")
@@ -280,7 +279,7 @@ fun MonitoringWarningDialog(
 fun MonitoringWarningPreview() {
     val total = BigDecimal("20.10")
     MonitoringWarningDialog(
-        onDismiss = { /*TODO*/ },
+        onDismiss = {},
         onConfirm = {}
     )
 }
@@ -323,6 +322,50 @@ fun ResetPasswordDialog(
 
                 Text(
                     text = "Please reset your password.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(15.dp)
+                )
+
+                Button(onClick = onConfirm) {
+                    Text("Ok")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FireDialog(
+    fullName: String,
+    onConfirm: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(.95f)
+                .padding(vertical = 15.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Rounded.WarningAmber,
+                    contentDescription = "Too many login icon",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(top = 10.dp),
+                    tint = Color.Yellow
+                )
+
+                Text(
+                    text = "Are you sure you want to fire $fullName?",
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(15.dp)

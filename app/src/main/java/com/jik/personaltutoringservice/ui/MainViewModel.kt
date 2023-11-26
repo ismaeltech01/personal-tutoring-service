@@ -210,7 +210,6 @@ class MainViewModel : ViewModel() {
         AuthUI.getInstance()
             .signOut(activity)
             .addOnCompleteListener {
-                //TODO: Display popup that signout was successful
                 RestoreDefaults()
             }
     }
@@ -435,13 +434,16 @@ class MainViewModel : ViewModel() {
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                        val data = document.data
 
                         //Update state values (Used in app)
                         //* Update user info
-                        _fullName.value = document.data?.get("fullName").toString()
-                        _phone.value = document.data?.get("phone").toString()
-                        _address.value = document.data?.get("address").toString()
-                        _imageUrl.value = document.data?.get("imageUrl").toString()
+                        _fullName.value = data?.get("fullName").toString()
+                        _userName.value = data?.get("userName").toString()
+                        _phone.value = data?.get("phone").toString()
+                        _address.value = data?.get("address").toString()
+                        _imageUrl.value = data?.get("imageUrl").toString()
+                        _isTutor.value = data?.get("isTutor") as Boolean
                     } else {
                         Log.d(TAG, "FetchUserData:failure -> No document found.")
                     }
@@ -571,14 +573,6 @@ class MainViewModel : ViewModel() {
             return -1
         }
 
-//        var tutorCardNum = ""
-//        var tutorExpDate = ""
-//        var tutorSecCode = ""
-
-//        if (!ConfirmBankingInfo(tutorCardNum, tutorExpDate, tutorSecCode)) {
-//            Log.e(TAG, "Error in InitTransaction: Tutor (userName: $payeeUserName) card info not valid")
-//            return -2
-//          }
         return if (rate == BigDecimal.ZERO) {
             Log.w(TAG, "Error in InitTransaction:tutorRate is 0")
             -3
@@ -618,9 +612,6 @@ class MainViewModel : ViewModel() {
 
         val tProfit = total.subtract(appProfit).setScale(2)
         _tutorProfit.value = tProfit
-
-//        db.collection("users").document(uidString).update("profit", tProfit)
-        //TODO: Add way to show a tutor's profit
     }
 
     /**
@@ -648,20 +639,48 @@ class MainViewModel : ViewModel() {
         db.collection("reporting").document(uid).set(data)
     }
 
+    //NOTE: Will crash if tutorId is empty
     fun HireTutor(
-        hireEmail: String
+        hireEmail: String,
+        tutorId: String
     ) {
         val uidString = auth.currentUser?.uid.toString()
 
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireEmail))
+        db.collection("relations").document(tutorId).update("clients", FieldValue.arrayUnion(hireEmail))
         FetchRelations()
+    }
+
+    fun FireTutor(
+        tutorEmail: String
+    ) {
+        val uidString = auth.currentUser?.uid.toString()
+        //Might crash or cause errors if tutorEmail is empty or is not present in array
+        db.collection("relations").document(uidString).update("tutors", FieldValue.arrayRemove(tutorEmail))
     }
 
     fun ResetPassword(email: String) {
         auth.sendPasswordResetEmail(email)
     }
 
-    fun incrementPasswordAttempts() {
-
+    /**
+     * Re-Authenticates for profile and user data changes
+     * */
+    fun ReAuthenticate(password: String, activity: Activity) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(activity) { task ->
+                if (task.isSuccessful) {
+                    Log.d(TAG, "reauthenticated: ${auth.currentUser?.email}")
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w(TAG, "signInWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        activity,
+                        "Authentication failed.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
     }
+
 }

@@ -1,6 +1,7 @@
 package com.jik.personaltutoringservice.ui
 
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -38,7 +39,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jik.personaltutoringservice.MainActivity
 import com.jik.personaltutoringservice.R
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStreamReader
 import java.util.regex.Pattern
 
 @Composable
@@ -300,23 +304,33 @@ fun ReportConfirmPagePreview() {
  * @return true if the input text is valid (no banned words detected), false otherwise
  * */
 fun ScanText(
-    text : String
-) : Boolean {
-    var isValid : Boolean = true
+    text : String,
+    onBannedDetect: () -> Unit,
+    onValidDetect: () -> Unit
+) {
+//    var isValid = true
     val lowerCased = text.lowercase()
-    val file = File("/java/com/jik/personaltutoringservice/ui/data/bannedWords.txt")
+    val bannedWords = Data().bannedWords
 
-    file.forEachLine {
-        val matches = Pattern.matches("\\b$it\\b", lowerCased)
-        isValid = !matches
-        if (matches) Log.w(TAG, "Banned Word detected: $it")
+    for (i in bannedWords.indices) {
+        val bannedWord = bannedWords[i]
+//        val matches = Pattern.matches("\\b$bannedWord\\b", lowerCased)
+        var wordList = lowerCased.split(" ").toMutableList()
+
+        for (i in wordList.indices) {
+            val word = wordList[i]
+            wordList[i] = word
+                .replace("!", "")
+                .replace("?", "")
+                .replace(".", "")
+        }
+
+        if (wordList.contains(bannedWord)) {
+            Log.w(TAG, "Banned Word detected: $bannedWord")
+            onBannedDetect()
+            return
+        }
     }
 
-    return isValid
+    onValidDetect()
 }
-
-//@Preview
-//@Composable
-//fun ReportingPagePreview() {
-//    ReportingPage()
-//}

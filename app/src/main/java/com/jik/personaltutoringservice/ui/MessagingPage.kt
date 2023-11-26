@@ -2,6 +2,7 @@ package com.jik.personaltutoringservice.ui
 
 //import android.content.IntentSender
 //Thew flag for unused
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -62,7 +63,8 @@ fun MessagingPage(
     tutors: Map<String, Map<String, String>>,
     viewModel: MainViewModel,
     modifier: Modifier,
-    onToSearch: () -> Unit
+    onToSearch: () -> Unit,
+    context: Context
 ) {
     var receiver by remember { mutableStateOf("") }
     var showChatroom by remember { mutableStateOf(false) }
@@ -113,7 +115,12 @@ fun MessagingPage(
                 }
             }
         } else {
-            ChatRoom(sender = email, receiver = receiver, viewModel = viewModel)
+            ChatRoom(
+                sender = email,
+                receiver = receiver,
+                viewModel = viewModel,
+                context = context
+            )
         }
     } else {
         Column (
@@ -133,9 +140,11 @@ fun MessagingPage(
 fun ChatRoom(
     sender: String,
     receiver: String,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    context: Context
 ) {
     var messageIn by remember { mutableStateOf("") }
+    var displayMonitorDialog by remember { mutableStateOf(false) }
 
     Column (
         modifier = Modifier
@@ -151,7 +160,7 @@ fun ChatRoom(
         Column (
             modifier = Modifier
                 .fillMaxWidth(.95f)
-                .weight(.3f),
+                .weight(.1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
@@ -162,13 +171,25 @@ fun ChatRoom(
                 trailingIcon = {
 
                     IconButton(onClick = {
-                        viewModel.SendMessage(message = messageIn, sender = "", receiver = "")
+                        ScanText(
+                            text = messageIn,
+                            onBannedDetect = {
+                                displayMonitorDialog = true
+                            },
+                            onValidDetect = {
+                                viewModel.SendMessage(message = messageIn, sender = "", receiver = "")
+                            }
+                        )
                     }) {
                         Icon(Icons.Rounded.Send, "Send Icon")
                     }
                 }
             )
         }
+    }
+
+    if (displayMonitorDialog) {
+        MonitoringWarningDialog(onDismiss = {}) { displayMonitorDialog = false }
     }
 }
 @Composable

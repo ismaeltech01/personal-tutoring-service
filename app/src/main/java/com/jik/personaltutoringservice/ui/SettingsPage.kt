@@ -117,8 +117,8 @@ fun SettingsPage(
             )
 
             PasswordField(
-                value = passwdState,
-                onValueChange = { passwdState = it },
+                value = confirmState,
+                onValueChange = { confirmState = it },
                 isConfirm = true
             )
 
@@ -134,9 +134,8 @@ fun SettingsPage(
                     activity = activity
                 )
 
-                //TODO: Add validation that user data is not the same as previous data in UpdateUserData()
-                //Use the initial variables to check for this ^
                 if (allValid) {
+                    viewModel.ReAuthenticate(passwdState, activity)
                     viewModel.UpdateUserData()
                     navigate()
                 }

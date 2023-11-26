@@ -132,7 +132,8 @@ class MainActivity : ComponentActivity() {
                                 tutors = tutors,
                                 viewModel = viewModel,
                                 modifier = pageModifier,
-                                onToSearch = { navController.navigate("search") }
+                                onToSearch = { navController.navigate("search") },
+                                context = this@MainActivity
                             )
                         }
                         composable("other") {

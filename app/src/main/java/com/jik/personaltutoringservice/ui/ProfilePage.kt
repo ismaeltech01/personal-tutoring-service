@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,7 +82,6 @@ fun ProfilePage(
     var clickedImage by remember { mutableStateOf(false) }
     var urlInput by remember { mutableStateOf(imageUrl) }
 
-    //TODO: Implementing state might help refresh the page whenever login finished (From Guest to User)
     if (!clickedImage) {
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -148,10 +148,28 @@ fun ProfilePage(
                     ) {
                         Text("Become a Tutor")
                     }
+                } else if (!searched) {
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Row {
+                        Icon(Icons.Rounded.School, "School icon", tint = Color.Green)
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text("You are a Tutor!")
+                    }
+
+                    Spacer(modifier = Modifier.height(5.dp))
+                    
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "Stop being a Tutor")
+                    }
                 }
+
                 if (searched) {
                     Button(onClick = {
-                        viewModel.HireTutor(email)
+                        viewModel.HireTutor(
+                            hireEmail = email,
+                            tutorId = uId
+                        )
                         onHire()
                     }
                     ) {

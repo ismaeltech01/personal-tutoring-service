@@ -43,7 +43,6 @@ val HomePageModifier = Modifier
     .fillMaxHeight(.85f)
     .fillMaxWidth()
 
-// TODO: I need to make the icons clickable and either take them to something
 @Composable
 fun HomePage(
     modifier: Modifier,
@@ -57,6 +56,8 @@ fun HomePage(
     var showPayPage by remember { mutableStateOf(false) }
     var tutorRate by remember { mutableStateOf("") }
     var tutorEmail by remember { mutableStateOf("") }
+    var tutorName by remember { mutableStateOf("") }
+    var displayFireDialog by remember { mutableStateOf(false) }
 
     if (!loggedIn) {
         Column (
@@ -103,8 +104,10 @@ fun HomePage(
                         imageUrl = profilePic,
                         isHome = true,
                         location = loc,
-                        //TODO: what to do when user decides to fire tutor
-                        onFire = {  },
+                        onFire = {
+                            tutorName = ParseFullName(fullname)
+                            displayFireDialog = true
+                        },
                         onPay = {
                             showPayPage = true
                             tutorRate = raTe
@@ -115,28 +118,6 @@ fun HomePage(
                 }
             }
 
-
-//        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-//             for(entry in tutors) {
-//                 val fullname = ParseFullName(entry.value["fullName"].toString())
-//
-//                 Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-//                     Image(
-//                         painter = painterResource(id = R.drawable.profileimage),
-//                         contentDescription = "Profile Image",
-//                         modifier = Modifier
-//                             .size(75.dp)
-//                             .clip(CircleShape)
-//                             .border(5.dp, Color.White, CircleShape)
-//                     )
-//
-//                     Text(text = fullname)
-//                 }
-//                 Spacer(modifier = Modifier.width(5.dp))
-//
-//
-//             }
-//        }
             Text(
                 text = "Suggested",
                 fontSize = 25.sp,
@@ -146,7 +127,6 @@ fun HomePage(
                     .align((Alignment.CenterHorizontally))
             )
             Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-// TODO: Add functionally that integrated with advertisment to display tutors in catogories intreseted in
                 Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                     Image(
                         painter = painterResource(id = R.drawable.profileimage),
@@ -156,10 +136,6 @@ fun HomePage(
                             .clip(CircleShape)
                             .border(5.dp, Color.White, CircleShape)
                     )
-                    /*
-this is going to be where the name of suggested tutor are displayed after advertisements are made
- */
-//                Text(text = fullname)
                 }
             }
 
@@ -175,5 +151,14 @@ this is going to be where the name of suggested tutor are displayed after advert
             viewModel = viewModel,
             activity = activity
         )
+    }
+
+    if (displayFireDialog) {
+        FireDialog(
+            fullName = tutorName
+        ) {
+            viewModel.FireTutor(tutorEmail)
+            displayFireDialog = false
+        }
     }
 }
