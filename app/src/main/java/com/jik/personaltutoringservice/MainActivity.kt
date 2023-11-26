@@ -14,14 +14,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.jik.personaltutoringservice.ui.AgreementPage
+import com.jik.personaltutoringservice.ui.AdsPage
 import com.jik.personaltutoringservice.ui.BecomeTutorPage
 import com.jik.personaltutoringservice.ui.CoursesPage
 import com.jik.personaltutoringservice.ui.HomePage
@@ -169,7 +166,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("ads") {
-
+                            AdsPage(
+                                viewModel = viewModel,
+                                onExit = {navController.navigate("profile")},
+                            )
                         }
                         composable("settings") {
                             SettingsPage(

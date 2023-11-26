@@ -4,15 +4,14 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -621,12 +620,59 @@ class MainViewModel : ViewModel() {
     fun GetChatroom() : String {
         return ""
     }
-    fun SendMessage(
-        message: String,
-        sender: String,
-        receiver: String
-    ) {
+    fun generateConversationId(userId: String, tutorId: String): String {
+        val sortedIds = listOf(userId, tutorId).sorted()
+        return "${sortedIds[0]}_${sortedIds[1]}"
     }
+    fun fetchMessages(conversationId: String): ArrayList<Message> {
+// TODO: create mutablestateofmap for the messages to display correctly  
+        val messageList = ArrayList<Message>()
+        db.collection("conversations")
+            .document(conversationId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .get()
+            .addOnSuccessListener{ docs ->
+//                if (docs.isEmpty) {
+//                    Log.w(TAG, "message retrieval failed: $docs")
+//                }
+
+
+                for ( doc in docs ) {
+                    val message = doc.toObject(Message::class.java)
+
+                    messageList.add(message)
+                }
+
+                // Update UI with messageList
+            }
+
+        return messageList
+    }
+
+
+    fun sendMessage( messageText: String, senderId: String, receiverId: String ) {
+        val message = hashMapOf(
+            "senderId" to senderId,
+            "receiverId" to receiverId,
+            "messageText" to messageText,
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+
+        val cID = generateConversationId(senderId,receiverId)
+
+        db.collection("conversations")
+            .document(cID)
+            .collection("messages")
+            .add(message)
+            .addOnSuccessListener { documentReference ->
+                Log.d(TAG, "Message sent with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error sending message", e)
+            }
+    }
+
 
     fun ReportUser(
         fullName: String,
@@ -635,7 +681,7 @@ class MainViewModel : ViewModel() {
         reason: String,
         onSuccess: () -> Unit
     ) {
-        val data = mutableMapOf("fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
+        val data = hashMapOf("fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
         val id = db.collection("users").document().id
 
         db.collection("reporting").document(id).set(data)
@@ -649,8 +695,14 @@ class MainViewModel : ViewModel() {
     ) {
         val uidString = auth.currentUser?.uid.toString()
 
+        val email = auth.currentUser?.email.toString()
+
+        val messageData = mapOf("UserId1" to email, "UserId2" to hireEmail, "messages" to "", "timestamp" to FieldValue.serverTimestamp())
+
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireEmail))
         db.collection("relations").document(tutorId).update("clients", FieldValue.arrayUnion(hireEmail))
+//        db.collection("conversations").document(generateConversationId(email,hireEmail)).set(mapOf("init" to true))
+//        db.collection("conversations").document(generateConversationId(email,hireEmail)).collection("messages").add(messageData)
         FetchRelations()
     }
 
@@ -662,6 +714,15 @@ class MainViewModel : ViewModel() {
         //Might crash or cause errors if tutorEmail is empty or is not present in array
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayRemove(tutorEmail))
         FetchTutorsRelations()
+
+//        val data = mapOf("email" to emailState.value)
+//        val bankingData = mapOf("cardNum" to cardNumState.value, "expDate" to expDateState.value, "secCode" to secCodeState.value)
+//        val relationsData = mapOf("tutors" to listOf<String>(), "clients" to listOf<String>())
+//
+//        db.collection("users").document(uidState.value).set(data)
+//        db.collection("banking").document(uidState.value).set(bankingData)
+//        db.collection("relations").document(uidState.value).set(mapOf("init" to true))
+//        db.collection("relations").document(uidState.value).set(relationsData)
     }
 
     fun ResetPassword(email: String) {
@@ -686,6 +747,10 @@ class MainViewModel : ViewModel() {
                     ).show()
                 }
             }
+    }
+
+    fun createAnAdd(msg: String, toString: String) {
+
     }
 
 }

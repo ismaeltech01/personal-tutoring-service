@@ -5,9 +5,7 @@ package com.jik.personaltutoringservice.ui
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +22,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MailOutline
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -33,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,13 +44,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jik.personaltutoringservice.R
 
-data class Message(val sender: String, val body: String)
-val MessageList = listOf(
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far")
-)
+data class Message(
+    var messageText: String? = null,
+    var receiverID: String? = null,
+    var senderID: String? = null,
+    var timestamp: java.util.Date? = null)
+
+
+
 
 @Composable
 fun MessagingPage(
@@ -154,6 +151,8 @@ fun ChatRoom(
             modifier = Modifier
                 .weight(.7f)
         ) {
+//            crashes app when trying to display
+            MessagingThread(messageList = viewModel.fetchMessages(viewModel.generateConversationId(sender,receiver)))
 
         }
 
@@ -177,7 +176,7 @@ fun ChatRoom(
                                 displayMonitorDialog = true
                             },
                             onValidDetect = {
-                                viewModel.SendMessage(message = messageIn, sender = "", receiver = "")
+                                viewModel.sendMessage(messageIn, sender, receiver)
                             }
                         )
                     }) {
@@ -210,12 +209,12 @@ fun MessagingCard(msg: Message) {
         Spacer(modifier = Modifier.width(6.dp))
 
         Column {
-            Text(text = msg.sender,
+            Text(text = msg.senderID.toString(),
                 style = MaterialTheme.typography.titleSmall)
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            Text(text = msg.body,
+            Text(text = msg.messageText.toString(),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(all = 3.dp))
         }
@@ -240,6 +239,5 @@ fun MessagingThread(messageList : List<Message>){
 )
 @Composable
 fun PreviewMC() {
-    MessagingThread(messageList = MessageList)
 
 }
