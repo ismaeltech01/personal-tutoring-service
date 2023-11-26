@@ -9,13 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -29,9 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
-import com.google.firebase.ktx.Firebase
 
 
 object Experience
@@ -51,18 +44,15 @@ object Distance
 }
 @Composable
 fun BecomeTutorPage(
-    viewModel : MainViewModel,
-    experience : RadioButtonDefaults,
-    availability : String,
-    distance : RadioButtonDefaults,
-    price : Number,
+    viewModel: MainViewModel,
     onSubmit: () -> Unit
 ) {
 
     LazyColumn (
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(Color.White)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         item{
@@ -78,33 +68,16 @@ fun BecomeTutorPage(
                     mutableStateOf("")
                 }
 
-                var monday by remember {
-                    mutableStateOf(" ")
+                var timeAvailability by remember {
+                mutableStateOf(" ")
                 }
 
-                var tuesday by remember {
-                    mutableStateOf(" ")
-                }
-                var wednesday by remember {
-                    mutableStateOf(" ")
-                }
-                var thursday by remember {
-                    mutableStateOf(" ")
-                }
-                var friday by remember {
-                    mutableStateOf(" ")
-                }
-                var saturday by remember {
-                    mutableStateOf(" ")
-                }
-                var sunday by remember {
-                    mutableStateOf(" ")
-                }
                 var hourlyPrice by remember {
                     mutableStateOf(" ")
                 }
 
-                Spacer(modifier = Modifier.size(16.dp))
+
+            Spacer(modifier = Modifier.size(16.dp))
 
                 Text("What is your level of experience on your specialty?")
                 Column {
@@ -151,61 +124,11 @@ fun BecomeTutorPage(
                     Text("What is your availability during the week?")
 
                     Spacer(modifier = Modifier.size(16.dp))
-                    Row {
 
-                        Text("Monday")
-                        TextField(value = monday, onValueChange = {
-                            newText -> monday = newText
-                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
-                    }
-
-                    Row {
-
-                        Text("Tuesday")
-                        TextField(value = tuesday, onValueChange = {
-                                newText -> tuesday = newText
-                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
-                    }
-
-                    Row {
-
-                        Text("Wednesday")
-                        TextField(value = wednesday, onValueChange = {
-                                newText -> wednesday = newText
-                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
-                    }
-
-                    Row {
-
-                        Text("Thursday")
-                        TextField(value = thursday, onValueChange = {
-                                newText -> thursday = newText
-                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
-                    }
-
-                    Row {
-
-                        Text("Friday")
-                        TextField(value = friday, onValueChange = {
-                                newText -> friday = newText
-                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
-                    }
-
-                    Row {
-
-                        Text("Saturday")
-                        TextField(value = saturday, onValueChange = {
-                                newText -> saturday = newText
-                        })
-                    }
-
-                    Row {
-
-                        Text("Sunday")
-                        TextField(value = sunday, onValueChange = {
-                                newText -> sunday = newText
-                        }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
-                    }
+                    TextField(value = timeAvailability, onValueChange = {
+                            timeAvailability = it
+                    }, label = {Text(text = "Write in the time frame you're available. eg: 9am-5pm")})
+                }
 
                     Spacer(modifier = Modifier.size(16.dp))
 
@@ -213,7 +136,7 @@ fun BecomeTutorPage(
                     Text("How much do you charge per hour? ")
 
                     TextField(value = hourlyPrice, onValueChange = {
-                            newText -> hourlyPrice = newText
+                            hourlyPrice = it
                     })
 
                     Spacer(modifier = Modifier.size(16.dp))
@@ -261,10 +184,8 @@ fun BecomeTutorPage(
 
                     Button(onClick = { 
                             viewModel.BecomeTutor(
-                                experience = experience,
-                                availability = availability,
-                                distance = distance,
-                                price = price
+                                availability = timeAvailability,
+                                price = hourlyPrice
                             )
 
 
@@ -279,20 +200,13 @@ fun BecomeTutorPage(
 
         }
     }
-}
+
 
 @Preview(showBackground = true)
 @Composable
 fun BecomeTutorPagePreview(){
     BecomeTutorPage(
         viewModel = MainViewModel(),
-        experience = RadioButtonDefaults,
-        availability = "Mondays ",
-        distance = RadioButtonDefaults,
-        price = 10,
-
-
-
-
-        onSubmit = {})
+        onSubmit = {}
+    )
 }

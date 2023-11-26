@@ -14,14 +14,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.jik.personaltutoringservice.ui.AgreementPage
 import com.jik.personaltutoringservice.ui.BecomeTutorPage
 import com.jik.personaltutoringservice.ui.CoursesPage
 import com.jik.personaltutoringservice.ui.HomePage
@@ -150,7 +146,9 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("courses") {
-                            CoursesPage(onSaveChange = {navController.navigate("search")})
+                            CoursesPage(
+                                viewModel = viewModel,
+                                onSaveChange = {navController.navigate("search")})
                         }
                         composable("payments") {
                             PaymentsPage(
@@ -214,7 +212,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("become-tutor") {
-                            BecomeTutorPage(onSubmit = { navController.navigate("profile")})
+                            BecomeTutorPage(
+                                viewModel = viewModel,
+                                onSubmit = { navController.navigate("profile") }
+                            )
                         }
                     }
 

@@ -26,12 +26,6 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CoursesPage(
 
-
-    math : CheckboxDefaults,
-    coding : CheckboxDefaults,
-    tennis : CheckboxDefaults,
-    french : CheckboxDefaults,
-    piano : CheckboxDefaults,
     viewModel : MainViewModel,
     onSaveChange: () -> Unit){
 
@@ -88,11 +82,11 @@ fun CoursesPage(
 
             Button(onClick = {
                 viewModel.Course(
-                    math = CheckboxDefaults,
-                    coding = CheckboxDefaults,
-                    tennis = CheckboxDefaults,
-                    french = CheckboxDefaults,
-                    piano = CheckboxDefaults,
+                    math = checkedStateMath,
+                    coding = checkedStateCoding,
+                    tennis = checkedStateTennis,
+                    french = checkedStateFrench,
+                    piano = checkedStatePiano,
 
             )
                              },
@@ -112,11 +106,6 @@ fun CoursesPage(
 @Composable
 fun CoursePreview(){
     CoursesPage(
-        math = CheckboxDefaults,
-        coding = CheckboxDefaults,
-        tennis = CheckboxDefaults,
-        french = CheckboxDefaults,
-        piano = CheckboxDefaults,
         viewModel = MainViewModel(),
         onSaveChange = {})
 }

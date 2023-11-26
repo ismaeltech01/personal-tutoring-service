@@ -2,10 +2,8 @@ package com.jik.personaltutoringservice.ui
 
 import android.app.Activity
 import android.content.ContentValues.TAG
-import android.provider.MediaStore.Audio.Radio
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
@@ -673,25 +671,23 @@ class MainViewModel : ViewModel() {
     }
 
     fun BecomeTutor(
-        experience : RadioButtonDefaults,
-        availability : String,
-        distance : RadioButtonDefaults,
-        price : Number
+        availability: String,
+        price: String
 
         ) {
 
-        val tutorData = mapOf("isTutor" to true, "price" to price, "distance" to distance, "availability" to availability, "experience" to experience)
+        val tutorData = mapOf("isTutor" to true, "price" to price, "availability" to availability, "ratings" to "0.0")
         db.collection("newTutors").document(auth.currentUser?.uid.toString()).update(tutorData)
     }
 
     fun Course(
-        math: CheckboxDefaults,
-        coding: CheckboxDefaults,
-        tennis: CheckboxDefaults,
-        french: CheckboxDefaults,
-        piano: CheckboxDefaults
+        math: Boolean,
+        coding: Boolean,
+        tennis: Boolean,
+        french: Boolean,
+        piano: Boolean
     ){
-        val courseData = mapOf("Math" to true, "Piano" to true, "Tennis" to true, "Coding" to true, "French" to true, "Math" to false, "Piano" to false, "Tennis" to false, "Coding" to false, "French" to false)
+        val courseData = mapOf("Math" to math, "Piano" to piano, "Tennis" to tennis, "Coding" to coding, "French" to french)
         db.collection("courses").document(auth.currentUser?.uid.toString()).update(courseData)
     }
 
