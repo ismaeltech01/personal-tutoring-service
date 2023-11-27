@@ -11,6 +11,7 @@ import androidx.compose.material.icons.rounded.AttachMoney
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PriceChange
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -31,6 +32,7 @@ fun UserCard(
     imageUrl: String,
     location: String = "",
     rate: String,
+    rating: String = "",
     isHome: Boolean = false,
     onClick: () -> Unit = {},
     onFire: () -> Unit = {},
@@ -71,7 +73,15 @@ fun UserCard(
                     }
                 }
 
+                if (rating != "") {
+                    Row {
+                        Icon(Icons.Rounded.Star, "rating icon")
+                        Text(rating)
+                    }
+                }
+
                 if (isHome) {
+
                     Row {
                         Button(onClick = onFire) {
                             Text(text = "Fire")
@@ -93,5 +103,5 @@ fun UserCard(
 @Preview
 @Composable
 fun UserCardPreview() {
-    UserCard(fullName = "Ismael * Tovar", userName = "ismaeltovar", imageUrl = "https://avatars.githubusercontent.com/u/73203513?v=4", rate = "20.00", location = "UTA", onFire = {}, onPay = {}, onClick = {})
+    UserCard(fullName = "Ismael * Tovar", userName = "ismaeltovar", imageUrl = "https://avatars.githubusercontent.com/u/73203513?v=4", rate = "20.00", location = "UTA", rating = "1.0", onFire = {}, onPay = {}, onClick = {})
 }

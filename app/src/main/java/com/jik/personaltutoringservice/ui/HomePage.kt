@@ -93,6 +93,7 @@ fun HomePage(
                 val raTe = entry.value["price"].toString()
                 val profilePic = entry.value["imageUrl"].toString()
                 val loc = entry.value["address"].toString()
+                val rating = entry.value["rating"].toString()
                 Log.d(TAG, "Displaying tutor in home: $fullname")
 
                 Column {
@@ -126,19 +127,18 @@ fun HomePage(
                     .padding(15.dp)
                     .align((Alignment.CenterHorizontally))
             )
-            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                    Image(
-                        painter = painterResource(id = R.drawable.profileimage),
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .size(75.dp)
-                            .clip(CircleShape)
-                            .border(5.dp, Color.White, CircleShape)
-                    )
-                }
-            }
-
+//            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+//                Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.profileimage),
+//                        contentDescription = "Profile Image",
+//                        modifier = Modifier
+//                            .size(75.dp)
+//                            .clip(CircleShape)
+//                            .border(5.dp, Color.White, CircleShape)
+//                    )
+//                }
+//            }
         }
     } else {
         PayTutorPage(

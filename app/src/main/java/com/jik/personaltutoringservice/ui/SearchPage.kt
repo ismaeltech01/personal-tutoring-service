@@ -98,9 +98,27 @@ fun SearchPage(
             priceSortSet = priceSort,
             distanceSortSet = distanceSort,
             ratingSortSet = ratingSort,
-            togglePriceSort = { priceSort = !priceSort },
-            toggleDistanceSort = { distanceSort = !distanceSort },
-            toggleRatingSort = { ratingSort = !ratingSort }
+            togglePriceSort = {
+                priceSort = !priceSort
+                if (priceSort) {
+                    distanceSort = false
+                    ratingSort = false
+                }
+            },
+            toggleDistanceSort = {
+                distanceSort = !distanceSort
+                if (distanceSort) {
+                    priceSort = false
+                    ratingSort = false
+                }
+            },
+            toggleRatingSort = {
+                ratingSort = !ratingSort
+                if (ratingSort) {
+                    priceSort = false
+                    distanceSort = false
+                }
+            }
         )
 
     if (!showTutor) {
@@ -123,7 +141,12 @@ fun SearchPage(
                                     price = priceFilter.toDouble(),
                                     rating = ratingFilter.toDouble(),
                                     available = availableFilter,
-                                    currentEmail = currentEmail
+                                    currentEmail = currentEmail,
+                                    orderBy = getSortingBy(
+                                        price = priceSort,
+                                        distance = distanceSort,
+                                        rating = ratingSort
+                                    )
                                 )
                             }) {
                                 Icon(Icons.Rounded.Search, "Search Icon")
@@ -140,17 +163,18 @@ fun SearchPage(
             }
             item {
                 //Tutors
-                for (pair in tutors) {
-                    val fullName = pair.value["fullName"].toString()
-                    val userName = pair.value["userName"].toString()
-                    val price = pair.value["price"].toString()
-                    val rating = pair.value["rating"].toString()
-                    val available = pair.value["available"] as Boolean
-                    val imageUrl = pair.value["imageUrl"].toString()
-                    val phone = pair.value["phone"].toString()
-                    val email = pair.value["email"].toString()
-                    val address = pair.value["address"].toString()
-                    val uId = pair.key
+                for (i in tutors.indices) {
+                    val tutor = tutors[i]
+                    val fullName = tutor["fullName"].toString()
+                    val userName = tutor["userName"].toString()
+                    val price = tutor["price"].toString()
+                    val rating = tutor["rating"].toString()
+                    val available = tutor["available"] as Boolean
+                    val imageUrl = tutor["imageUrl"].toString()
+                    val phone = tutor["phone"].toString()
+                    val email = tutor["email"].toString()
+                    val address = tutor["address"].toString()
+                    val uId = tutor["uId"].toString()
                     Log.d(TAG, "Displaying user: $fullName")
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -160,6 +184,7 @@ fun SearchPage(
                         userName = userName,
                         imageUrl = imageUrl,
                         rate = price,
+                        rating = rating,
                         onClick = {
                             //onClick
                             tFullName = fullName
@@ -318,5 +343,21 @@ fun SortFilterDialog(
                 }
             }
         }
+    }
+}
+
+fun getSortingBy(
+    price: Boolean,
+    distance: Boolean,
+    rating: Boolean
+) : String {
+    if (price) {
+        return "price"
+    } else if (distance) {
+        return "distance"
+    } else if (rating) {
+        return "rating"
+    } else {
+        return ""
     }
 }
