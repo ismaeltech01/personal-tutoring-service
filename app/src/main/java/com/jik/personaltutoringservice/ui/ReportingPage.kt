@@ -2,6 +2,8 @@ package com.jik.personaltutoringservice.ui
 
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.graphics.drawable.shapes.OvalShape
+import android.graphics.drawable.shapes.Shape
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -12,9 +14,12 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -33,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,8 +89,10 @@ fun ReportingPage(
                     val fullName = ParseFullName(pair.value["fullName"].toString())
                     val userName = pair.value["userName"].toString()
                     val email = pair.value["email"].toString()
+                    val imageUrl = pair.value["imageUrl"].toString()
 
                     ReportUserCard(
+                        picture = imageUrl,
                         fullName = fullName,
                         userName = userName,
                         enableReport = true,
@@ -94,6 +102,7 @@ fun ReportingPage(
                             reportFullNameState = fullName
                             reportUserNameState = userName
                             reportEmailState = email
+                            reportPicState = imageUrl
                         }
                     )
                 }
@@ -114,8 +123,10 @@ fun ReportingPage(
                         val userName = pair.value["userName"].toString()
                         val email = pair.value["email"].toString()
                         val uId = pair.value["uId"].toString()
+                        val imageUrl = pair.value["imageUrl"].toString()
 
                         ReportUserCard(
+                            picture = imageUrl,
                             fullName = fullName,
                             userName = userName,
                             enableReport = true,
@@ -124,6 +135,8 @@ fun ReportingPage(
                                 reportUIDState = pair.key
                                 reportFullNameState = fullName
                                 reportUserNameState = userName
+                                reportEmailState = email
+                                reportPicState = imageUrl
                             }
                         )
                     }
@@ -161,7 +174,7 @@ fun ReportUserCard(
             Row (
                 horizontalArrangement = if (enableReport) Arrangement.Start else Arrangement.Center,
                 verticalAlignment = CenterVertically,
-                modifier = Modifier.weight(if (enableReport) 2 / 3f else 1f)
+                modifier = Modifier.weight(if (enableReport) 3 / 4f else 1f)
             ) {
                 Column (
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -170,6 +183,7 @@ fun ReportUserCard(
                     if (picture == "") {
                         Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
                     } else {
+                        ImageFrame(imageUrl = picture)
                     }
                 }
 
@@ -190,7 +204,7 @@ fun ReportUserCard(
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = CenterVertically,
-                modifier = Modifier.weight(1 / 3f)
+                modifier = Modifier.weight(1 / 4f)
             ) {
                 Button(onClick = onReportClick) {
                     Text("Report")
@@ -229,11 +243,16 @@ fun ReportConfirmPage(
 
         Text("The following user will be reported: ")
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         ReportUserCard(
+            picture = imageUrl,
             fullName = fullName,
             userName = userName,
             enableReport = false
         )
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = textState,
@@ -242,8 +261,12 @@ fun ReportConfirmPage(
             placeholder = { Text(text = "Reasons for reporting...")}
         )
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         Button(
-            modifier = Modifier.background(if (reportState) Color.Red else Color.Transparent),
+            modifier = Modifier
+                .background(if (reportState) Color.Red else Color.Transparent)
+                .clip(CircleShape),
             onClick = {
                 viewModel.ReportUser(
                     fullName = fullName,
