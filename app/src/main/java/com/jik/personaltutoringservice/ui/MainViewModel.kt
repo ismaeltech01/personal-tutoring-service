@@ -128,7 +128,7 @@ class MainViewModel : ViewModel() {
                         UpdateAuthData()
                         FetchUserData()
                         FetchUserBankingInfo()
-                        FetchRelations()
+                            FetchRelations()
                         onSuccess()
                     } else {
                         // If sign in fails, display a message to the user.
@@ -737,7 +737,7 @@ class MainViewModel : ViewModel() {
         piano: Boolean
     ){
         val courseData = mapOf("Math" to math, "Piano" to piano, "Tennis" to tennis, "Coding" to coding, "French" to french)
-        db.collection("courses").document(auth.currentUser?.uid.toString()).update(courseData)
+        db.collection("courses").document(auth.currentUser?.uid.toString()).set(courseData)
     }
     
     fun FireTutor(
