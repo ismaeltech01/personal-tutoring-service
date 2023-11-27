@@ -92,6 +92,8 @@ class MainViewModel : ViewModel() {
     private val _passwordAttempts = MutableStateFlow(0)
     val passwordAttempts = _passwordAttempts.asStateFlow().value
 
+    private val _messages = mutableStateListOf<String>()
+
     /***/
 
     /** Logges In User based on input data.
@@ -620,10 +622,19 @@ class MainViewModel : ViewModel() {
     fun GetChatroom() : String {
         return ""
     }
+
     fun generateConversationId(userId: String, tutorId: String): String {
         val sortedIds = listOf(userId, tutorId).sorted()
         return "${sortedIds[0]}_${sortedIds[1]}"
     }
+
+    fun SendMessage(
+        message: String,
+        sender: String,
+        receiver: String
+    ) {
+    }
+    
     fun fetchMessages(conversationId: String): ArrayList<Message> {
 // TODO: create mutablestateofmap for the messages to display correctly  
         val messageList = ArrayList<Message>()
@@ -681,8 +692,8 @@ class MainViewModel : ViewModel() {
         reason: String,
         onSuccess: () -> Unit
     ) {
-        val data = hashMapOf("fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
-        val id = db.collection("users").document().id
+        val data = mutableMapOf("fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
+        val id = db.collection("reporting").document().id
 
         db.collection("reporting").document(id).set(data)
         onSuccess()
