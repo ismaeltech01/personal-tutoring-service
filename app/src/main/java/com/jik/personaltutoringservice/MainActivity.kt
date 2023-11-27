@@ -153,7 +153,9 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("courses") {
-                            CoursesPage(onSaveChange = {navController.navigate("search")})
+                            CoursesPage(
+                                viewModel = viewModel,
+                                onSaveChange = {navController.navigate("search")})
                         }
                         composable("payments") {
                             PaymentsPage(
@@ -220,7 +222,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("become-tutor") {
-                            BecomeTutorPage(onSubmit = { navController.navigate("profile")})
+                            BecomeTutorPage(
+                                viewModel = viewModel,
+                                onSubmit = { navController.navigate("profile") }
+                            )
                         }
                     }
 

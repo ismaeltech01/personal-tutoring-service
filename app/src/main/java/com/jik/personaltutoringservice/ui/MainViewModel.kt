@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
@@ -706,6 +707,27 @@ class MainViewModel : ViewModel() {
         FetchRelations()
     }
 
+    fun BecomeTutor(
+        availability: String,
+        price: String
+
+        ) {
+
+        val tutorData = mapOf("isTutor" to true, "price" to price, "availability" to availability, "ratings" to "0.0")
+        db.collection("newTutors").document(auth.currentUser?.uid.toString()).update(tutorData)
+    }
+
+    fun Course(
+        math: Boolean,
+        coding: Boolean,
+        tennis: Boolean,
+        french: Boolean,
+        piano: Boolean
+    ){
+        val courseData = mapOf("Math" to math, "Piano" to piano, "Tennis" to tennis, "Coding" to coding, "French" to french)
+        db.collection("courses").document(auth.currentUser?.uid.toString()).update(courseData)
+    }
+    
     fun FireTutor(
         tutorEmail: String
     ) {
