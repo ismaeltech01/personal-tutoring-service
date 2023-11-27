@@ -18,6 +18,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.jik.personaltutoringservice.ui.AdsPage
 import com.jik.personaltutoringservice.ui.BecomeTutorPage
 import com.jik.personaltutoringservice.ui.CoursesPage
 import com.jik.personaltutoringservice.ui.HomePage
@@ -37,7 +38,6 @@ import com.jik.personaltutoringservice.ui.theme.PersonalTutoringServiceTheme
 
 //MainActivity is were main app is loaded
 class MainActivity : ComponentActivity() {
-//    private lateinit var auth: FirebaseAuth;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val loggedIn by viewModel.loggedInState.collectAsState()
             val fullName by viewModel.fullNameState.collectAsState()
-            val userName by viewModel.userName.collectAsState()
+            val userName by viewModel.userNameState.collectAsState()
             val email by viewModel.emailState.collectAsState()
             val phone by viewModel.phoneState.collectAsState()
             val address by viewModel.addressState.collectAsState()
@@ -88,15 +88,18 @@ class MainActivity : ComponentActivity() {
                         composable("home") {
                             HomePage(
                                 modifier = pageModifier,
-                                tutors = tutors,
+//                                tutors = tutors,
                                 onEditCard = { navController.navigate("payments") },
                                 viewModel = viewModel,
-                                activity = this@MainActivity
+                                activity = this@MainActivity,
+                                onSigninClick = { navController.navigate("profile") },
+                                loggedIn = loggedIn
                             )
                         }
                         composable("search") {
                             SearchPage(
-                                mainVM = viewModel
+                                mainVM = viewModel,
+                                currentEmail = email
                             )
                         }
                         composable("profile") {
@@ -121,8 +124,12 @@ class MainActivity : ComponentActivity() {
                         composable("messaging") {
                             MessagingPage(
                                 userName = userName,
+                                email = email,
                                 tutors = tutors,
-                                viewModel = viewModel
+                                viewModel = viewModel,
+                                modifier = pageModifier,
+                                onToSearch = { navController.navigate("search") },
+                                context = this@MainActivity
                             )
                         }
                         composable("other") {
@@ -161,7 +168,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("ads") {
-
+                            AdsPage(
+                                viewModel = viewModel,
+                                onExit = {navController.navigate("profile")},
+                            )
                         }
                         composable("settings") {
                             SettingsPage(
@@ -189,7 +199,7 @@ class MainActivity : ComponentActivity() {
                         composable("login") {
                             LoginPage(viewModel,
                                 this@MainActivity,
-                                navigate = { navController.navigate("profile") },
+                                navigateSuccess = { navController.navigate("profile") },
                                 onResetPassword = {
                                     navController.navigate("login")
 

@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,7 @@ class MainViewModel : ViewModel() {
     val uidState = _uid.asStateFlow()
 
     private val _userName = MutableStateFlow("Guest")
-    val userName = _userName.asStateFlow()
+    val userNameState = _userName.asStateFlow()
 
     private val _email = MutableStateFlow("")
     val emailState = _email.asStateFlow()
@@ -66,6 +67,7 @@ class MainViewModel : ViewModel() {
 
     private val _tutors = mutableStateMapOf<String, Map<String, String>>()
     val tutorsState = _tutors
+    val tutors = tutorsState.entries
 
     private val _clients = mutableStateMapOf<String, Map<String, String>>()
     val clientsState = _clients
@@ -88,8 +90,9 @@ class MainViewModel : ViewModel() {
     private val _imageUrl = MutableStateFlow("")
     val imageUrl = _imageUrl.asStateFlow()
 
-    private val _searchTutors = mutableStateMapOf<String, Map<String, String>>()
-    val searchTutors = _searchTutors
+    private val _passwordAttempts = MutableStateFlow(0)
+    val passwordAttempts = _passwordAttempts.asStateFlow().value
+
     /***/
 
     /** Logges In User based on input data.
@@ -99,9 +102,13 @@ class MainViewModel : ViewModel() {
      * @param [password] User's Password
      * @param [activity] The Activity passed to the auth function (should be MainActivity)
      * */
-    fun LogIn(email: String?, password: String, activity: Activity): Int {
-        var result = 0
-
+    fun LogIn(
+        email: String?,
+        password: String,
+        activity: Activity,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
         if (email == "" || password == "") {
             Toast.makeText(
                 activity,
@@ -119,6 +126,7 @@ class MainViewModel : ViewModel() {
                         FetchUserData()
                         FetchUserBankingInfo()
                         FetchRelations()
+                        onSuccess()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -128,11 +136,10 @@ class MainViewModel : ViewModel() {
                             Toast.LENGTH_LONG,
                         ).show()
 
-                        result = -1
+                        onFailure()
                     }
                 }
         }
-        return result
     }
 
     /** Registers User based on input data.
@@ -154,10 +161,10 @@ class MainViewModel : ViewModel() {
         password: String,
         activity: Activity,
         selectedOption: String,
-        answer: String
-    ): Int {
+        answer: String,
+        onRegister: () -> Unit
+    ) {
         //Returns -1 if registration failed, otherwise returns 0 on success
-        var result = 0
 
         if (firstName == "" || lastName == "" || userName == "" || phone == "" || address == "" || email == "" || password == "") {
             Toast.makeText(
@@ -165,7 +172,6 @@ class MainViewModel : ViewModel() {
                 "One or more fields are empty.",
                 Toast.LENGTH_SHORT,
             ).show()
-            result = -1
         } else {
             auth.createUserWithEmailAndPassword(email.toString(), password)
                 .addOnCompleteListener(activity) { task ->
@@ -184,7 +190,8 @@ class MainViewModel : ViewModel() {
                             address = address,
                             imageUrl = "https://static.wikia.nocookie.net/fictionalcrossover/images/0/0c/Bugdroid.png/revision/latest?cb=20161215134435"
                         )
-                        UpdateSecQuestion(question = selectedOption, answer = answer)
+                        UpdateSecQuestion(email = email.toString(), question = selectedOption, answer = answer)
+                        onRegister()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.exception)
@@ -196,8 +203,6 @@ class MainViewModel : ViewModel() {
                     }
                 }
         }
-
-        return result
     }
 
     /** Signs Out currently logged in user
@@ -206,7 +211,6 @@ class MainViewModel : ViewModel() {
         AuthUI.getInstance()
             .signOut(activity)
             .addOnCompleteListener {
-                //TODO: Display popup that signout was successful
                 RestoreDefaults()
             }
     }
@@ -230,7 +234,6 @@ class MainViewModel : ViewModel() {
     fun UpdateAuthData() {
         _loggedIn.value = auth.currentUser != null
         if (loggedInState.value) {
-            _userName.value = auth.currentUser?.displayName.toString()
             _email.value = auth.currentUser?.email.toString()
             _uid.value = auth.currentUser?.uid.toString()
         }
@@ -296,6 +299,7 @@ class MainViewModel : ViewModel() {
 
                 db.collection("users").document(uidState.value).update("userName", userName)
                 _userName.value = userName.toString()
+                Log.d(TAG, "User Name: ${userNameState.value}")
             }
 
             if (phone != "") {
@@ -328,18 +332,13 @@ class MainViewModel : ViewModel() {
     }
 
     fun UpdateSecQuestion(
+        email: String,
         question: String,
         answer: String
     ) {
-        //val data = mapOf("secQuestion" to question, "secAnswer" to answer)
-        if (uidState.value != "") {
-            db.collection("users").document(uidState.value)
-                .update("secQuestion", question, "secAnswer", answer)
-        } else {
-            Log.e(TAG, "Error: uidState is empty")
-            db.collection("users").document(auth.uid.toString())
-                .update("secQuestion", question, "secAnswer", answer)
-        }
+        val data = mapOf("email" to email, "secQuestion" to question, "secAnswer" to answer)
+
+        db.collection("secQuestions").document(auth.currentUser?.uid.toString()).update(data)
     }
 
     fun isCorrectSecQuestion(
@@ -353,6 +352,11 @@ class MainViewModel : ViewModel() {
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
                     Log.d(TAG, "FetchUserData:failure -> No document found.")
+                    Toast.makeText(
+                        activity,
+                        "An account with the email does not exist.",
+                        Toast.LENGTH_LONG,
+                    ).show()
                 } else {
                     for (doc in documents) {
                         val secQuestion = doc.data?.get("secQuestion").toString()
@@ -431,13 +435,16 @@ class MainViewModel : ViewModel() {
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                        val data = document.data
 
                         //Update state values (Used in app)
                         //* Update user info
-                        _fullName.value = document.data?.get("fullName").toString()
-                        _phone.value = document.data?.get("phone").toString()
-                        _address.value = document.data?.get("address").toString()
-                        _imageUrl.value = document.data?.get("imageUrl").toString()
+                        _fullName.value = data?.get("fullName").toString()
+                        _userName.value = data?.get("userName").toString()
+                        _phone.value = data?.get("phone").toString()
+                        _address.value = data?.get("address").toString()
+                        _imageUrl.value = data?.get("imageUrl").toString()
+                        _isTutor.value = data?.get("isTutor") as Boolean
                     } else {
                         Log.d(TAG, "FetchUserData:failure -> No document found.")
                     }
@@ -567,19 +574,11 @@ class MainViewModel : ViewModel() {
             return -1
         }
 
-//        var tutorCardNum = ""
-//        var tutorExpDate = ""
-//        var tutorSecCode = ""
-
-//        if (!ConfirmBankingInfo(tutorCardNum, tutorExpDate, tutorSecCode)) {
-//            Log.e(TAG, "Error in InitTransaction: Tutor (userName: $payeeUserName) card info not valid")
-//            return -2
-//          }
         return if (rate == BigDecimal.ZERO) {
             Log.w(TAG, "Error in InitTransaction:tutorRate is 0")
             -3
         } else {
-            ProfitManagement(tutorRate.value.multiply(hours))
+            ProfitManagement(rate.multiply(hours))
             0
         }
     }
@@ -596,14 +595,16 @@ class MainViewModel : ViewModel() {
     fun ProfitManagement(
         total : BigDecimal
     ) {
+        Log.d(TAG, "$total")
         val appProfit = commission.multiply(total)
         val uidString = auth.currentUser?.uid.toString()
 
         db.collection("banking").document("app").get()
             .addOnSuccessListener { doc ->
-                val profit = doc.data?.get("profit").toString()
+                val profit = doc.data?.get("profits").toString()
+                Log.d(TAG, "Profit: $profit")
                 val newProfit = BigDecimal(profit).add(appProfit)
-                Log.d(TAG, "App Profit: ${newProfit.toString()}")
+                Log.d(TAG, "App Profit: $appProfit")
                 db.collection("banking").document("app").update("profits", newProfit.toString())
             }
             .addOnFailureListener { exception ->
@@ -612,28 +613,6 @@ class MainViewModel : ViewModel() {
 
         val tProfit = total.subtract(appProfit).setScale(2)
         _tutorProfit.value = tProfit
-
-//        db.collection("users").document(uidString).update("profit", tProfit)
-        //TODO: Add way to show a tutor's profit
-    }
-
-    /**
-     * Function used to search for tutors in database.
-     *
-     * @return A list of tutors and their attributes as key-value pairs
-     * */
-    fun SearchTutors(
-        price: Int,
-        distance: Int,
-        rating: Int,
-        available: Boolean,
-    ) : Map<String, Map<String, String>> {
-        //TODO
-        val searched : MutableMap<String, Map<String, String>> = mutableMapOf()
-        Log.d(TAG, "Searching tutors....")
-
-
-        return searched
     }
 
     /**
@@ -642,31 +621,89 @@ class MainViewModel : ViewModel() {
     fun GetChatroom() : String {
         return ""
     }
-    fun SendMessage(
-        message: String,
-        sender: String,
-        receiver: String
-    ) {
+    fun generateConversationId(userId: String, tutorId: String): String {
+        val sortedIds = listOf(userId, tutorId).sorted()
+        return "${sortedIds[0]}_${sortedIds[1]}"
+    }
+    fun fetchMessages(conversationId: String): ArrayList<Message> {
+// TODO: create mutablestateofmap for the messages to display correctly  
+        val messageList = ArrayList<Message>()
+        db.collection("conversations")
+            .document(conversationId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .get()
+            .addOnSuccessListener{ docs ->
+//                if (docs.isEmpty) {
+//                    Log.w(TAG, "message retrieval failed: $docs")
+//                }
+
+
+                for ( doc in docs ) {
+                    val message = doc.toObject(Message::class.java)
+
+                    messageList.add(message)
+                }
+
+                // Update UI with messageList
+            }
+
+        return messageList
     }
 
+
+    fun sendMessage( messageText: String, senderId: String, receiverId: String ) {
+        val message = hashMapOf(
+            "senderId" to senderId,
+            "receiverId" to receiverId,
+            "messageText" to messageText,
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+
+        val cID = generateConversationId(senderId,receiverId)
+
+        db.collection("conversations")
+            .document(cID)
+            .collection("messages")
+            .add(message)
+            .addOnSuccessListener { documentReference ->
+                Log.d(TAG, "Message sent with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error sending message", e)
+            }
+    }
+
+
     fun ReportUser(
-        uid : String,
         fullName: String,
         userName: String,
         email: String,
-        reason: String
+        reason: String,
+        onSuccess: () -> Unit
     ) {
-        val data = mapOf("uId" to uid, "fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
+        val data = hashMapOf("fullName" to fullName, "userName" to userName, "email" to email, "reported" to true, "reason" to reason)
+        val id = db.collection("users").document().id
 
-        db.collection("reporting").document(uid).set(data)
+        db.collection("reporting").document(id).set(data)
+        onSuccess()
     }
 
+    //NOTE: Will crash if tutorId is empty
     fun HireTutor(
-        hireEmail: String
+        hireEmail: String,
+        tutorId: String
     ) {
         val uidString = auth.currentUser?.uid.toString()
 
+        val email = auth.currentUser?.email.toString()
+
+        val messageData = mapOf("UserId1" to email, "UserId2" to hireEmail, "messages" to "", "timestamp" to FieldValue.serverTimestamp())
+
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayUnion(hireEmail))
+        db.collection("relations").document(tutorId).update("clients", FieldValue.arrayUnion(hireEmail))
+//        db.collection("conversations").document(generateConversationId(email,hireEmail)).set(mapOf("init" to true))
+//        db.collection("conversations").document(generateConversationId(email,hireEmail)).collection("messages").add(messageData)
         FetchRelations()
     }
 
@@ -689,6 +726,53 @@ class MainViewModel : ViewModel() {
     ){
         val courseData = mapOf("Math" to math, "Piano" to piano, "Tennis" to tennis, "Coding" to coding, "French" to french)
         db.collection("courses").document(auth.currentUser?.uid.toString()).update(courseData)
+    }
+    
+    fun FireTutor(
+        tutorEmail: String
+    ) {
+        val uidString = auth.currentUser?.uid.toString()
+        Log.d(TAG, "tutorEmail: $tutorEmail")
+        //Might crash or cause errors if tutorEmail is empty or is not present in array
+        db.collection("relations").document(uidString).update("tutors", FieldValue.arrayRemove(tutorEmail))
+        FetchTutorsRelations()
+
+//        val data = mapOf("email" to emailState.value)
+//        val bankingData = mapOf("cardNum" to cardNumState.value, "expDate" to expDateState.value, "secCode" to secCodeState.value)
+//        val relationsData = mapOf("tutors" to listOf<String>(), "clients" to listOf<String>())
+//
+//        db.collection("users").document(uidState.value).set(data)
+//        db.collection("banking").document(uidState.value).set(bankingData)
+//        db.collection("relations").document(uidState.value).set(mapOf("init" to true))
+//        db.collection("relations").document(uidState.value).set(relationsData)
+    }
+
+    fun ResetPassword(email: String) {
+        auth.sendPasswordResetEmail(email)
+    }
+
+    /**
+     * Re-Authenticates for profile and user data changes
+     * */
+    fun ReAuthenticate(password: String, activity: Activity) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(activity) { task ->
+                if (task.isSuccessful) {
+                    Log.d(TAG, "reauthenticated: ${auth.currentUser?.email}")
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w(TAG, "signInWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        activity,
+                        "Authentication failed.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
+    }
+
+    fun createAnAdd(msg: String, toString: String) {
+
     }
 
 }

@@ -2,11 +2,15 @@ package com.jik.personaltutoringservice.ui
 
 //import android.content.IntentSender
 //Thew flag for unused
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.MailOutline
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -25,54 +30,106 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.jik.personaltutoringservice.R
 
-data class Message(val sender: String, val body: String)
-val MessageList = listOf(
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far"),
-    Message("Joseph","Seems to be working wonderful so far")
-)
+data class Message(
+    var messageText: String? = null,
+    var receiverID: String? = null,
+    var senderID: String? = null,
+    var timestamp: java.util.Date? = null)
+
+
+
 
 @Composable
 fun MessagingPage(
     userName: String,
+    email: String,
     tutors: Map<String, Map<String, String>>,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    modifier: Modifier,
+    onToSearch: () -> Unit,
+    context: Context
 ) {
     var receiver by remember { mutableStateOf("") }
     var showChatroom by remember { mutableStateOf(false) }
 
-    if (!showChatroom) {
-        LazyColumn() {
-            item {
-                for (entry in tutors) {
-                    val tutorId = entry.key
-                    val values = entry.value
+    if (tutors.isNotEmpty()) {
+        if (!showChatroom) {
+            LazyColumn(
+                modifier = modifier.padding(15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    for (entry in tutors) {
+                        val tutorId = entry.key
+                        val values = entry.value
+                        val userName = entry.value["userName"].toString()
+                        val imgUrl = entry.value["imageUrl"].toString()
+                        val fullName = entry.value["fullName"].toString()
 
-                    Button(onClick = {
-                        receiver = values["userName"].toString()
-                    }) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ImageFrame(imageUrl = imgUrl)
+                            Spacer(modifier = Modifier.width(10.dp))
 
-                        //Contains User card that on clicked, would take you to the relevant chatroom
+                            Column {
+                                Column {
+                                    Text(text = ParseFullName(fullName), fontSize = 20.sp)
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Row {
+                                        Icon(Icons.Rounded.Person, "Person icon")
+                                        Text(userName)
+                                    }
+                                }
+
+                                Button(onClick = {
+                                    receiver = userName
+                                    showChatroom = true
+                                }) {
+                                    Row {
+                                        Icon(Icons.Rounded.MailOutline, "Message Icon")
+                                        Text(text = "Message")
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+        } else {
+            ChatRoom(
+                sender = email,
+                receiver = receiver,
+                viewModel = viewModel,
+                context = context
+            )
         }
     } else {
-        ChatRoom(sender = userName, receiver = receiver, viewModel = viewModel)
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(text = "You have not hired any tutors.")
+            Button(onClick = onToSearch) {
+                Text("Search Tutors")
+            }
+        }
     }
 }
 
@@ -80,24 +137,59 @@ fun MessagingPage(
 fun ChatRoom(
     sender: String,
     receiver: String,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    context: Context
 ) {
     var messageIn by remember { mutableStateOf("") }
+    var displayMonitorDialog by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
-        value = messageIn,
-        onValueChange = { messageIn = it },
-        label = { Text("Message") },
-        keyboardOptions = KeyboardOptions.Default,
-        trailingIcon = {
+    Column (
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column (
+            modifier = Modifier
+                .weight(.7f)
+        ) {
+//            crashes app when trying to display
+            MessagingThread(messageList = viewModel.fetchMessages(viewModel.generateConversationId(sender,receiver)))
 
-            IconButton(onClick = {
-                viewModel.SendMessage(message = messageIn, sender = "", receiver = "")
-            }) {
-                Icon(Icons.Rounded.Send, "Send Icon")
-            }
         }
-    )
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(.95f)
+                .weight(.1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = messageIn,
+                onValueChange = { messageIn = it },
+                label = { Text("Message") },
+                keyboardOptions = KeyboardOptions.Default,
+                trailingIcon = {
+
+                    IconButton(onClick = {
+                        ScanText(
+                            text = messageIn,
+                            onBannedDetect = {
+                                displayMonitorDialog = true
+                            },
+                            onValidDetect = {
+                                viewModel.sendMessage(messageIn, sender, receiver)
+                            }
+                        )
+                    }) {
+                        Icon(Icons.Rounded.Send, "Send Icon")
+                    }
+                }
+            )
+        }
+    }
+
+    if (displayMonitorDialog) {
+        MonitoringWarningDialog(onDismiss = {}) { displayMonitorDialog = false }
+    }
 }
 @Composable
         /*
@@ -117,12 +209,12 @@ fun MessagingCard(msg: Message) {
         Spacer(modifier = Modifier.width(6.dp))
 
         Column {
-            Text(text = msg.sender,
+            Text(text = msg.senderID.toString(),
                 style = MaterialTheme.typography.titleSmall)
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            Text(text = msg.body,
+            Text(text = msg.messageText.toString(),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(all = 3.dp))
         }
@@ -147,6 +239,5 @@ fun MessagingThread(messageList : List<Message>){
 )
 @Composable
 fun PreviewMC() {
-    MessagingThread(messageList = MessageList)
 
 }

@@ -44,6 +44,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,12 +62,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
 import java.io.File
+import java.time.Duration
 
 @Composable
 fun LoginPage(
     viewModel: MainViewModel,
     activity: Activity,
-    navigate: () -> Unit,
+    navigateSuccess: () -> Unit,
     onResetPassword: () -> Unit,
     onExit : () -> Unit,
     onSecQExit: () -> Unit
@@ -81,11 +83,11 @@ fun LoginPage(
 
     var passwordReset by remember { mutableStateOf(false) }
 
-    var loginAttempts by remember { mutableStateOf(0) }
+    var loginAttempts by remember { mutableIntStateOf(0) }
 
     ExitBar { onExit() }
 
-    if (!passwordReset) {
+    if (!passwordReset && loginAttempts < 3) {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -134,13 +136,12 @@ fun LoginPage(
                             Toast.LENGTH_LONG,
                         ).show()
                     } else {
-                        val res = viewModel.LogIn(emailState, passwdState, activity)
-                        if (res != -1) {
-                            navigate()
-                        } else {
-                            loginAttempts += 1
-                            passwordReset = true
-                        }
+                        viewModel.LogIn(
+                            email = emailState,
+                            password = passwdState,
+                            activity = activity,
+                            onSuccess = { navigateSuccess() },
+                            onFailure = { loginAttempts += 1 })
                     }
                 })
                 {
@@ -154,6 +155,8 @@ fun LoginPage(
                     .clickable(onClick = {passwordReset = true})
             )
         }
+    } else if (!passwordReset) {
+        ResetPasswordDialog { passwordReset = true }
     } else {
         /** If user clicks the forgot password option */
         SeqQPassResetPage(
@@ -162,7 +165,8 @@ fun LoginPage(
             onResetPassword = onResetPassword,
             onCancel = onExit,
             onExit = { passwordReset = false },
-            loginAttempts = loginAttempts
+            loginAttempts = loginAttempts,
+            emailIn = emailState
         )
     }
 }
@@ -371,7 +375,7 @@ fun RegisterPage(
                             } else if (selectedOption == "") {
                                 Log.e(TAG, "Error: selectedOption is empty")
                             } else {
-                                val res = viewModel.Register(
+                                viewModel.Register(
                                     firstName = firstNameState,
                                     middleName = middleNameState,
                                     lastName = lastNameState,
@@ -382,12 +386,9 @@ fun RegisterPage(
                                     password = passwordState,
                                     activity = activity,
                                     selectedOption = selectedOption,
-                                    answer = answer
+                                    answer = answer,
+                                    onRegister = { onRegisterNavigate() }
                                 )
-
-                                if (res != -1) {
-                                    onRegisterNavigate()
-                                }
                             }
                         }) {
                             Text("Submit")
@@ -667,20 +668,22 @@ fun SeqQPassResetPage(
     onResetPassword : () -> Unit,
     onExit : () -> Unit,
     onCancel : () -> Unit,
-    loginAttempts : Int
+    loginAttempts : Int,
+    emailIn: String
 ) {
     var expanded by remember { mutableStateOf(false) }
     val options = getSecQuestions()
     var selectedOption by remember { mutableStateOf(options[0]) }
     var answer by remember { mutableStateOf("") }
     var passwordReset by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(emailIn) }
 
     if (loginAttempts < 3) ExitBar { onExit() }
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
     ) {
 
         Text(text = "Reset Password", fontSize = 15.sp, fontWeight = FontWeight.Bold)
@@ -786,7 +789,25 @@ fun SeqQPassResetPage(
                 }
             }
         } else {
-            ResetPasswordPage(viewModel = viewModel, activity = activity) { onResetPassword() }
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Click send to receive a password reset link in your email.",
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Button(onClick = {
+                    viewModel.ResetPassword(email = email)
+                }) {
+                    Text(text = "Send Link")
+                }
+            }
+//            ResetPasswordPage(email = email, viewModel = viewModel, activity = activity) { onResetPassword() }
         }
     }
 }
@@ -800,12 +821,14 @@ fun SeqQPassResetPagePreview() {
         onCancel = {},
         onExit = {},
         onResetPassword = {},
-        loginAttempts = 0
+        loginAttempts = 0,
+        emailIn = ""
     )
 }
 
 @Composable
 fun ResetPasswordPage(
+    email: String,
     viewModel : MainViewModel,
     activity : Activity,
     onResetPassword: () -> Unit
@@ -827,7 +850,8 @@ fun ResetPasswordPage(
 
     Button(onClick = {
         if (ValidatePassword(password = password, confirm = confirm, activity = activity)) {
-            viewModel.UpdateUserData(password = password)
+            Log.d(TAG, "Updating Password....")
+//            viewModel.UpdateUserData(password = password)
             onResetPassword()
         }
     }) {

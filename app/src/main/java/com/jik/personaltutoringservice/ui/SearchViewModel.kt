@@ -23,7 +23,8 @@ class SearchViewModel : ViewModel() {
         name: String,
         price: Double,
         rating: Double,
-        available: Boolean
+        available: Boolean,
+        currentEmail: String
     ) {
         tutors.clear()
         db.collection("users")
@@ -35,13 +36,15 @@ class SearchViewModel : ViewModel() {
                     val docName = ParseFullName(doc.data["fullName"].toString())
                     val docPrice = doc.data["price"]
                     val docRating = doc.data["rating"]
+                    val docEmail = doc.data["email"]
 
                     Log.d(ContentValues.TAG, "${doc.id} => ${doc.data}")
                     if (docPrice != null && docRating != null) {
                         if (
                             docName.contains(name, true) &&
                             docPrice.toString().toDouble() <= price &&
-                            docRating.toString().toDouble() >= rating
+                            docRating.toString().toDouble() >= rating &&
+                            docEmail.toString() != currentEmail
                             ) {
                             addTutor(doc.id, doc.data as Map<String, String>)
                             Log.d(ContentValues.TAG, "Added user: ${doc.id}")

@@ -6,6 +6,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,20 +43,36 @@ val HomePageModifier = Modifier
     .fillMaxHeight(.85f)
     .fillMaxWidth()
 
-// TODO: I need to make the icons clickable and either take them to something
 @Composable
 fun HomePage(
     modifier: Modifier,
-    tutors: Map<String, Map<String, String>>,
     onEditCard: () -> Unit,
     viewModel: MainViewModel,
-    activity: Activity
+    activity: Activity,
+    loggedIn: Boolean,
+    onSigninClick: () -> Unit
 ) {
     var showPayPage by remember { mutableStateOf(false) }
     var tutorRate by remember { mutableStateOf("") }
     var tutorEmail by remember { mutableStateOf("") }
+    var tutorName by remember { mutableStateOf("") }
+    var displayFireDialog by remember { mutableStateOf(false) }
 
-    if (!showPayPage) {
+    if (!loggedIn) {
+        Column (
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Please Signin to hire tutors")
+            Spacer(modifier = Modifier.height(5.dp))
+            Button(
+                onClick = onSigninClick
+            ) {
+                Text("Signin")
+            }
+        }
+    } else if (!showPayPage) {
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -68,7 +86,7 @@ fun HomePage(
                     .align(Alignment.CenterHorizontally)
             )
 
-            for (entry in tutors) {
+            for (entry in viewModel.tutors) {
                 val fullname = entry.value["fullName"].toString()
                 val userName = entry.value["userName"].toString()
                 val email = entry.value["email"].toString()
@@ -85,39 +103,21 @@ fun HomePage(
                         imageUrl = profilePic,
                         isHome = true,
                         location = loc,
-                        //TODO: what to do when user decides to fire tutor
-                        onFire = {  },
+                        onFire = {
+                            tutorName = ParseFullName(fullname)
+                            displayFireDialog = true
+                            tutorEmail = email
+                        },
                         onPay = {
                             showPayPage = true
                             tutorRate = raTe
                             tutorEmail = email
                         }
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
 
-
-//        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-//             for(entry in tutors) {
-//                 val fullname = ParseFullName(entry.value["fullName"].toString())
-//
-//                 Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-//                     Image(
-//                         painter = painterResource(id = R.drawable.profileimage),
-//                         contentDescription = "Profile Image",
-//                         modifier = Modifier
-//                             .size(75.dp)
-//                             .clip(CircleShape)
-//                             .border(5.dp, Color.White, CircleShape)
-//                     )
-//
-//                     Text(text = fullname)
-//                 }
-//                 Spacer(modifier = Modifier.width(5.dp))
-//
-//
-//             }
-//        }
             Text(
                 text = "Suggested",
                 fontSize = 25.sp,
@@ -127,7 +127,6 @@ fun HomePage(
                     .align((Alignment.CenterHorizontally))
             )
             Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-// TODO: Add functionally that integrated with advertisment to display tutors in catogories intreseted in
                 Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                     Image(
                         painter = painterResource(id = R.drawable.profileimage),
@@ -137,10 +136,6 @@ fun HomePage(
                             .clip(CircleShape)
                             .border(5.dp, Color.White, CircleShape)
                     )
-                    /*
-this is going to be where the name of suggested tutor are displayed after advertisements are made
- */
-//                Text(text = fullname)
                 }
             }
 
@@ -156,5 +151,14 @@ this is going to be where the name of suggested tutor are displayed after advert
             viewModel = viewModel,
             activity = activity
         )
+    }
+
+    if (displayFireDialog) {
+        FireDialog(
+            fullName = tutorName
+        ) {
+            viewModel.FireTutor(tutorEmail)
+            displayFireDialog = false
+        }
     }
 }

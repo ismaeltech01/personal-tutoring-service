@@ -1,6 +1,7 @@
 package com.jik.personaltutoringservice.ui
 
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -38,7 +39,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jik.personaltutoringservice.MainActivity
 import com.jik.personaltutoringservice.R
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStreamReader
 import java.util.regex.Pattern
 
 @Composable
@@ -49,17 +53,11 @@ fun ReportingPage(
     viewModel: MainViewModel
 ) {
     var confirmState by remember { mutableStateOf(false) }
-
     var reportUIDState by remember { mutableStateOf("") }
-
     var reportPicState by remember { mutableStateOf("") }
-
     var reportFullNameState by remember { mutableStateOf("") }
-
     var reportUserNameState by remember { mutableStateOf("") }
-
     var reportEmailState by remember { mutableStateOf("") }
-
 
     if (tutors.isEmpty()) {
         Column(
@@ -114,6 +112,8 @@ fun ReportingPage(
                     for (pair in clients) {
                         val fullName = ParseFullName(pair.value["fullName"].toString())
                         val userName = pair.value["userName"].toString()
+                        val email = pair.value["email"].toString()
+                        val uId = pair.value["uId"].toString()
 
                         ReportUserCard(
                             fullName = fullName,
@@ -158,7 +158,6 @@ fun ReportUserCard(
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
-//        if (enableReport) {
             Row (
                 horizontalArrangement = if (enableReport) Arrangement.Start else Arrangement.Center,
                 verticalAlignment = CenterVertically,
@@ -171,7 +170,6 @@ fun ReportUserCard(
                     if (picture == "") {
                         Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
                     } else {
-                        //TODO
                     }
                 }
 
@@ -199,23 +197,6 @@ fun ReportUserCard(
                 }
             }
         }
-//        } else {
-//            Column (
-//                horizontalAlignment = Alignment.Start,
-//                verticalArrangement = Arrangement.Center
-//            ) {
-//                if (picture == "") {
-//                    Image(Icons.Rounded.AccountCircle, "$fullName's profile picture")
-//                } else {
-//                    //TODO
-//                }
-//
-//                Text(fullName)
-//                Row {
-//                    Image(Icons.Rounded.Person, "UserName icon")
-//                    Text(userName)
-//                }
-//            }
     }
 }
 
@@ -265,13 +246,12 @@ fun ReportConfirmPage(
             modifier = Modifier.background(if (reportState) Color.Red else Color.Transparent),
             onClick = {
                 viewModel.ReportUser(
-                    uid = uid,
                     fullName = fullName,
                     userName = userName,
                     email = email,
-                    reason = textState
+                    reason = textState,
+                    onSuccess = { reportState = true }
                 )
-                reportState = true
             },
             enabled = !reportState
         ) {
@@ -300,23 +280,31 @@ fun ReportConfirmPagePreview() {
  * @return true if the input text is valid (no banned words detected), false otherwise
  * */
 fun ScanText(
-    text : String
-) : Boolean {
-    var isValid : Boolean = true
+    text : String,
+    onBannedDetect: () -> Unit,
+    onValidDetect: () -> Unit
+) {
     val lowerCased = text.lowercase()
-    val file = File("/java/com/jik/personaltutoringservice/ui/data/bannedWords.txt")
+    val bannedWords = Data().bannedWords
 
-    file.forEachLine {
-        val matches = Pattern.matches("\\b$it\\b", lowerCased)
-        isValid = !matches
-        if (matches) Log.w(TAG, "Banned Word detected: $it")
+    for (i in bannedWords.indices) {
+        val bannedWord = bannedWords[i]
+        var wordList = lowerCased.split(" ").toMutableList()
+
+        for (i in wordList.indices) {
+            val word = wordList[i]
+            wordList[i] = word
+                .replace("!", "")
+                .replace("?", "")
+                .replace(".", "")
+        }
+
+        if (wordList.contains(bannedWord)) {
+            Log.w(TAG, "Banned Word detected: $bannedWord")
+            onBannedDetect()
+            return
+        }
     }
 
-    return isValid
+    onValidDetect()
 }
-
-//@Preview
-//@Composable
-//fun ReportingPagePreview() {
-//    ReportingPage()
-//}

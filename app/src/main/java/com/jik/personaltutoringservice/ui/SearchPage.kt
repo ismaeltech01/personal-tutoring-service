@@ -55,13 +55,11 @@ import com.google.firebase.ktx.Firebase
 @Composable
 fun SearchPage(
     mainVM: MainViewModel,
-    searchVM: SearchViewModel = viewModel()
+    searchVM: SearchViewModel = viewModel(),
+    currentEmail: String
 ) {
     val tutors = searchVM.tutors
     var searchIn by remember { mutableStateOf("") }
-    //NOTE: searchedTutors might cause issues since a map might not be observable
-//    var searchedTutors by remember { mutableStateListOf<Map<String, String>>() }
-//    var searchedTutors by remember { mutableStateMapOf<String, Map<String, String>>() }
     var showDialog by remember { mutableStateOf(false) }
     //Filtering
     var priceFilter by remember { mutableIntStateOf(120) }
@@ -73,7 +71,6 @@ fun SearchPage(
     var priceSort by remember { mutableStateOf(false) }
     var distanceSort by remember { mutableStateOf(false) }
     var ratingSort by remember { mutableStateOf(false) }
-//    var searchResults by remember { mutableStateMapOf<String, Map<String, String>>(dummyVal) }
     var showTutor by remember { mutableStateOf(false) }
     var tFullName by remember { mutableStateOf("") }
     var tUserName by remember { mutableStateOf("") }
@@ -125,7 +122,8 @@ fun SearchPage(
                                     name = searchIn,
                                     price = priceFilter.toDouble(),
                                     rating = ratingFilter.toDouble(),
-                                    available = availableFilter
+                                    available = availableFilter,
+                                    currentEmail = currentEmail
                                 )
                             }) {
                                 Icon(Icons.Rounded.Search, "Search Icon")
