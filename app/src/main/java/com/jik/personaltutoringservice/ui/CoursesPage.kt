@@ -47,25 +47,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-
 //NOTE: This page is just a test. Can be removed or kept if desired
 @Composable
 fun CoursesPage(
-
     viewModel : MainViewModel,
-    onSaveChange: () -> Unit){
-
+    onSaveChange: () -> Unit
+){
     var checkedStateMath by remember { mutableStateOf(false) }
     var checkedStatePiano by remember { mutableStateOf(false) }
     var checkedStateFrench by remember { mutableStateOf(false) }
     var checkedStateCoding by remember { mutableStateOf(false) }
     var checkedStateTennis by remember { mutableStateOf(false)}
-
-
-//NOTE: This page is just a test. Can be removed or kept if desired
-@Composable
-fun CoursesPage(){
-
     val scrollState = rememberScrollState()
 
     LazyColumn(
@@ -131,54 +123,6 @@ fun CoursesPage(){
             }
         }
     }
-
-        Text("Course",
-            fontSize = 40.sp)
-        Text("Page",
-            fontSize = 40.sp)
-
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("Math")
-        }
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("Piano")
-        }
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("French")
-        }
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("Coding")
-        }
-        Button(onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState),
-
-            ){
-            Text("Tennis")
-        }
-    }
-
 }
 
 @Preview(showBackground = true)
