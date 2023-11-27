@@ -259,7 +259,8 @@ class MainViewModel : ViewModel() {
         address: String = "",
         email: String? = "",
         password: String? = "",
-        imageUrl: String? = ""
+        imageUrl: String? = "",
+        registering: Boolean = false
     ) {
         if (uidState.value != "") {
             if (firstName != "" || middleName != "" || lastName != "") {
@@ -329,6 +330,9 @@ class MainViewModel : ViewModel() {
                 auth.currentUser?.updatePassword(password.toString())
             }
 
+            if (registering) {
+                db.collection("users").document(uidState.value).update("isTutor", false)
+            }
         } else {
             Log.w(TAG, "UpdateUserData:failure -> uid is empty")
         }
@@ -340,8 +344,9 @@ class MainViewModel : ViewModel() {
         answer: String
     ) {
         val data = mapOf("email" to email, "secQuestion" to question, "secAnswer" to answer)
+        Log.d(TAG, "Updating secQuestion & Answer: ${question}, ${answer}")
 
-        db.collection("secQuestions").document(auth.currentUser?.uid.toString()).update(data)
+        db.collection("secQuestions").document(auth.currentUser?.uid.toString()).set(data)
     }
 
     fun isCorrectSecQuestion(
@@ -447,7 +452,13 @@ class MainViewModel : ViewModel() {
                         _phone.value = data?.get("phone").toString()
                         _address.value = data?.get("address").toString()
                         _imageUrl.value = data?.get("imageUrl").toString()
-                        _isTutor.value = data?.get("isTutor") as Boolean
+
+                        if (data?.get("isTutor") != null) {
+                            _isTutor.value = data?.get("isTutor") as Boolean
+                        } else {
+                            auth.currentUser?.let { db.collection("users").document(it.uid).update("isTutor", false) }
+                            _isTutor.value = false
+                        }
                     } else {
                         Log.d(TAG, "FetchUserData:failure -> No document found.")
                     }
