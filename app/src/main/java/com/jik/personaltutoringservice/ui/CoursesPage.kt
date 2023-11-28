@@ -112,6 +112,7 @@ fun CoursesPage(
                     tennis = checkedStateTennis,
                     french = checkedStateFrench,
                     piano = checkedStatePiano,
+
             )
                              },
                 modifier = Modifier

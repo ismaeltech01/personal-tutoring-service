@@ -226,7 +226,7 @@ fun MessagesList(messages: List<Map<String, String>>) {
         * */
 fun MessagingCard(senderID: String, messageText: String) {
     Row {
-        Image(painter = painterResource(id = R.drawable.profileimage),
+        Image(Icons.Rounded.Person,
             contentDescription = "Profile Image",
             modifier = Modifier
                 .size(40.dp)

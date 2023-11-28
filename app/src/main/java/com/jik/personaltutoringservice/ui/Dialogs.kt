@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import java.math.BigDecimal
+import java.math.MathContext
 import java.math.RoundingMode
 import java.util.Currency
 
@@ -94,7 +95,7 @@ fun ConfirmTransactionDialog(
     rate : BigDecimal
 ) {
     val rawHours = BigDecimal(minutes).divide(BigDecimal(60), 2, RoundingMode.HALF_UP)
-    val rawTotal = rate.multiply(rawHours)
+    val rawTotal = rate.multiply(rawHours, MathContext(2))
     val hours = rawHours.setScale(2).toString()
     val total = rawTotal.setScale(2).toString()
     val fontSize = 10.sp

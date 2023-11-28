@@ -159,7 +159,7 @@ fun ProfilePage(
 
                     Spacer(modifier = Modifier.height(5.dp))
                     
-                    Button(onClick = { viewModel.StopBeingTutor() }) {
+                    Button(onClick = { /*TODO*/ }) {
                         Text(text = "Stop being a Tutor")
                     }
                 }

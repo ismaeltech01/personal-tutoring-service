@@ -74,6 +74,14 @@ class MainActivity : ComponentActivity() {
 
             PersonalTutoringServiceTheme {
                 Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    /*
+                    Titlebar used for testing, can be removed
+                    Titlebar(modifier = Modifier
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .fillMaxWidth()
+                        .weight(.1f))
+                     */
+
                     //NavHost used to hold navigation page (current page that the user is looking at)
                     NavHost(navController, startDestination = "home", modifier = Modifier.weight(.87f)) {
                         //Each composable under the NavHost is a path/destination to travel to
@@ -81,6 +89,7 @@ class MainActivity : ComponentActivity() {
                         composable("home") {
                             HomePage(
                                 modifier = pageModifier,
+//                                tutors = tutors,
                                 onEditCard = { navController.navigate("payments") },
                                 viewModel = viewModel,
                                 activity = this@MainActivity,

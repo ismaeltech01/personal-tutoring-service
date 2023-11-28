@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jik.personaltutoringservice.MainActivity
 import java.math.BigDecimal
+import java.math.MathContext
 import java.math.RoundingMode
 
 @Composable
@@ -290,7 +291,7 @@ fun PayCompletePage(
     val fontSize = 20.sp
     val subTxtFontSize = 15.sp
     val rawHours = BigDecimal(minutes).divide(BigDecimal(60), 2, RoundingMode.HALF_UP)
-    val rawTotal = rate.multiply(rawHours)
+    val rawTotal = rate.multiply(rawHours).round(MathContext(2))
     val hours = rawHours.setScale(2).toString()
     val total = rawTotal.setScale(2).toString()
     val commission = rawTotal.multiply(BigDecimal(.20)).setScale(2, RoundingMode.HALF_UP)

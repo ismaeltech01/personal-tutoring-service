@@ -18,6 +18,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.math.BigDecimal
+import java.math.MathContext
 
 class MainViewModel : ViewModel() {
     //auth val holds authentication instance (to interact with FirebaseAuth)
@@ -504,10 +505,30 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun FetchTutorsRelations() {
+        val uidString = uidState.value
+
+        if (uidString != "") {
+            db.collection("relations").document(uidString).collection("tutors").get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        if (doc.id != "sample") {
+                            tutorsState[doc.id] = doc.data as Map<String, String>
+                            Log.d(TAG, "${doc.id} => ${doc.data}")
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting tutors documents: ", exception)
+                }
+        } else {
+            Log.w(TAG, "FetchTutorsRelations:failure -> uid is empty")
+        }
+    }
+
     fun FetchRelations() {
         val uidString = uidState.value
         val tList = mutableListOf<String>()
-        val cList = mutableListOf<String>()
 
         if (uidString != "") {
             db.collection("relations").document(uidString).get()
@@ -515,7 +536,6 @@ class MainViewModel : ViewModel() {
                     Log.d(TAG, "Got relations")
                     Log.d(TAG, "Tutors list: ${doc.data?.get("tutors").toString()}")
 
-                    //Fetch tutor relations
                     val tutors = doc.data?.get("tutors")
                     if (tutors is List<*>) {
                         for (email in doc.data?.get("tutors") as List<String>) {
@@ -527,7 +547,6 @@ class MainViewModel : ViewModel() {
                     if (tList.isNotEmpty()) {
                         db.collection("users").where(Filter.inArray("email", tList)).get()
                             .addOnSuccessListener { docs ->
-                                tutorsState.clear()
                                 for (doc in docs) {
                                     tutorsState[doc.id] = doc.data as Map<String, String>
                                     Log.d(TAG, "${doc.id} => ${doc.data}")
@@ -537,39 +556,17 @@ class MainViewModel : ViewModel() {
                                 Log.w(TAG, "Error getting tutors documents: ", exception)
                             }
                     }
-
-                    //Fetch client relations
-                    val clients = doc.data?.get("clients")
-                    if (clients is List<*>) {
-                        for (email in clients as List<String>) {
-                            cList.add(email)
-                            Log.d(TAG, "$email")
-                        }
-                    }
-
-                    if (cList.isNotEmpty()) {
-                        db.collection("users").where(Filter.inArray("email", cList)).get()
-                            .addOnSuccessListener { docs ->
-                                clientsState.clear()
-                                for (doc in docs) {
-                                    clientsState[doc.id] = doc.data as Map<String, String>
-                                    Log.d(TAG, "${doc.id} => ${doc.data}")
-                                }
-                            }
-                            .addOnFailureListener { exception ->
-                                Log.w(TAG, "Error getting clients documents: ", exception)
-                            }
-                    }
-
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting tutors documents: ", exception)
                 }
 
             Log.d(TAG, "is tList empty? : ${tList.isEmpty()}")
-            Log.d(TAG, "is cList empty? : ${cList.isEmpty()}")
+            if (tList.isNotEmpty()) {
+
+            }
         } else {
-            Log.w(TAG, "FetchRelations:failure -> uid is empty")
+            Log.w(TAG, "FetchClientsRelations:failure -> uid is empty")
         }
     }
 
@@ -633,7 +630,7 @@ class MainViewModel : ViewModel() {
                 Log.d(TAG, "get failed with ", exception)
             }
 
-        val tProfit = total.subtract(appProfit).setScale(2)
+        val tProfit = total.subtract(appProfit).round(MathContext(2)).setScale(2)
         _tutorProfit.value = tProfit
     }
 
@@ -733,16 +730,22 @@ class MainViewModel : ViewModel() {
     fun BecomeTutor(
         availability: String,
         price: String
-    ) {
-        val tutorData = mapOf("isTutor" to true, "price" to "0.0", "availability" to availability, "ratings" to "0.0")
+
+        ) {
+
+        val tutorData = mapOf("isTutor" to true, "price" to price, "availability" to availability, "ratings" to "0.0")
         db.collection("newTutors").document(auth.currentUser?.uid.toString()).set(tutorData)
+<<<<<<< HEAD
 
         val data = mapOf<String, Any>("price" to price, "availability" to true, "rating" to "0.0", "isTutor" to true)
         db.collection("users").document(auth.currentUser?.uid.toString()).update(data)
     }
 
     fun StopBeingTutor() {
+        _isTutor.value = false
         db.collection("users").document(auth.currentUser?.uid.toString()).update("isTutor", false)
+=======
+>>>>>>> parent of 488fad0 (Search & settings updates)
     }
 
     fun Course(
@@ -763,7 +766,16 @@ class MainViewModel : ViewModel() {
         Log.d(TAG, "tutorEmail: $tutorEmail")
         //Might crash or cause errors if tutorEmail is empty or is not present in array
         db.collection("relations").document(uidString).update("tutors", FieldValue.arrayRemove(tutorEmail))
-        FetchRelations()
+        FetchTutorsRelations()
+
+//        val data = mapOf("email" to emailState.value)
+//        val bankingData = mapOf("cardNum" to cardNumState.value, "expDate" to expDateState.value, "secCode" to secCodeState.value)
+//        val relationsData = mapOf("tutors" to listOf<String>(), "clients" to listOf<String>())
+//
+//        db.collection("users").document(uidState.value).set(data)
+//        db.collection("banking").document(uidState.value).set(bankingData)
+//        db.collection("relations").document(uidState.value).set(mapOf("init" to true))
+//        db.collection("relations").document(uidState.value).set(relationsData)
     }
 
     fun ResetPassword(email: String) {
