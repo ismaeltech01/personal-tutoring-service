@@ -184,10 +184,10 @@ fun ValidateInputs(
         invalidCount++
     }
 
-    if (!ValidateAddress(address)) {
-        ShowToast(activity, "address")
-        invalidCount++
-    }
+//    if (!ValidateAddress(address)) {
+//        ShowToast(activity, "address")
+//        invalidCount++
+//    }
 
     return invalidCount == 0
 }

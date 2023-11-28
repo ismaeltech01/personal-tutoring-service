@@ -209,9 +209,9 @@ fun SearchPage(
         ExitBar { showTutor = false }
         ProfilePage(
             modifier = Modifier.fillMaxWidth(),
-            onLoginClick = { /*TODO*/ },
-            onRegisterClick = { /*TODO*/ },
-            onTutorClick = { /*TODO*/ },
+            onLoginClick = { },
+            onRegisterClick = {  },
+            onTutorClick = {},
             loggedIn = true,
             fullName = tFullName,
             userName = tUserName,
