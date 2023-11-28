@@ -64,7 +64,7 @@ class SearchViewModel : ViewModel() {
                     val docEmail = doc.data["email"]
 
                     Log.d(ContentValues.TAG, "${doc.id} => ${doc.data}")
-                    if (docPrice != null && docRating != null && docPrice == "" && docRating == "") {
+                    if (docPrice.toString().toDoubleOrNull() != null && docRating.toString().toDoubleOrNull() != null) {
                         if (
                             docName.contains(name, true) &&
                             docPrice.toString().toDouble() <= price &&

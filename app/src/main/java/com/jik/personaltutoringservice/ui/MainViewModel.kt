@@ -733,9 +733,8 @@ class MainViewModel : ViewModel() {
 
         ) {
 
-        val tutorData = mapOf("isTutor" to true, "price" to price, "availability" to availability, "ratings" to "0.0")
+        val tutorData = mapOf("isTutor" to true, "price" to "0.0", "availability" to true, "ratings" to "0.0")
         db.collection("newTutors").document(auth.currentUser?.uid.toString()).set(tutorData)
-<<<<<<< HEAD
 
         val data = mapOf<String, Any>("price" to price, "availability" to true, "rating" to "0.0", "isTutor" to true)
         db.collection("users").document(auth.currentUser?.uid.toString()).update(data)
@@ -744,8 +743,6 @@ class MainViewModel : ViewModel() {
     fun StopBeingTutor() {
         _isTutor.value = false
         db.collection("users").document(auth.currentUser?.uid.toString()).update("isTutor", false)
-=======
->>>>>>> parent of 488fad0 (Search & settings updates)
     }
 
     fun Course(
