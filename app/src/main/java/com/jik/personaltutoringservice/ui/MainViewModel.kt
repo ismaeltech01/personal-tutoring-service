@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
@@ -94,7 +93,12 @@ class MainViewModel : ViewModel() {
     private val _passwordAttempts = MutableStateFlow(0)
     val passwordAttempts = _passwordAttempts.asStateFlow().value
 
-    private val _messages = mutableStateListOf<String>()
+    private val _messages = mutableStateListOf<Map<String,String>>()
+    val messages = _messages
+
+    private val _ads = mutableStateMapOf<String, Map<String, String>>()
+    val adsState = _ads
+    val ads = adsState.entries
 
     /***/
 
@@ -645,30 +649,29 @@ class MainViewModel : ViewModel() {
         return "${sortedIds[0]}_${sortedIds[1]}"
     }
 
-    fun fetchMessages(conversationId: String): ArrayList<Message> {
-// TODO: create mutablestateofmap for the messages to display correctly  
-        val messageList = ArrayList<Message>()
+    fun fetchMessages(conversationId: String) {
+        var messageList = mutableListOf<MutableMap<String,String>>()
+        _messages.clear() // Clear existing messages if needed
         db.collection("conversations")
             .document(conversationId)
             .collection("messages")
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .get()
-            .addOnSuccessListener{ docs ->
-//                if (docs.isEmpty) {
-//                    Log.w(TAG, "message retrieval failed: $docs")
-//                }
+            .addOnSuccessListener { docs ->
+                for (doc in docs) {
+                    val msgMap = doc.data as MutableMap<String, String>
+// This add causes infinite loop that will not stop pulling from the database
+                    _messages.add(msgMap)
+                    Log.d(TAG,"Message Pulled")
 
-
-                for ( doc in docs ) {
-                    val message = doc.toObject(Message::class.java)
-
-                    messageList.add(message)
                 }
-
-                // Update UI with messageList
+            }
+            .addOnFailureListener { e ->
+                // Handle the error scenario
+                Log.e(TAG, "Error fetching messages: ", e)
             }
 
-        return messageList
+
     }
 
 
@@ -787,8 +790,41 @@ class MainViewModel : ViewModel() {
             }
     }
 
-    fun createAnAdd(msg: String, toString: String) {
+    fun createAnAdd(msg: String, type: String, userId: String) {
+        val data = hashMapOf(
+            "msg" to msg,
+            "senderId" to type,
+            "userId" to userId
+        )
+        db.collection("advertisement")
+            .add(data)
+            .addOnSuccessListener { documentReference ->
+                Log.d(TAG, "Add created with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error creating add", e)
+            }
+    }
 
+    fun FetchAds() {
+        val uidString = uidState.value
+
+        if (uidString != "") {
+            db.collection("advertisement").get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        if (doc.id != "sample") {
+                            adsState[doc.id] = doc.data as Map<String, String>
+                            Log.d(TAG, "AD RX'd: ${doc.id} => ${doc.data}")
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting AD: ", exception)
+                }
+        } else {
+            Log.w(TAG, "FetchTAD:failure -> uid is empty")
+        }
     }
 
 }

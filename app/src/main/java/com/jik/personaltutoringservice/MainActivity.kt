@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
             val isTutor by viewModel.isTutorState.collectAsState()
             val tutors = viewModel.tutorsState.toMap()
             val clients = viewModel.clientsState.toMap()
+            val messages = viewModel.messages.toList()
 
             if (loggedIn) {
                 viewModel.UpdateAuthData()
@@ -120,7 +121,8 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 modifier = pageModifier,
                                 onToSearch = { navController.navigate("search") },
-                                context = this@MainActivity
+                                context = this@MainActivity,
+                                messages = messages
                             )
                         }
                         composable("other") {

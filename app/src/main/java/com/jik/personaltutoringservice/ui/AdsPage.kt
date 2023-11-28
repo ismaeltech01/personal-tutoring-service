@@ -58,7 +58,7 @@ fun AdsPage(
 
 
             Button(onClick = {
-                viewModel.createAnAdd(msg, selectedOption.toString());
+                viewModel.createAnAdd(msg, selectedOption.toString(),viewModel.uidState.toString());
                 onExit();
             }
             ){

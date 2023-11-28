@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -39,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jik.personaltutoringservice.R
@@ -61,7 +59,8 @@ fun MessagingPage(
     viewModel: MainViewModel,
     modifier: Modifier,
     onToSearch: () -> Unit,
-    context: Context
+    context: Context,
+    messages: List<Map<String,String>>
 ) {
     var receiver by remember { mutableStateOf("") }
     var showChatroom by remember { mutableStateOf(false) }
@@ -100,8 +99,11 @@ fun MessagingPage(
                                 Button(onClick = {
                                     receiver = userName
                                     showChatroom = true
+                                    viewModel.fetchMessages(viewModel.generateConversationId(email,receiver))
+
                                 }) {
                                     Row {
+
                                         Icon(Icons.Rounded.MailOutline, "Message Icon")
                                         Text(text = "Message")
                                     }
@@ -112,11 +114,13 @@ fun MessagingPage(
                 }
             }
         } else {
+
             ChatRoom(
                 sender = email,
                 receiver = receiver,
                 viewModel = viewModel,
-                context = context
+                context = context,
+                messages = messages
             )
         }
     } else {
@@ -138,21 +142,29 @@ fun ChatRoom(
     sender: String,
     receiver: String,
     viewModel: MainViewModel,
-    context: Context
+    context: Context,
+    messages: List<Map<String,String>>
+
 ) {
     var messageIn by remember { mutableStateOf("") }
     var displayMonitorDialog by remember { mutableStateOf(false) }
-
     Column (
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Column (
+//Does display messages correctly however fetching them causes a infinite loop
+//        MessagesList(messages)
+        LazyColumn(
             modifier = Modifier
                 .weight(.7f)
         ) {
-//            crashes app when trying to display
-            MessagingThread(messageList = viewModel.fetchMessages(viewModel.generateConversationId(sender,receiver)))
+
+            item {
+                MessagesList(messages)
+
+            }
+
+
 
         }
 
@@ -179,6 +191,8 @@ fun ChatRoom(
                                 viewModel.sendMessage(messageIn, sender, receiver)
                             }
                         )
+                        viewModel.fetchMessages(viewModel.generateConversationId(sender,receiver))
+
                     }) {
                         Icon(Icons.Rounded.Send, "Send Icon")
                     }
@@ -191,12 +205,26 @@ fun ChatRoom(
         MonitoringWarningDialog(onDismiss = {}) { displayMonitorDialog = false }
     }
 }
+
+@Composable
+fun MessagesList(messages: List<Map<String, String>>) {
+    for (map in messages) {
+        val senderId = map["senderId"] ?: "DefaultSenderId"
+        val messageText = map["messageText"] ?: "DefaultMessageText"
+
+        MessagingCard(
+            senderID = senderId,
+            messageText = messageText
+        )
+    }
+}
+
 @Composable
         /*
         Still needs to limit preview message, Gonna see if a toggle is a better option
 
         * */
-fun MessagingCard(msg: Message) {
+fun MessagingCard(senderID: String, messageText: String) {
     Row {
         Image(painter = painterResource(id = R.drawable.profileimage),
             contentDescription = "Profile Image",
@@ -209,35 +237,15 @@ fun MessagingCard(msg: Message) {
         Spacer(modifier = Modifier.width(6.dp))
 
         Column {
-            Text(text = msg.senderID.toString(),
+            Text(text = senderID.toString(),
                 style = MaterialTheme.typography.titleSmall)
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            Text(text = msg.messageText.toString(),
+            Text(text = messageText.toString(),
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(all = 3.dp))
         }
 
     }
-}
-
-@Composable
-//Makes a list of messages, we need to ensure data entry follows this format
-//want to add image handling, we can use this same option for the conversation as well
-fun MessagingThread(messageList : List<Message>){
-    LazyColumn{
-        items(messageList){
-                message -> MessagingCard(message)
-        }
-    }
-
-}
-
-@Preview(
-    showBackground = true
-)
-@Composable
-fun PreviewMC() {
-
 }
