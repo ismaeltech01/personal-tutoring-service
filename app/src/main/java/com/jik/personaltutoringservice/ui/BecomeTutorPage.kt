@@ -146,7 +146,7 @@ fun BecomeTutorPage(
                     Row{
                         RadioButton(
                             selected = locationRadio.value == Distance.lessThanFiveMiles,
-                            onClick = { locationRadio.value == Distance.lessThanFiveMiles },
+                            onClick = { locationRadio.value = Distance.lessThanFiveMiles },
                             colors = RadioButtonDefaults.colors(Color.Blue)
                         )
                         Text(Distance.lessThanFiveMiles)
@@ -156,7 +156,7 @@ fun BecomeTutorPage(
                     Row {
                         RadioButton(
                             selected = locationRadio.value == Distance.fiveToTenMiles,
-                            onClick = { locationRadio.value == Distance.fiveToTenMiles },
+                            onClick = { locationRadio.value = Distance.fiveToTenMiles },
                             colors = RadioButtonDefaults.colors(Color.Blue)
                         )
                         Text(Distance.fiveToTenMiles)
@@ -167,7 +167,7 @@ fun BecomeTutorPage(
                     Row {
                         RadioButton(
                             selected = locationRadio.value == Distance.tenToTwentyMiles,
-                            onClick = { locationRadio.value == Distance.tenToTwentyMiles },
+                            onClick = { locationRadio.value = Distance.tenToTwentyMiles },
                             colors = RadioButtonDefaults.colors(Color.Blue)
                         )
                         Text(Distance.tenToTwentyMiles)
@@ -176,7 +176,7 @@ fun BecomeTutorPage(
                     Row {
                         RadioButton(
                             selected = locationRadio.value == Distance.moreThanFiftyMiles,
-                            onClick = { locationRadio.value == Distance.moreThanFiftyMiles },
+                            onClick = { locationRadio.value = Distance.moreThanFiftyMiles },
                             colors = RadioButtonDefaults.colors(Color.Blue)
                         )
                         Text(Distance.moreThanFiftyMiles)

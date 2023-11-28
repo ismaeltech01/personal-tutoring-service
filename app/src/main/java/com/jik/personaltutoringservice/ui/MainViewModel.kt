@@ -737,7 +737,7 @@ class MainViewModel : ViewModel() {
         ) {
 
         val tutorData = mapOf("isTutor" to true, "price" to price, "availability" to availability, "ratings" to "0.0")
-        db.collection("newTutors").document(auth.currentUser?.uid.toString()).update(tutorData)
+        db.collection("newTutors").document(auth.currentUser?.uid.toString()).set(tutorData)
     }
 
     fun Course(
