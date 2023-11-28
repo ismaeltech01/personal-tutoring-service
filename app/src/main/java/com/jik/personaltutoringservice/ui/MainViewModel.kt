@@ -732,6 +732,7 @@ class MainViewModel : ViewModel() {
         price: String
 
         ) {
+        _isTutor.value = true
 
         val tutorData = mapOf("isTutor" to true, "price" to "0.0", "availability" to true, "ratings" to "0.0")
         db.collection("newTutors").document(auth.currentUser?.uid.toString()).set(tutorData)
