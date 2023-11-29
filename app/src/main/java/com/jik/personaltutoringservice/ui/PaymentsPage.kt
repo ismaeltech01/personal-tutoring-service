@@ -311,7 +311,7 @@ fun PayCompletePage(
         )
 
         Text(
-            text = "Confirm Transaction",
+            text = "Transaction Complete",
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(10.dp),

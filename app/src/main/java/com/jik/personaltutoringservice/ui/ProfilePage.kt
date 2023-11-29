@@ -98,7 +98,12 @@ fun ProfilePage(
                 )
             }
 
-            NameDisplay(fullName = fullName)
+            if (searched) {
+                Text(ParseFullName(fullName), fontSize = 20.sp)
+            } else {
+                NameDisplay(fullName = fullName)
+            }
+
             Spacer(modifier = Modifier.height(3.dp))
 
             if (!loggedIn) {

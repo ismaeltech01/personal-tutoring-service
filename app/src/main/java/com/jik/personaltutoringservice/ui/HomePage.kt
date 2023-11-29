@@ -90,7 +90,7 @@ fun HomePage(
                 val fullname = entry.value["fullName"].toString()
                 val userName = entry.value["userName"].toString()
                 val email = entry.value["email"].toString()
-                val raTe = entry.value["price"].toString()
+                val tRate = entry.value["price"].toString()
                 val profilePic = entry.value["imageUrl"].toString()
                 val loc = entry.value["address"].toString()
                 val rating = entry.value["rating"].toString()
@@ -100,7 +100,7 @@ fun HomePage(
                     UserCard(
                         fullName = fullname,
                         userName = userName,
-                        rate = raTe,
+                        rate = tRate,
                         imageUrl = profilePic,
                         isHome = true,
                         location = loc,
@@ -110,9 +110,10 @@ fun HomePage(
                             tutorEmail = email
                         },
                         onPay = {
-                            showPayPage = true
-                            tutorRate = raTe
+                            Log.d(TAG, "tRate: $tRate")
+                            tutorRate = tRate.replace(" ", "")
                             tutorEmail = email
+                            showPayPage = true
                         }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -127,20 +128,9 @@ fun HomePage(
                     .padding(15.dp)
                     .align((Alignment.CenterHorizontally))
             )
-//            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-//                Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.profileimage),
-//                        contentDescription = "Profile Image",
-//                        modifier = Modifier
-//                            .size(75.dp)
-//                            .clip(CircleShape)
-//                            .border(5.dp, Color.White, CircleShape)
-//                    )
-//                }
-//            }
         }
     } else {
+        Log.d(TAG, "tutorRate: $tutorRate")
         PayTutorPage(
             rate = BigDecimal(tutorRate),
             userEmail = viewModel.email,
