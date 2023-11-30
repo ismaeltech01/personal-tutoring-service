@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 //Page that contains all of the links for the "Other" option in the navbar
@@ -30,7 +29,8 @@ fun OtherPage(
     onReportClick : () -> Unit,
     onSigninClick : () -> Unit,
     onSignOutClick : () -> Unit,
-    userSignedIn : Boolean
+    userSignedIn : Boolean,
+    isTutor : Boolean
 ) {
     val spacerModifier = Modifier.height(3.dp)
 
@@ -47,8 +47,10 @@ fun OtherPage(
             Spacer(modifier = spacerModifier.weight(.02f))
             PageButton("Payments", onPaymentsClick, modifier = Modifier.weight(.1f))
             Spacer(modifier = spacerModifier.weight(.02f))
-            PageButton("Advertisement", onAdClick, modifier = Modifier.weight(.1f))
-            Spacer(modifier = spacerModifier.weight(.02f))
+            if(isTutor) {
+                PageButton("Advertisement", onAdClick, modifier = Modifier.weight(.1f))
+                Spacer(modifier = spacerModifier.weight(.02f))
+            }
             PageButton("Settings", onSettingsClick, modifier = Modifier.weight(.1f))
             Spacer(modifier = spacerModifier.weight(.02f))
             PageButton("Reporting", onReportClick, modifier = Modifier.weight(.1f))
@@ -92,26 +94,26 @@ fun PageButton(
     }
 }
 
-@Preview(
-    showBackground = true
-)
-@Composable
-fun OtherPagePreview() {
-    OtherPage(
-        onCalendarClick = { /*TODO*/ },
-        onCoursesClick = { /*TODO*/ },
-        onPaymentsClick = { /*TODO*/ },
-        onAdClick = { /*TODO*/ },
-        onSettingsClick = { /*TODO*/ },
-        onReportClick = { /*TODO*/ },
-        onSigninClick = { /*TODO*/ },
-        onSignOutClick = { /*TODO*/ },
-        userSignedIn = true
-    )
-}
+//@Preview(
+//    showBackground = true
+//)
+//@Composable
+//fun OtherPagePreview() {
+//    OtherPage(
+//        onCalendarClick = { /*TODO*/ },
+//        onCoursesClick = { /*TODO*/ },
+//        onPaymentsClick = { /*TODO*/ },
+//        onAdClick = { /*TODO*/ },
+//        onSettingsClick = { /*TODO*/ },
+//        onReportClick = { /*TODO*/ },
+//        onSigninClick = { /*TODO*/ },
+//        onSignOutClick = { /*TODO*/ },
+//        userSignedIn = true
+//    )
+//}
 
-@Preview
-@Composable
-fun PageButtonPreview() {
-    PageButton(text = "HELLO", {}, Modifier)
-}
+//@Preview
+//@Composable
+//fun PageButtonPreview() {
+//    PageButton(text = "HELLO", {}, Modifier)
+//}

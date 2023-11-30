@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
             val tutors = viewModel.tutorsState.toMap()
             val clients = viewModel.clientsState.toMap()
             val messages = viewModel.messages.toList()
+            val uID by viewModel.uidState.collectAsState()
 
             if (loggedIn) {
                 viewModel.UpdateAuthData()
@@ -74,13 +75,7 @@ class MainActivity : ComponentActivity() {
 
             PersonalTutoringServiceTheme {
                 Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    /*
-                    Titlebar used for testing, can be removed
-                    Titlebar(modifier = Modifier
-                        .background(MaterialTheme.colorScheme.secondary)
-                        .fillMaxWidth()
-                        .weight(.1f))
-                     */
+
 
                     //NavHost used to hold navigation page (current page that the user is looking at)
                     NavHost(navController, startDestination = "home", modifier = Modifier.weight(.87f)) {
@@ -147,7 +142,8 @@ class MainActivity : ComponentActivity() {
                                     viewModel.SignOut(this@MainActivity)
                                     navController.navigate("home")
                                 },
-                                userSignedIn = loggedIn
+                                userSignedIn = loggedIn,
+                                isTutor = isTutor
                             )
                         }
                         //Below here are routes relating to the OtherPage links
@@ -169,11 +165,14 @@ class MainActivity : ComponentActivity() {
                                 navigate = { navController.navigate("other") }
                             )
                         }
-                        composable("ads") {
-                            AdsPage(
-                                viewModel = viewModel,
-                                onExit = {navController.navigate("profile")},
-                            )
+
+                            composable("ads") {
+                                AdsPage(
+                                    viewModel = viewModel,
+                                    onExit = { navController.navigate("profile") },
+                                    uID = uID,
+                                )
+
                         }
                         composable("settings") {
                             SettingsPage(

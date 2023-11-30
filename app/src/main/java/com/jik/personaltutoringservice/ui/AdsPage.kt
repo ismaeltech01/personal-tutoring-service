@@ -13,16 +13,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun AdsPage(
     viewModel: MainViewModel,
-    onExit : () -> Unit
+    onExit : () -> Unit,
+    uID : String
 ) {
     var msg by remember { mutableStateOf("") }
     var selectedOption by remember { mutableStateOf("") }
+    var course by remember { mutableStateOf(("")) }
 
         Column{
 
@@ -51,29 +52,58 @@ fun AdsPage(
                     onValueChange = { newText -> msg= newText },
                     label = { Text("What do you want your advertisement to say") }
                 )
+
+                Row(verticalAlignment = CenterVertically) {
+                    RadioButton(
+                        selected = course == "Math",
+                        onClick = { course = "Math" }
+                    )
+                    Text("Math")
+
+                    RadioButton(
+                        selected = course == "Piano",
+                        onClick = { course = "Piano" }
+                    )
+                    Text("Piano")
+
+                    RadioButton(
+                        selected = course == "French",
+                        onClick = { course = "French" }
+                    )
+                    Text("French")
+
+                }
 //                Text("Hello, ${msg.value}!")
+            }
+
+            Column(horizontalAlignment = CenterHorizontally) {
+
+                Row(verticalAlignment = CenterVertically) {
+
+
+                    RadioButton(
+                        selected = course == "Coding",
+                        onClick = { course = "Coding" }
+                    )
+                    Text("Coding")
+
+                    RadioButton(
+                        selected = course == "Tennis",
+                        onClick = { course = "Tennis" }
+                    )
+                    Text("Tennis")
+                }
             }
 
 
 
 
             Button(onClick = {
-                viewModel.createAnAdd(msg, selectedOption.toString(),viewModel.uidState.toString());
+                viewModel.createAnAdd(msg, selectedOption.toString(), uID, course.toString());
                 onExit();
             }
             ){
                 Text("Submit",fontSize = 30.sp)
             }
         }
-// TODO: Create a function to add the data too the database
-//    viewModel.createAnAdd(msg.toString(), selectedOption.toString())
     }
-
-
-@Preview(
-    showBackground = true,
-)
-@Composable
-fun testcase(){
-//    AdsPage(viewModel: MainViewModel)
-}

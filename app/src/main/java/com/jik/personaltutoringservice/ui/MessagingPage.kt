@@ -1,7 +1,5 @@
 package com.jik.personaltutoringservice.ui
 
-//import android.content.IntentSender
-//Thew flag for unused
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -37,19 +35,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jik.personaltutoringservice.R
 
 data class Message(
     var messageText: String? = null,
     var receiverID: String? = null,
     var senderID: String? = null,
     var timestamp: java.util.Date? = null)
-
-
-
 
 @Composable
 fun MessagingPage(
@@ -152,8 +145,6 @@ fun ChatRoom(
         modifier = Modifier
             .fillMaxSize()
     ) {
-//Does display messages correctly however fetching them causes a infinite loop
-//        MessagesList(messages)
         LazyColumn(
             modifier = Modifier
                 .weight(.7f)
@@ -220,11 +211,7 @@ fun MessagesList(messages: List<Map<String, String>>) {
 }
 
 @Composable
-        /*
-        Still needs to limit preview message, Gonna see if a toggle is a better option
-
-        * */
-fun MessagingCard(senderID: String, messageText: String) {
+fun MessagingCard(senderID: String, messageText: String, ) {
     Row {
         Image(Icons.Rounded.Person,
             contentDescription = "Profile Image",

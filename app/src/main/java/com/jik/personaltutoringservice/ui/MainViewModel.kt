@@ -800,11 +800,12 @@ class MainViewModel : ViewModel() {
             }
     }
 
-    fun createAnAdd(msg: String, type: String, userId: String) {
+    fun createAnAdd(msg: String, type: String, userId: String, course: String) {
         val data = hashMapOf(
             "msg" to msg,
             "senderId" to type,
-            "userId" to userId
+            "userId" to userId,
+            "course" to course
         )
         db.collection("advertisement")
             .add(data)
