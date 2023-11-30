@@ -187,9 +187,7 @@ fun BecomeTutorPage(
                                 availability = timeAvailability,
                                 price = hourlyPrice
                             )
-
-
-                                     } ,
+                     },
                         modifier = Modifier
                             .fillMaxWidth()
                         ){
