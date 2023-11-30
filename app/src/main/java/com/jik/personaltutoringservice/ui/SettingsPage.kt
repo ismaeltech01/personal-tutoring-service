@@ -135,7 +135,7 @@ fun SettingsPage(
                 )
 
                 if (allValid) {
-                    viewModel.ReAuthenticate(passwdState, activity)
+                    viewModel.ReAuthenticate(emailState, passwdState, activity)
                     viewModel.UpdateUserData()
                     navigate()
                 }

@@ -733,8 +733,22 @@ class MainViewModel : ViewModel() {
 
         ) {
         _isTutor.value = true
+        val tutorData:Map<String, Any>
 
-        val tutorData = mapOf("isTutor" to true, "price" to "0.0", "availability" to true, "ratings" to "0.0")
+        if (price.toDoubleOrNull() == null) {
+            tutorData = mapOf(
+                "isTutor" to true,
+                "price" to "0.0",
+                "availability" to true,
+                "ratings" to "0.0"
+            )
+        } else {
+            tutorData = mapOf(
+                "isTutor" to true,
+                "availability" to true,
+                "ratings" to "0.0"
+            )
+        }
         db.collection("newTutors").document(auth.currentUser?.uid.toString()).set(tutorData)
     }
 
@@ -780,7 +794,7 @@ class MainViewModel : ViewModel() {
     /**
      * Re-Authenticates for profile and user data changes
      * */
-    fun ReAuthenticate(password: String, activity: Activity) {
+    fun ReAuthenticate(email: String, password: String, activity: Activity) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(activity) { task ->
                 if (task.isSuccessful) {
